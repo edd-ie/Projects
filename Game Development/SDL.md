@@ -1,8 +1,18 @@
 #ui #sdl 
+
+# Documentation
+
+- [Simple Directmedia Layer](https://github.com/libsdl-org)
+- [SDL Library Documentation](https://documentation.help/SDL/index.html)
+- [An in depth cross platform tutorial for SDL2 using Vulkan in C++](https://github.com/AndreVallestero/sdl-vulkan-tutorial)
+- 
+
 # Installation
 
-Tutorial [HOWTO: Setup CLion for SDL2 Gamedev](https://www.youtube.com/watch?v=N5CZLSVU0DA)
-Alternative -[C++/SDL2 RPG Platformer Tutorial for Beginners Part 1 | Setting up SDL2 on Windows](https://www.youtube.com/watch?v=KsG6dJlLBDw&list=PL2RPjWnJduNmXHRYwdtublIPdlqocBoLS)
+Tutorial:
+- [HOWTO: Setup CLion for SDL2 Gamedev](https://www.youtube.com/watch?v=N5CZLSVU0DA)
+- [Writing 2D Games in C using SDL by Thomas Lively](https://www.youtube.com/watch?v=yFLa3ln16w0)
+Alternative -[Setting up SDL2 on Windows](https://www.youtube.com/watch?v=KsG6dJlLBDw&list=PL2RPjWnJduNmXHRYwdtublIPdlqocBoLS)
 
 1. Ensure SDL2 is downloaded
 2. Create `cmake_modules` directory in your project
@@ -10,7 +20,7 @@ Alternative -[C++/SDL2 RPG Platformer Tutorial for Beginners Part 1 | Setting up
 4. Paste [SDL finder code](https://gist.githubusercontent.com/416rehman/4b5a88f5e5f033dfe8f7abd7bb768bde/raw/e1ffd1d8aa8f5047ae7526c246581938b463eeba/gistfile1.txt) in the new cmake
 5. Create a `FindSDL_image.cmake` in the new dir
 6. Paste: 
-```
+```CMake
 SET(SDL_IMAGE_SEARCH_PATHS  
         ~/Library/Frameworks  
         /Library/Frameworks  
@@ -639,3 +649,6 @@ if(!TheTextureManager::Instance()->load("resources/pack/Effect Block-Sheet.png",
 ```c++
 TheTextureManager::Instance()->drawFrame("animate", 100,100, 32, 32, 1, currentFrame, renderer);
 ```
+
+
+
