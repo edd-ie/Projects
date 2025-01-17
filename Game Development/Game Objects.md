@@ -146,4 +146,53 @@ while(g_game->running()){
 
 Now build and run to see the separate objects.
 
-P
+# Polymorphism
+Reference an object through a pointer to its parent or base class.
+
+This allows storage of a list of `GameObject` in `Game` class with our explicitly referring to the class.
+
+Instead of  creating individual objects, you can place them in a vector of their parent classes
+```c++
+std::vector gameObjects;
+
+// Add the objects
+GameObject* m_player = new player();
+GameObject* m_enemy1 = new enemy();
+GameObject* m_enemy2 = new enemy();
+GameObject* m_enemy3 = new enemy();
+
+gameObjects.push_back(m_player); 
+gameObjects.push_back(m_enemy1); 
+gameObjects.push_back(m_enemy2); 
+gameObjects.push_back(m_enemy3);
+
+```
+
+The `Game::draw` function can now look something like this:
+```c++
+void Game::draw()
+ {
+	for(std::vector<GameObject*>::size_type i = 0;
+	i != m_gameObjects.size(); i++) {
+		  m_gameObjects[i]->draw(m_pRenderer);
+	}
+
+	// Or an enhanced for loop
+	for(auto & gameObject : gameObjects){  
+	    gameObject->update();  
+	}
+ }
+```
+
+
+Alter `GameObject` function to allow polymorphism:
+```c++
+virtual void load(int x, int y, int width, int height, std::string textureID);
+virtual void draw(SDL_Renderer* pRenderer);
+virtual void update();
+virtual void clean();
+```
+
+`Virtual` keyword means that when calling this function through a pointer, it *uses  
+the definition from the type of the object itself*, not the type of its pointer:
+- This function would always call the `draw` function contained in `GameObject`, neither `Player` nor `Enemy`.

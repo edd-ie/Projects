@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Game Development/Game Objects.md",
+                "file": "Graphics/OpenGL/Introduction.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Game Objects"
+              "title": "Introduction"
             }
           }
         ],
@@ -152,10 +152,10 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Game Development/Game Objects.md"
+                "file": "Graphics/OpenGL/Introduction.md"
               },
               "icon": "lucide-list",
-              "title": "Outline of Game Objects"
+              "title": "Outline of Introduction"
             }
           }
         ],
@@ -177,8 +177,11 @@
   },
   "active": "d5428e7e7a0cc9ae",
   "lastOpenFiles": [
-    "Game Development/SDL.md",
     "Game Development/Game Objects.md",
+    "Graphics/OpenGL/Introduction.md",
+    "Graphics/OpenGL",
+    "Graphics",
+    "Game Development/SDL.md",
     "Game Development/Untitled",
     "Game Development/Installations.md",
     "README.md",
