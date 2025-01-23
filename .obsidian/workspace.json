@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Graphics/OpenGL/Test code.md",
+                "file": "Graphics/OpenGL/java/Introduction.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Test code"
+              "title": "Introduction"
             }
           },
           {
@@ -171,9 +171,19 @@
               "icon": "lucide-list",
               "title": "Outline of C++"
             }
+          },
+          {
+            "id": "72c8915d21cd3941",
+            "type": "leaf",
+            "state": {
+              "type": "git-view",
+              "state": {},
+              "icon": "git-pull-request",
+              "title": "Source Control"
+            }
           }
         ],
-        "currentTab": 3
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
@@ -186,18 +196,20 @@
       "graph:Open graph view": false,
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
-      "command-palette:Open command palette": false
+      "command-palette:Open command palette": false,
+      "obsidian-git:Open Git source control": false,
+      "omnisearch:Omnisearch": false
     }
   },
   "active": "88489c22f559be58",
   "lastOpenFiles": [
+    "Graphics/OpenGL/java/Introduction.md",
+    "Graphics/OpenGL/java/Test code.md",
     "Graphics/OpenGL/c++/Manual.md",
     "Concepts/C++.md",
     "Concepts",
-    "Graphics/OpenGL/java/Introduction.md",
     "Graphics/OpenGL/c++",
     "Graphics/OpenGL/java",
-    "Graphics/OpenGL/java/Test code.md",
     "Game Development/SDL.md",
     "Game Development/Game Objects.md",
     "Graphics/OpenGL",

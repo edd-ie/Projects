@@ -1,5 +1,5 @@
 If imports have been implemented this should show a red window.
-```java
+```java title:HelloWorld.java 
 import org.lwjgl.Version;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
