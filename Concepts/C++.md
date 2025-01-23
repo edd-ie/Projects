@@ -19,7 +19,7 @@ Smart pointers have a `reset` member function that *releases ownership of the po
 
 ```cpp title:uniquePtr.cpp
 // Create the object and pass it to a smart pointer
-std::unique_ptr<LargeObject> pLarge(new LargeObject());
+std::unique_ptr<LargeObject> pLarge = std::make_unique<LargeObject>();
 
 //Call a method on the object
 pLarge->DoSomething();
