@@ -1,3 +1,8 @@
+# Resources
+- [Smart pointers (Modern C++) | Microsoft Learn](https://learn.microsoft.com/en-us/cpp/cpp/smart-pointers-modern-cpp?view=msvc-170)
+- [Smart Pointers in C++ - GeeksforGeeks](https://www.geeksforgeeks.org/smart-pointers-cpp/)
+- [smart pointers - cppreference.com](https://en.cppreference.com/book/intro/smart_pointers)
+
 # Smart Pointers
 A wrapper class over a pointer with an operator like `*` and `->` overloaded.
 Similar to normal pointer but, it can deallocate and free destroyed object memory.

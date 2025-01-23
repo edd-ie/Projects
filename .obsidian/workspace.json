@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Graphics/OpenGL/c++/Manual.md",
+                "file": "Concepts/C++.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Manual"
+              "title": "C++"
             }
           }
         ]
@@ -137,10 +137,10 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Graphics/OpenGL/c++/Manual.md"
+                "file": "Concepts/C++.md"
               },
               "icon": "lucide-list",
-              "title": "Outline of Manual"
+              "title": "Outline of C++"
             }
           },
           {
@@ -172,12 +172,12 @@
       "omnisearch:Omnisearch": false
     }
   },
-  "active": "72c8915d21cd3941",
+  "active": "dd29847f25258208",
   "lastOpenFiles": [
+    "Graphics/OpenGL/c++/Manual.md",
     "Graphics/OpenGL/java/Introduction.md",
     "Game Development/Game Objects.md",
     "Concepts/C++.md",
-    "Graphics/OpenGL/c++/Manual.md",
     "Graphics/OpenGL/java/Test code.md",
     "Concepts",
     "Graphics/OpenGL/c++",
