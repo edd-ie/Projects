@@ -1,4 +1,10 @@
 #opengl #rendering #research #Cpp 
+
+# Resource
+- [GLFW: Introduction to the API](https://www.glfw.org/docs/latest/intro_guide.html)
+- [How include Vulkan & GLFW in CLion using CMAKE - YouTube](https://www.youtube.com/watch?v=82taqgqkdeU)
+- [glfw/glfw: A multi-platform library for OpenGL, OpenGL ES, Vulkan, window and input](https://github.com/glfw/glfw)
+- 
 # Window
 
 Creating classes for the `Window` and `Logger` for errors
@@ -80,3 +86,73 @@ while (!glfwWindowShouldClose(mainWindow)) {
 ```
 
 The `cleanup()` destroys the window and terminates GLFW.
+
+## OpenGL context
+
+Link CMake:
+```CMake
+set(OpenGL_GL_PREFERENCE GLVND)
+find_package(OpenGL REQUIRED)
+target_link_libraries(${PROJECT_NAME} glfw  OpenGL::GL)
+```
+
+`glfwMakeContextCurrent()` – it gets the OpenGL context, which contains the
+global state of the rendering, and makes it the context of the current thread.
+
+```cpp
+bool Window::init(unsigned int width, unsigned int height, std::string
+title) {
+	if (!glfwInit()) {...}
+	if (!mainWindow) {...}
+	glfwMakeContextCurrent(mainWindow);
+}
+```
+
+we can use some simple OpenGL calls inside the `Window::mainloop()` 
+
+```cpp
+void Window::mainLoop(){
+	// wait for the vertical sync 
+	glfwSwapInterval(1);
+	...
+}
+```
+
+### Background
+`glfwSwapInterval()` - activate the wait for the vertical sync with a call to this GLFW
+function
+- Without waiting for it: the window might *flicker, tearing might occur*, as the update and buffer switch will be done as fast as possible.
+
+```cpp
+void Window::mainLoop(){
+	...
+	//Background
+	float color = 0.0f;
+	
+	while (!glfwWindowShouldClose(mWindow)) {
+		color >= 1.0f ? color = 0.0f : color += 0.01f;
+		glClearColor(color, color, color, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		
+		/* swap buffers */
+		glfwSwapBuffers(mWindow);
+		
+		...
+	}
+```
+
+`glClearColor()` - Sets the new colour to be used when clearing the draw buffer
+
+`glClear()` - with the value set to clear only the colour buffer
+- gives the window a simple grey background:
+
+`GLFW` activates `double buffering` for the OpenGL window. 
+- Has two separate graphics buffers of the same size, a `front buffer` and a `back buffer`.
+
+`Front buffer` - contains the image created by the previous rendering calls.
+`Back buffer` - changes to the final picture occur in while showing the front buffer, 
+
+`glfwSwapBuffers()` - After the drawing of the back buffer has finished, it swaps the two buffers and displays the content of the back buffer, making the previous front buffer the new back buffer for the hidden drawing:
+
+# Event Handling
+All events are stored in an `event queue` and must be handled by the application code.

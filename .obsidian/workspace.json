@@ -13,12 +13,26 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Concepts/C++.md",
+                "file": "Graphics/OpenGL/c++/Manual.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "C++"
+              "title": "Manual"
+            }
+          },
+          {
+            "id": "4898503ea77354fa",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Package install CLION.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Package install CLION"
             }
           }
         ]
@@ -137,10 +151,10 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Concepts/C++.md"
+                "file": "Graphics/OpenGL/c++/Manual.md"
               },
               "icon": "lucide-list",
-              "title": "Outline of C++"
+              "title": "Outline of Manual"
             }
           },
           {
@@ -172,12 +186,13 @@
       "omnisearch:Omnisearch": false
     }
   },
-  "active": "dd29847f25258208",
+  "active": "72c8915d21cd3941",
   "lastOpenFiles": [
+    "Package install CLION.md",
     "Graphics/OpenGL/c++/Manual.md",
+    "Concepts/C++.md",
     "Graphics/OpenGL/java/Introduction.md",
     "Game Development/Game Objects.md",
-    "Concepts/C++.md",
     "Graphics/OpenGL/java/Test code.md",
     "Concepts",
     "Graphics/OpenGL/c++",
