@@ -4,9 +4,9 @@
 - [GLFW: Introduction to the API](https://www.glfw.org/docs/latest/intro_guide.html)
 - [How include Vulkan & GLFW in CLion using CMAKE - YouTube](https://www.youtube.com/watch?v=82taqgqkdeU)
 - [glfw/glfw: A multi-platform library for OpenGL, OpenGL ES, Vulkan, window and input](https://github.com/glfw/glfw)
-- 
+- [GLFW: Introduction](https://www.glfw.org/docs/latest/) 
 # Window
-
+[GLFW: Window guide](https://www.glfw.org/docs/latest/window_guide.html) <-- Resource
 Creating classes for the `Window` and `Logger` for errors
 ## Main
 Window creation
@@ -156,3 +156,126 @@ void Window::mainLoop(){
 
 # Event Handling
 All events are stored in an `event queue` and must be handled by the application code.
+- If you never request the events of that queue, the application window won’t even close properly thus can only be killed using Task Manager.
+
+`glfwPollEvents()` - required to empty the event queue and runs any configured call-backs. 
+- Without this the window will do nothing, not even close down.
+- Should be at end of main loop to process new calls
+
+`glfwWaitEvents()` - also clears the event queue and fire the call-backs
+- puts the thread to sleep and waits until at least one event has been generated for the window.
+- Usually used in non-interactive applications that are waiting for any input from the user
+
+For events that react to user actions by performing another action, eg. message display when a user tries closing the application need two parts:
+1. Function called by GLFW 
+2. call that sets the function as a `callback`
+
+### Lambda functions
+
+A small piece of code, running as an anonymous function.
+
+GLFW is written in C and has no concept of C++ features like OOP thus a small helper is added to every window that might be created – a pointer that can be set and read by the user:
+```cpp
+void glfwSetWindowUserPointer(GLFWwindow *win, void *ptr);
+```
+
+Can store any arbitrary data in the user pointer like:
+- C++ Window object, and inside the lambda, this pointer will be read and used just like in any other C++ call.
+
+The callback for window close event:
+- requires a pointer to a function and returns either NULL
+
+```cpp
+GLFWwindowclosefun glfwSetWindowCloseCallback (GLFWwindow *window, GLFWwindowclosefun callback);
+```
+
+**Callbacks** created using `typedef`. This is done to avoid writing the expression in the second braces every time we use the function.
+```cpp
+typedef void(* GLFWwindowclosefun) (GLFWwindow *window)
+```
+
+In the `init()`, lambda is introduced by the square brackets, [], followed by the parameters the function takes.
+```cpp
+glfwSetWindowUserPointer(mWindow, this);
+glfwSetWindowCloseCallback(mWindow, [](GLFWwindow *win) {
+	auto thisWindow = static_cast<Window*>(
+	glfwGetWindowUserPointer(win));
+	thisWindow->handleWindowCloseEvents();
+});
+```
+
+Termination:
+```cpp
+void Window::handleWindowCloseEvents() {  
+    Logger::log(1, "%s: Window got close event... bye!\n", __FUNCTION__);  
+}
+```
+
+
+## Keyboard Presses
+
+Similar to window events
+1. create a member function to be called 
+2. add the lambda-encapsulated call to GLFW
+
+GLFW offers callback to get the events for keyboard key presses/releases.
+
+Plain key input receives four values:
+1. The ASCII key code of the key
+	- `GLFW_KEY_A` - 7-bit ASCII code of the letter you pressed, >256.
+2. The (platform-specific) scan code of that key
+	- hardcoding it into your code is a bad idea. 
+3. The action you carried out 
+	- `GLFW_PRESS` - key press
+	- `GLFW_RELEASE` - key release
+	- `GLFW_REPEAT` - key pressed for longer, but note this is not issued for all keys.
+4. The status of the modifier key, such as Shift, Ctrl, or Alt
+	- bitmap to see whether the users pressed keys such as `Shift`, `Ctrl`, or `Alt`
+```cpp
+glfwSetKeyCallback(window, key_callback);
+void key_callback(GLFWwindow* window, int key, int scancode, int
+action, int mods)
+```
+
+Example GLFW callback for key presses:
+```cpp
+//place in class under public to give callbak access to window pointer
+public:
+void handleKeyEvents(int key, int scancode, int action,
+int mods);
+
+/*In init()*/
+//Callback for key events  
+glfwSetKeyCallback(mainWindow, [](GLFWwindow *win, int key,  
+int scancode, int action, int mods) {  
+auto thisWindow = static_cast<Window*>(glfwGetWindowUserPointer(win));  
+thisWindow->handleKeyEvents(key, scancode, action, mods);  
+});
+```
+
+Simple key Event handler:
+```cpp
+void Window::handleKeyEvents(int key, int scancode, int action, int mods) {
+    std::string actionName;
+    switch (action) {
+        case GLFW_PRESS:
+            actionName = "pressed";
+        break;
+        case GLFW_RELEASE:
+            actionName = "released";
+        break;
+        case GLFW_REPEAT:
+            actionName = "repeated";
+        break;
+        default:
+            actionName = "invalid";
+        break;
+    }
+    const char *keyName = glfwGetKeyName(key, 0);
+    Logger::log(1, "%s: key %s (key %i, scancode %i) %s\n",
+    __FUNCTION__, keyName, key, scancode,
+    actionName.c_str());
+}
+```
+
+## Mouse movement
