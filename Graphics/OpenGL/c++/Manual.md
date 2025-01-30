@@ -1,6 +1,6 @@
 #opengl #rendering #research #Cpp 
 
-# Resource
+# Resources
 - [GLFW: Introduction to the API](https://www.glfw.org/docs/latest/intro_guide.html)
 - [How include Vulkan & GLFW in CLion using CMAKE - YouTube](https://www.youtube.com/watch?v=82taqgqkdeU)
 - [glfw/glfw: A multi-platform library for OpenGL, OpenGL ES, Vulkan, window and input](https://github.com/glfw/glfw)
@@ -231,6 +231,7 @@ Plain key input receives four values:
 	- `GLFW_REPEAT` - key pressed for longer, but note this is not issued for all keys.
 4. The status of the modifier key, such as Shift, Ctrl, or Alt
 	- bitmap to see whether the users pressed keys such as `Shift`, `Ctrl`, or `Alt`
+	- Can enable the reporting of `Caps Lock` and `Num Lock` – *not enabled* in the normal input mode
 ```cpp
 glfwSetKeyCallback(window, key_callback);
 void key_callback(GLFWwindow* window, int key, int scancode, int
@@ -279,3 +280,59 @@ void Window::handleKeyEvents(int key, int scancode, int action, int mods) {
 ```
 
 ## Mouse movement
+### 1. Movement adjusted by the OS 
+
+Returns the value with all the *optional settings* you might have defined, such as `mouse acceleration`, which speeds up the cursor if you need to move the cursor across the screen.
+
+-  The following is a callback function, which gets informed if the mouse position changes:
+```cpp
+glfwSetCursorPosCallback(window, cursor_position_callback);
+void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+```
+
+Alternatively, you can poll the current mouse position in your code manually:
+```cpp
+double xpos, ypos;
+glfwGetCursorPos(window, &xpos, &ypos);
+```
+
+### 2. Raw movement.
+Excludes these settings and provides you with the `precise level of movement` of the mouse. 
+
+To enable raw mode:
+1. Disable the mouse cursor in the window (not only hide it)
+2. Try to activate it:
+```cpp
+glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+if (glfwRawMouseMotionSupported()) {
+	glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION,GLFW_TRUE);
+}
+```
+
+To `exit raw mode`, go back to the `normal mouse mode`:
+```cpp
+glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+```
+
+Example use cases:
+1. Adjusting the settings using an onscreen menu, OS movement is perfect.
+2. Rotate or move the model, or change the view in the virtual world use the raw mode instead.
+## Mouse presses
+To add a mouse button callback, add the function call to `Window.h`:
+```cpp
+private:
+void handleMouseButtonEvents(int button, int action, int mods);
+```
+
+Callback handling and the function itself in `Window::init()`:
+```cpp
+glfwSetMouseButtonCallback(mainWindow, [](GLFWwindow *win, int button, int action, int mods) {
+	auto thisWindow = static_cast<Window*>(
+	glfwGetWindowUserPointer(win));
+	thisWindow->handleMouseButtonEvents(button, action,
+	mods);
+});
+```
+Gets back the pressed button, the action (`GLFW_PRESS` or `GLFW_RELEASE`), and any pressed modifiers such as the `Shift` or `Alt` .
+
+# Building an OpenGL Renderer

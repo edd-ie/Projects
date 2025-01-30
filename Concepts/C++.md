@@ -4,6 +4,7 @@
 - [smart pointers - cppreference.com](https://en.cppreference.com/book/intro/smart_pointers)
 
 # Smart Pointers
+#smart_pointer #unique_pr #shared_ptr
 A wrapper class over a pointer with an operator like `*` and `->` overloaded.
 Similar to normal pointer but, it can deallocate and free destroyed object memory.
 - `Destructor` is automatically called when an object goes out of scope, the dynamically allocated memory would automatically be deleted
@@ -32,3 +33,10 @@ pLarge->DoSomething();
 // Pass a reference to a method.
 ProcessLargeObject(*pLarge);
 ```
+
+
+
+# Lambda expression
+## Resource 
+#lambda
+- [C++ Lambda](https://www.programiz.com/cpp-programming/lambda-expression)
