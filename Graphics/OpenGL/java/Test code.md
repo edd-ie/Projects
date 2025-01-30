@@ -1,3 +1,4 @@
+#glfw #lwgl #java 
 If imports have been implemented this should show a red window.
 ```java title:HelloWorld.java 
 import org.lwjgl.Version;
