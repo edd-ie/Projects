@@ -11,6 +11,20 @@
             "id": "dd29847f25258208",
             "type": "leaf",
             "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Graphics/OpenGL/c++/Manual.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Manual"
+            }
+          },
+          {
+            "id": "2a92b9a693ee9ec9",
+            "type": "leaf",
+            "state": {
               "type": "graph",
               "state": {},
               "icon": "lucide-git-fork",
@@ -36,7 +50,8 @@
             "state": {
               "type": "file-explorer",
               "state": {
-                "sortOrder": "alphabetical"
+                "sortOrder": "alphabetical",
+                "autoReveal": false
               },
               "icon": "lucide-folder-closed",
               "title": "Files"
@@ -48,7 +63,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "tag:#graphics/pipeline",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -73,7 +88,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "afde6462c99d2d73",
@@ -132,9 +148,14 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {},
+              "state": {
+                "file": "Graphics/OpenGL/c++/Manual.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of Manual"
             }
           },
           {
@@ -168,10 +189,11 @@
   },
   "active": "72c8915d21cd3941",
   "lastOpenFiles": [
+    "Pasted image 20250207221216.png",
+    "Graphics/OpenGL/c++/Manual.md",
     "Concepts/C++.md",
     "Game Development/Installations.md",
     "Graphics/OpenGL/java/Test code.md",
-    "Graphics/OpenGL/c++/Manual.md",
     "Graphics/Package install CLION.md",
     "README.md",
     "Graphics/OpenGL/java/Introduction.md",

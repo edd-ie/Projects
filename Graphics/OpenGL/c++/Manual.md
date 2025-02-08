@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
 Simplify the debugging process. Logging messages with different *logging levels*, enabling you to control the number of logs being shown.
 
 ## Window
-Use of `GLFW` - an open source toolkit that is used to handle the tasks around the application window
+Use of `GLFW` - an open source toolkit that is used to handle the tasks around the application window #glfw/window  
 - Create and destroy the application window
 - Handle the window events (such as minimize, resize, or close)
 - Add an #OpenGL context or #Vulkan support to enable 3D rendering
@@ -120,7 +120,7 @@ void Window::mainLoop(){
 
 ### Background
 `glfwSwapInterval()` - activate the wait for the vertical sync with a call to this GLFW
-function
+function  #glfw/background 
 - Without waiting for it: the window might *flicker, tearing might occur*, as the update and buffer switch will be done as fast as possible.
 
 ```cpp
@@ -155,7 +155,7 @@ void Window::mainLoop(){
 `glfwSwapBuffers()` - After the drawing of the back buffer has finished, it swaps the two buffers and displays the content of the back buffer, making the previous front buffer the new back buffer for the hidden drawing:
 
 # Event Handling
-All events are stored in an `event queue` and must be handled by the application code.
+All events are stored in an `event queue` and must be handled by the application code. #glfw/eventHandling 
 - If you never request the events of that queue, the application window won’t even close properly thus can only be killed using Task Manager.
 
 `glfwPollEvents()` - required to empty the event queue and runs any configured call-backs. 
@@ -336,3 +336,68 @@ glfwSetMouseButtonCallback(mainWindow, [](GLFWwindow *win, int button, int actio
 Gets back the pressed button, the action (`GLFW_PRESS` or `GLFW_RELEASE`), and any pressed modifiers such as the `Shift` or `Alt` .
 
 # Building an OpenGL Renderer
+#opengl/renderer
+## Requirements
+1. Main.cpp and the OpenGL window
+2. `Glad`, the OpenGL loader generator
+3. `stb_image`, a single-header loader for image files
+4. The [OpenGL Mathematics (GLM)](https://github.com/g-truc/glm) library
+
+```CMake
+include(FetchContent)
+
+FetchContent_Declare(
+	glm
+	GIT_REPOSITORY	https://github.com/g-truc/glm.git
+	GIT_TAG 	bf71a834948186f4097caa076cd2663c69a10e1e #refs/tags/1.0.1
+)
+
+FetchContent_MakeAvailable(glm)
+
+target_link_libraries(main PRIVATE glm::glm)
+```
+
+## Graphics pipeline
+
+#graphics/pipeline
+![[Pasted image 20250207221216.png]]
+
+### 1. Vertex data
+The characters to be drawn are made of triangles, and the `Vertex Data of these triangles` is
+sent from the application to the graphics card.
+
+### 2. Primitive processing
+This input data is processed per `Primitive` 
+- For every triangle we send, OpenGL sends the primitive type with the draw call.
+### 3. Vertex Shader 
+The Vertex Shader transforms the per-vertex data into the so-called `clip space`, 
+- a normalized space with a range between -1.0 and 1.0. 
+This makes the processing of further transformation easier; any *coordinate outside the range will not be visible*.
+
+### 4. Tessellation
+The Tessellation stage runs only for a special OpenGL primitive, `the patch`. 
+The tessellation operation will **subdivide the patch into smaller primitives** such as triangles. 
+- This stage can be controlled by shader programs too.
+
+### 5. Geometry Shader
+For triangles, the Geometry Shader comes next. 
+This shader can generate new primitives in addition to the currently processed ones, and you can use it to easily add debug information to your scene.
+
+### 6. Primitive Assembly
+All primitives are converted into triangles, transformed into viewport space (our screen dimensions), and clipped to the visible part in the viewport.
+
+### 7. Rasterization
+*Converts* the *incoming primitives into* so-called `fragments`, which will eventually become screen pixels. 
+- It also interpolates the vertex values, such as colour or texture, across the face of the primitive.
+
+### 8. Fragment Shader
+Determines the final colour of the fragment. 
+- It can be used to blend textures or add fog.
+
+### 8. Per-Sample Operations 
+Tests which decides whether the fragment will be used for the final screen or discarded:
+- Include scissor or stencil tests (to “cut out” parts of the screen) 
+- The depth test
+
+### 9. Screen
+At the end of the stage, a final picture will have been created. This picture will eventually be displayed on the computer screen.
