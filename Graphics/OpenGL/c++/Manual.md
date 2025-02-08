@@ -401,3 +401,78 @@ Tests which decides whether the fragment will be used for the final screen or di
 
 ### 9. Screen
 At the end of the stage, a final picture will have been created. This picture will eventually be displayed on the computer screen.
+
+
+## OpenGL loader generator Glad
+To translate the function pointers back to more human-readable function names, several helper
+libraries exist. Document uses [Glad](https://glad.dav1d.de/).
+1. Select OpenGL for Specification,** Version 4.6** for API
+2. **Core** for Profile.
+3. For Extensions, choose **ADD ALL**.
+4. Keep **Generate a loader** checked and the other two options unchecked
+5. Press the **GENERATE** button
+6. Download the ZIP file and unpack it to the project root, including the folders
+
+```CMakeList
+file(GLOB SOURCES  
+        glad/src/glad.c  
+)
+...
+target_include_directories(${PROJECT_NAME} PUBLIC include src window tools opengl model)
+```
+
+## Anatomy of the OpenGL renderer
+The renderer will be split into five classes to collect all operations and data required for different
+OpenGL objects:
+1. **Main renderer** - which is called from `mainLoop()` in the *Window* class.
+2. **Framebuffer** - which is responsible for the creation of the buffers.
+3. **Vertex array** - which stores the vertex data that will be drawn to the screen
+4. **Shader** - which loads and compiles the shader programs
+5. **Texture** - which loads PNG image files from the system and creates an OpenGL texture out of them
+
+### 1. Main Renderer class
+Make sure glad.h is included before glfw3.h as GLFW changes its behavior and will not include
+the basic system headers if OpenGL functionality is already found
+
+`init()` - used for the first initialization; it creates the OpenGL objects we need to draw anything at all. 
+`cleanup()` - removes the objects, called from the *Window class* after we close the application window.
+`setSize()` - is used during window resizes; it will be called from the *Window class*.
+`uploadData()` - stores triangle and texture data from the model in the renderer class, 
+`draw()` - the triangles will be drawn to the framebuffer
+
+we add local objects of our four classes in the list to create, and a counter of the triangles we upload to the renderer. 
+The counter is needed for the draw() call to display the correct amount of triangles from the vertex array.
+
+```cpp:mainRender.h
+#ifndef MainRENDERER_H  
+#define MainRENDERER_H  
+  
+#pragma once  
+#include <vector>  
+#include <string>  
+#include <glm/glm.hpp>  
+#include <glad/glad.h>  
+#include <GLFW/glfw3.h>  
+  
+#include "Framebuffer.h"  
+#include "VertexBuffer.h"  
+#include "Texture.h"  
+#include "Shader.h"  
+#include "MainRenderData.h"  
+  
+class MainRenderer {  
+    Shader basicShader{};  
+    Framebuffer frameBuffer{};  
+    VertexBuffer vertexBuffer{};  
+    Texture texture{};  
+    int triangleCount = 0;  
+public:  
+    bool init(unsigned int width, unsigned int height);  
+    void setSize(unsigned int width, unsigned int height);  
+    void cleanup();  
+    void uploadData(OGLMesh vertexData);  
+    void draw();  
+};  
+  
+#endif //MainRENDERER_H
+```
