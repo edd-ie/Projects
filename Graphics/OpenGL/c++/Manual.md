@@ -1,6 +1,7 @@
 #opengl #rendering #research #Cpp 
 
 # Resources
+- [Code produced](https://github.com/edd-ie/Graphics-Programming) 
 - [GLFW: Introduction to the API](https://www.glfw.org/docs/latest/intro_guide.html)
 - [How include Vulkan & GLFW in CLion using CMAKE - YouTube](https://www.youtube.com/watch?v=82taqgqkdeU)
 - [glfw/glfw: A multi-platform library for OpenGL, OpenGL ES, Vulkan, window and input](https://github.com/glfw/glfw)
@@ -375,8 +376,8 @@ The Vertex Shader transforms the per-vertex data into the so-called `clip space`
 This makes the processing of further transformation easier; any *coordinate outside the range will not be visible*.
 
 ### 4. Tessellation
-The Tessellation stage runs only for a special OpenGL primitive, `the patch`. 
-The tessellation operation will **subdivide the patch into smaller primitives** such as triangles. 
+Runs only for a special OpenGL primitive, `the patch`. 
+Process **Subdivides the patch into smaller primitives** such as triangles. 
 - This stage can be controlled by shader programs too.
 
 ### 5. Geometry Shader
@@ -384,7 +385,7 @@ For triangles, the Geometry Shader comes next.
 This shader can generate new primitives in addition to the currently processed ones, and you can use it to easily add debug information to your scene.
 
 ### 6. Primitive Assembly
-All primitives are converted into triangles, transformed into viewport space (our screen dimensions), and clipped to the visible part in the viewport.
+All primitives are converted into triangles, transformed into viewport space (the screen dimensions), and clipped to the visible part in the viewport.
 
 ### 7. Rasterization
 *Converts* the *incoming primitives into* so-called `fragments`, which will eventually become screen pixels. 
@@ -476,3 +477,171 @@ public:
   
 #endif //MainRENDERER_H
 ```
+
+
+**MainRenderer::init()** :
+- `gladLoadGLLoader()` initializes OpenGL via Glad, if fails return false to signal a failure to the creating Window class
+
+`GLAD_GL_VERSION_4_6` integer is only satisfied if the graphics card and driver support OpenGL 4.6
+
+Initialize other class variables
+The vertex array initialization needs no separate check as this operation can only fail in a fatal way (such as out-of-memory errors)
+If none of the steps fails, we return true to signal that the OpenGL initialization succeeded.
+
+**MainRenderer::setSize()** :
+- Resizes the framebuffer object and also the OpenGL viewport – the viewport information is important for the driver to know how to map the framebuffer to the output window.
+
+**MainRenderer::uploadData()** :
+- For correct usage of the uploaded vertex and triangle data, the method needs to store the size of `std::vector` with the triangle data. 
+It hands over the input data to the vertex array object.
+
+
+**MainRenderer::draw()** :
+Responsible for displaying the triangles from the vertex array object to the framebuffers, and then to the screen
+1. Start by binding the framebuffer object, which will let the framebuffer receive our vertex data.
+2. Clear the screen with a very low grey colour. 
+3. Clear the depth buffer
+4. Back-face culling. 
+	- Every triangle in the virtual world has two sides, front and back. 
+	- The front side of the triangle usually faces the outside of the virtual objects we draw
+	- The back side faces the inside. 
+5. As the back of the objects will never be seen are occluded by the front faces
+	- The triangles facing “away” from us don’t need to be drawn.  
+	- Gives speedups, as the triangles are discarded early in the graphics pipeline before much work has been done with them
+6. Draw the triangles stored in the vertex buffer :
+	1. Load the shader program, which enables the processing of the vertex data
+	2. Bind the texture to be able to draw textured triangles
+	3. Bind the vertex array, so we have our triangle data available
+7. Call `draw()` in vertex buffer:
+	1. Sends vertex data to the GPU to be processed by the shaders.
+8. Draw the content of the framebuffer to the screen
+
+**MainRenderer::cleanup()** :
+- Calls the cleanup() method of all other objects
+
+### 2. Render Data
+For ease of management of the vertex data, two structs will be used:
+1. Holds the data for a single vertex, consists:
+	1. 3-element `GLM vector` for its `position` 
+	2. 2-element `vector` for the `texture coordinates`.
+2. C++-style vector with elements of the first struct
+	1. Creates a collection of all the vertices of a model.
+
+`GLM` - allows data to be organized in the same way in the system memory as it would be on the GPU memory, allowing a simple copy to transfer the vertex data to the graphics card.
+
+
+### 3. Buffer Types
+#buffers
+Memory of the graphics cards is managed by the driver; usually, all memory is seen as a single, large block.
+This block will be divided into smaller parts `Buffer` for:
+- triangle data
+- texture 
+- frame buffers, and more.
+Buffer is accessible from by code via the driver.
+
+#### i. Frame buffer
+#buffers/frame_buffer
+Creates the final picture displayed on the screen and stores the intermediate results of rendering.
+
+Frame buffers need to be bound before modification:
+- `glBindFramebuffer(GL_FRAMEBUFFER, buffer);` 
+
+**NOTE :** include Glad and GLFW in the correct order 
+- Glad first and GLFW second. 
+- This is required for the OpenGL calls in the class to work
+
+Framebuffers::init() 
+- Takes size and width as parameters and initializes the framebuffers.
+- `glGenFramebuffers()` - creates an OpenGL framebuffer object
+- create a texture with the same size as the window, but without data
+- Bind the created texture as a 2D texture type to alter it
+- The texture created will have four 8-bit wide components: red, green, blue, and alpha (transparency)
+- `GL_TEXTURE_MIN_FILTER` - handles #downscaling (minification) the texture if it is drawn far away
+- `GL_TEXTURE_MAG_FILTER` - handles #upscaling (magnification)) the texture if it is drawn close to view
+- `GL_NEAREST` - fastest way to up/downscale as it does no filtering at all.
+- `GL_TEXTURE_WRAP_S / GL_TEXTURE_WRAP_T` - decides what happens on the positive and negative edges of the texture when drawn outside the defined area of the texture
+	- edge-clamping sets the value of the texture data of the x or y position to 0.0 if the requested position is <0,  and to 1.0 if we are requesting a position of >1.
+- unbind the texture by binding the (invalid) texture ID of 0
+- binding the texture as texture attachment zero
+
+Framebuffers::resize()
+- Same parameters as `init()` and recreates the framebuffers to the given, new size. 
+	- Deletes old colour texture and depth buffer
+	- Calls the init() with the new parameters
+- This is called from the renderer on window size changes to have matching framebuffer sizes.
+
+Framebuffers::bind() 
+- Enables the drawing to the framebuffers
+	- `glBindFramebuffer(GL_DRAW_FRAMEBUFFER, buffer);` - called to enable modification
+
+Framebuffers::unbind() 
+- Disables the drawing to the framebuffers
+	- `glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);` - called to disable modification
+
+`bind()`  & `unbind()` makes it possible to use multiple Framebuffer objects in a single function.
+- #deferred_rendering - uses this technique and combines the buffers in a final method to the output picture.
+
+Framebuffers::drawToScreen()
+- Copies the data to the `GLFW window`. 
+- Can be drawn internally to a separate buffer and not directly to the screen, just to show the flexibility of the rendering.
+1. `glBindFramebuffer(GL_READ_FRAMEBUFFER, mBuffer)` - bind the frame buffer for reading
+2. `glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0)` - disable drawing to the frame buffer
+	- window becomes the output (draw) framebuffer
+3. `glBlitFramebuffer(...)` - #blit the contents of the internal framebuffer to the window
+	- a memory copy, a fast method to copy the contents of one framebuffer to another.
+4. `glBindFramebuffer(GL_READ_FRAMEBUFFER, 0)` - unbind the framebuffer to stop reading it
+
+Framebuffers::cleanup()
+- `unbind()` - Disables drawing to the framebuffers
+- `glDeleteTextures(1, &mColorTex)` - delete colour texture
+- `glDeleteRenderbuffers(1, &depthBuffer)` - delete the depth buffer
+- `glDeleteFramebuffers(1, &buffer)`  - delete the frame buffer
+
+```c++::FrameBuffer.h
+class Framebuffer {  
+    unsigned int bufferWidth = 640;  
+    unsigned int bufferHeight = 480;  
+    GLuint buffer = 0;  
+    GLuint colorTexture = 0;  
+    GLuint depthBuffer = 0;  
+    bool checkComplete();  
+public:  
+    bool init(unsigned int width, unsigned int height);  
+    bool resize(unsigned int newWidth, unsigned int newHeight);  
+    void bind(); // Enable drawing to the frame buffers  
+    void unbind(); // Disable drawing to the frame buffers  
+    void drawToScreen();  
+    void cleanup();  
+};
+```
+
+`bufferWidth` and `bufferHeight` - stores the current dimensions of the buffer
+- They are required in the method for the final drawing to the output window. *(screen size)*
+
+`GLuint` typed values are integers for internal buffers:
+5. **buffer** - the overall framebuffer we draw to
+6. **colourTexture** - the colour texture we use as data storage for the framebuffer
+7. **depthBuffer** - stores the distance from the viewer for every pixel and ensures that only the colour value nearest to the viewer will be drawn.
+
+`checkComplete()` - checks whether the framebuffer contains all components required to draw.
+- Do this check when creating a framebuffer. 
+- If the created framebuffer is missing parts of the configuration, accessing them would result in errors.
+
+#### ii. Render buffer 
+#buffers/render_buffer
+In case don’t need to show or reuse the result of a drawing operation, we may use a render buffer instead of a texture.
+- It can be written to like the texture in the framebuffer, but it cannot be read out easily.
+- Most useful for intermediate buffers that are valid for a single frame, where the content is not needed for more than this single draw processing
+```cpp
+/* Use of render buffer to create a depth buffer */  
+glGenRenderbuffers(1, &depthBuffer);  
+glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);  
+glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
+```
+When a pixel in the colour attachment is about to be written: 
+- depth buffer will be checked to see whether the pixel is closer to the viewer compared to a pixel already in that position (if any).
+- If the new pixel is from a triangle closer to the viewer position, the depth buffer will be updated with the new, nearer value and the color attachment will be drawn. 
+- If it is further away, both writes are discarded.
+
+#### iii Vertex buffer and arrays
+A simple ways to store all the data about the vertices we want to draw is using vertex buffers
