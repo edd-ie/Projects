@@ -644,4 +644,103 @@ When a pixel in the colour attachment is about to be written:
 - If it is further away, both writes are discarded.
 
 #### iii Vertex buffer and arrays
-A simple ways to store all the data about the vertices we want to draw is using vertex buffers
+#buffers/vertex_buffer
+**Vertex Buffer** - OpenGL data structures that hold all the required information for the rendering:
+1. ordering of the data
+2. How many elements are used per vertex, such as:
+	- 3 for vertex coordinates, 4 for colour, and 2 for the texture coordinates
+Stores all the data about the vertices we want to draw.
+The buffer objects will contain the vertex and texture data
+
+**Vertex array** - multiple vertex buffers bound together to be enabled or disabled by a single call as the source to draw from.
+
+Vertex buffers inside a vertex array are bound tight to the shaders used.
+- buffers will be used to “feed” the vertex data to the GPU
+- **Format and positions** in the vertex array **have to match** the shader input definition
+- Any differences, the *data will be misinterpreted*,** resulting in garbage** on the screen.
+
+```cpp::VertexBuffer.h
+#pragma once  
+#include <vector>  
+#include <glm/glm.hpp>  
+#include <glad/glad.h>  
+#include <GLFW/glfw3.h>  
+#include "MainRenderData.h"  
+  
+class VertexBuffer {  
+    GLuint vertexArray = 0;  
+	GLuint vertexBuffer = 0;  
+public:  
+    void init();  
+    void uploadData(OGLMesh vertexData);  
+    void bind();  
+    void unbind();  
+    void draw(GLuint mode, unsigned int start,  
+    unsigned int num);  
+    void cleanup();  
+};
+```
+
+
+`VertexBuffer::init() `
+Set up the buffers
+- `glGenVertexArray(1, &vertexArray) ` - creates a new vertex array object
+- `glGenBuffers(1, &vertexBuffer)` - creates a vertex buffer object.
+- `glBindVertexArray(vertexArray)` - bind the vertex array object
+- `glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer)` - bind the first buffer for the vertex data
+- `glVertexAttribPointer()` - configures the buffer object with parameters:
+	1. Input location in shaders, e.g. 0
+	2. Number of elements, e.g. 3
+	3. Element type, e.g. `GL_FLOAT`. 
+	4. Are the elements normalized, for floating-point values `GL_FALSE` 
+	5. Size of the vertex struct used, `sizeof(OGLVertex)` 
+		- consisting of the position and the texture coordinate. 
+	6. offset inside the `OGLVertex` struct, e.g. `offsetof(OGLVertex, uv)`
+		- Used the C++ `offsetof()` macro to get the offsets of the position and the texture coordinates elements.
+	
+- ` glEnableVertexAttribArray(0)` - enable the vertex buffers which was just configured.
+- `glBindBuffer(GL_ARRAY_BUFFER, 0)` - unbind the array buffer
+- `glBindVertexArray(0)` - unbind the vertex array
+
+`VertexBuffer::uploadData()`
+Copies the data to the vertex buffers. We are using our own data type here to have all the per-vertex data as a single element. 
+- `glBindVertexArray(vertexArray)`  - bind the vertex array
+- `glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer)`  - bind the vertex buffer
+- `glBufferData()` - uploads the vertex data to the OpenGL buffer
+	- calculates size by (number of elements in the vector) * (size of custom vertex data type)
+	- Takes starting address for the memory copy, the address of the 1st vertex element
+	- `GL_DYNAMIC_DRAW` - hints to the driver the data will be written and used multiple times
+```c++
+glBufferData(GL_ARRAY_BUFFER, 
+	vertexData.vertices.size()* sizeof(OGLVertex), 
+	&vertexData.vertices.at(0),  GL_DYNAMIC_DRAW);
+```
+- `glBindVertexArray(0)` - unbind the buffers
+
+
+`VertexBuffer::bind() `and `VertexBuffer::unbind() `
+similar to the Framebuffer class
+- `glBindVertexArray(vertexArray)` - bind vertex array
+- `glBindVertexArray(0)` - unbind vertex array
+
+
+`VertexBuffer::draw() `
+`glDrawArrays(mode, start, num)` - instructs OpenGL to draw the vertex array from the currently bound vertex array object
+- `mode` - rendering mode. To draw triangles, use `GL_TRIANGLES`
+- `start` - starting index in vertex array
+- `num` - number of elements to be rendered
+
+`VertexBuffer::cleanup()`
+Frees the OpenGL resources
+- `glDeleteBuffers(1, &vertexBuffer)`
+- `glDeleteVertexArrays(1, &vertexArray)` 
+
+
+#### iv. Textures
+Used to make objects in the virtual world appear more realistic.
+They can be :
+- generated procedurally
+- generated from pictures taken from the real world
+- altered by graphics tools.
+
+They can also be used to *transport vertex data to the GPU* in a very efficient way

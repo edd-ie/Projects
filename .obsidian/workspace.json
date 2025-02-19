@@ -22,6 +22,18 @@
             }
           },
           {
+            "id": "5cffc42c6a1a2b80",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.8.7"
+              },
+              "icon": "lucide-book-up",
+              "title": "Release Notes 1.8.7"
+            }
+          },
+          {
             "id": "2a92b9a693ee9ec9",
             "type": "leaf",
             "state": {
@@ -63,7 +75,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "tag:#frame_buffer",
+                "query": "tag:#buffers/vertex_buffer",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -124,11 +136,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "Graphics/OpenGL/c++/Manual.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links"
+              "title": "Outgoing links from Manual"
             }
           },
           {
@@ -190,8 +203,8 @@
   },
   "active": "72c8915d21cd3941",
   "lastOpenFiles": [
-    "Pasted image 20250207221216.png",
     "Graphics/OpenGL/c++/Manual.md",
+    "Pasted image 20250207221216.png",
     "Concepts/C++.md",
     "Game Development/Installations.md",
     "Graphics/OpenGL/java/Test code.md",
