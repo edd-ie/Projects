@@ -739,8 +739,71 @@ Frees the OpenGL resources
 #### iv. Textures
 Used to make objects in the virtual world appear more realistic.
 They can be :
-- generated procedurally
+- Procedurally generated
 - generated from pictures taken from the real world
-- altered by graphics tools.
+- Altered by graphics tools.
 
 They can also be used to *transport vertex data to the GPU* in a very efficient way
+
+To load images the project uses [STB image header](https://github.com/nothings/stb/blob/master/stb_image.h)
+- A free header to load images from the system, such as PNG or JPEG, and make them available as a byte buffer for further usage.
+
+```cpp
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+#include "Texture.h"
+```
+`STB_IMAGE_IMPLEMENTATION` before the header is required only in a C++ file, to advise the header to activate the functions
+
+```c++
+#pragma once  
+#include <string>  
+#include <glad/glad.h>  
+#include <GLFW/glfw3.h>  
+  
+class Texture {  
+    GLuint mTexture = 0;  
+public:  
+    bool loadTexture(std::string textureFilename);  
+    void bind();  
+    void unbind();  
+    void cleanup();  
+};
+```
+
+`Texture::loadTexture()` 
+Loads the file using the STB functions and creates the OpenGL texture
+- 3 integer values are required for the STB loading function
+	1. Texture width
+	2. Texture height
+	3. Number of channels (3 for RGB picture and 4 for RGBA, transparency channel).
+- `stbi_set_flip_vertically_on_load()` - flips the image on the vertical axis, as the coordinate systems of the texture and the picture differ on the axis
+- `stbi_load()` : 
+	1. creates a memory area
+	2. Reads the file from the system
+	3. Flips the image as instructed before
+	4. Fills the width, height, and channels with the values found in the image.
+- If it can’t be loaded for some reason, such as the file was not found, free the memory
+- `glGenTextures(1, &mTexture)` - generate a Texture object 
+- `glBindTexture(GL_TEXTURE_2D, mTexture)` - bind the new texture as the current 2D texture
+- `GL_TEXTURE_MIN_FILTER` - handles #downscaling (minification) the texture if it is drawn far away
+	- `GL_LINEAR_MIPMAP_LINEAR` - trilinear sampling for minification in the project
+- `GL_TEXTURE_MAG_FILTER` - handles #upscaling (magnification)) the texture if it is drawn close to view
+	- `GL_LINEAR` - there is only linear filtering available.
+- `GL_TEXTURE_WRAP_S & GL_TEXTURE_WRAP_T` - decides what happens on the positive and negative edges of the texture when drawn outside the defined area of the texture
+	- `GL_REPEAT` - repeats the texture outside the range of 0 to 1. 
+	- Similar to using only the fractional part of the texture coordinate, ignoring the integer part.
+-  `glTexImage2D()` - loads the data to the graphics
+	- loaded byte data from `stbi_load()`
+	- `GL_RGBA` - for 4 component images
+- `glGenerateMipmap(GL_TEXTURE_2D)` - generate #mipmaps. 
+	- These are scaled-down versions of the original image, halving the width and height in every step.
+	- Increases rendering speed - less data is read if the texture is far away
+	- Reduces artifacts
+- `glBindTexture(GL_TEXTURE_2D, 0)` - Unbind to prevent changes
+- `stbi_image_free(textureData)` - free the memory allocated by the STB load call and return true
+
+`Texture::bind() `and `Texture::unbind() `
+similar to the Framebuffer class
+- `glBindTexture(GL_TEXTURE_2D, mTexture)` - bind texture
+- `glBindTexture(GL_TEXTURE_2D, 0)` - unbind texture
