@@ -375,7 +375,7 @@ The Vertex Shader transforms the per-vertex data into the so-called `clip space`
 - a normalized space with a range between -1.0 and 1.0. 
 This makes the processing of further transformation easier; any *coordinate outside the range will not be visible*.
 
-### 4. Tessellation
+### 4. Tessellation shader
 Runs only for a special OpenGL primitive, `the patch`. 
 Process **Subdivides the patch into smaller primitives** such as triangles. 
 - This stage can be controlled by shader programs too.
@@ -431,7 +431,7 @@ OpenGL objects:
 4. **Shader** - which loads and compiles the shader programs
 5. **Texture** - which loads PNG image files from the system and creates an OpenGL texture out of them
 
-### 1. Main Renderer class
+### 1. Renderer
 Make sure glad.h is included before glfw3.h as GLFW changes its behavior and will not include
 the basic system headers if OpenGL functionality is already found
 
@@ -530,7 +530,7 @@ For ease of management of the vertex data, two structs will be used:
 `GLM` - allows data to be organized in the same way in the system memory as it would be on the GPU memory, allowing a simple copy to transfer the vertex data to the graphics card.
 
 
-### 3. Buffer Types
+### 3. Buffers
 #buffers
 Memory of the graphics cards is managed by the driver; usually, all memory is seen as a single, large block.
 This block will be divided into smaller parts `Buffer` for:
@@ -807,3 +807,51 @@ Loads the file using the STB functions and creates the OpenGL texture
 similar to the Framebuffer class
 - `glBindTexture(GL_TEXTURE_2D, mTexture)` - bind texture
 - `glBindTexture(GL_TEXTURE_2D, 0)` - unbind texture
+
+
+### Shaders
+#shaders - a small program running on the graphics card, which has special computing units for them.
+Modern GPUs have thousands of shader units to be able to run the shaders in a massively parallel.
+- Reason for the high-speed drawing of pictures of 3D worlds.
+
+OpenGL rendering pipeline uses several shader types, current focussing on the first and last steps in the pipeline.
+- Vertex shader
+- Fragment shader
+
+#### Vertex and fragment shaders
+<font color="#30D5C8">OpenGL Shading Language (GLSL)</font> is used to write the code
+
+#shaders/vertex_shader - takes <font color="yellow">uploaded vertex data  as input and transforms</font> the incoming primitive types, such as triangles, <font color="yellow">from 3D to 2D screen space</font>
+- Passes the generated data into the remaining parts of the pipeline.
+
+Basic vertex shader:
+1. Every OpenGL shader must start with a version string; this is required for the driver to see which data types and functions are available. `#version 460 core`
+2. Create `layout` variables to match the incoming vertex buffer data at specified locations:
+	- `aPos` vec3 type on input location 0 – 3 elements vector for the x, y, and z coordinates.
+	- `aTexCoord` vec2 type on input location 1,  (“a texture coordinate”)
+3. `out` defines an output parameter, example; 
+	- `out vec2 texCoord;` - a vec2 type variable is passed to the next shader stage as texture coordinates.
+4. `main()` - is similar to C/C++ code
+	- `glPosition` – important 4-element vector that's always passed to the next shader stage.
+
+```C::basic.vert
+#version 460 core  
+  
+layout (location = 0) in vec3 aPos;  
+layout (location = 1) in vec2 aTexCoord;  
+  
+out vec2 texCoord;  
+  
+void main() {  
+    gl_Position = vec4(aPos, 1.0);  
+    texCoord = aTexCoord;  
+}
+```
+
+
+#shaders/fragment_shader - <font color="yellow">computes the colour value</font> for every “fragment” <font color="yellow">of the final picture.</font> 
+- `Fragment` - an internal unit – usually, it maps 1:1 to a <font color="yellow">pixel</font>. 
+- Can also be used to make post-processing changes to an image, such as blurring parts of the picture.
+
+
+#### Loading and compiling shaders
