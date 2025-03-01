@@ -22,25 +22,17 @@
             }
           },
           {
-            "id": "5cffc42c6a1a2b80",
+            "id": "08513442523df7c3",
             "type": "leaf",
             "state": {
-              "type": "release-notes",
+              "type": "markdown",
               "state": {
-                "currentVersion": "1.8.7"
+                "file": "Colour codes.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-book-up",
-              "title": "Release Notes 1.8.7"
-            }
-          },
-          {
-            "id": "2a92b9a693ee9ec9",
-            "type": "leaf",
-            "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "icon": "lucide-file",
+              "title": "Colour codes"
             }
           }
         ]
@@ -96,13 +88,11 @@
               "title": "Bookmarks"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "afde6462c99d2d73",
@@ -205,13 +195,15 @@
   },
   "active": "72c8915d21cd3941",
   "lastOpenFiles": [
+    "Colour codes.md",
     "Graphics/OpenGL/c++/Manual.md",
     "Pasted image 20250207221216.png",
+    "Untitled",
+    "README.md",
     "Concepts/C++.md",
     "Game Development/Installations.md",
     "Graphics/OpenGL/java/Test code.md",
     "Graphics/Package install CLION.md",
-    "README.md",
     "Graphics/OpenGL/java/Introduction.md",
     "Game Development/Game Objects.md",
     "Concepts",
@@ -232,7 +224,6 @@
     "Operating System",
     "Untitled.canvas",
     "Untitled 1",
-    "Chess Engine",
     "2024-10-30.md",
     "Android/Indoor Navigation (Labyrinth).md",
     "gps.md",

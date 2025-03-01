@@ -818,13 +818,14 @@ OpenGL rendering pipeline uses several shader types, current focussing on the fi
 - Vertex shader
 - Fragment shader
 
-#### Vertex and fragment shaders
-<font color="#30D5C8">OpenGL Shading Language (GLSL)</font> is used to write the code
+<font color="#30D5C8">OpenGL Shading Language (GLSL)</font> - used to write shader code
+
+#### Vertex shader
 
 #shaders/vertex_shader - takes <font color="yellow">uploaded vertex data  as input and transforms</font> the incoming primitive types, such as triangles, <font color="yellow">from 3D to 2D screen space</font>
 - Passes the generated data into the remaining parts of the pipeline.
 
-Basic vertex shader:
+Basic vertex shader: `.vert - file ext`
 1. Every OpenGL shader must start with a version string; this is required for the driver to see which data types and functions are available. `#version 460 core`
 2. Create `layout` variables to match the incoming vertex buffer data at specified locations:
 	- `aPos` vec3 type on input location 0 – 3 elements vector for the x, y, and z coordinates.
@@ -849,9 +850,104 @@ void main() {
 ```
 
 
+#### Fragment shader
 #shaders/fragment_shader - <font color="yellow">computes the colour value</font> for every “fragment” <font color="yellow">of the final picture.</font> 
 - `Fragment` - an internal unit – usually, it maps 1:1 to a <font color="yellow">pixel</font>. 
 - Can also be used to make post-processing changes to an image, such as blurring parts of the picture.
 
+Basic fragment shader `.frag - file ext`
+1. Start with OpenGL version declaration 
+	`#version 460 core`
 
+2. Declare incoming data - example: incoming vec2 data element
+	`in vec2 texCoord;`
+		<font color=ff2800>Note:</font> The <font color=#ffcba4>name for the incoming data</font> element <font color=ff2800>must match</font> the <font color=#ffcba4>name given to the output</font> element of the previous shader stage. 
+		->output name (texCoord) from the vertex shader must match the input name in the fragment shader.
+		-> If the names do not match, the shader compiling will fail!
+
+3. Declare output data:
+	`out vec4 FragColor;` - four-element vector containing RGBA values
+
+4. If you have <font color=#ffcba4>constant data</font> for all draw calls use keyword `uniform`  
+	`uniform sampler2D Tex;` - a 2D texture
+
+5. The `main()` function
+- `texture()` function of the fragment shader does :
+	1. <font color=#ffcba4>Colour lookup</font> - in the texture given as the 1st parameter. 
+	2. <font color=#ffcba4>Find the colour value on the position</font> - given (x, y) coordinates the 2nd parameter.
+- This lookup process maps the texture to the drawn primitive objects, such as a triangle, creating a natural-looking appearance of the object.
+```c++:basic.frag
+void main() {
+	FragColor = texture(Tex, texCoord);
+}
+```
 #### Loading and compiling shaders
+##### Shader Loader
+```c++:Shader.h
+#include <string>  
+#include <glad/glad.h>  
+#include <GLFW/glfw3.h>  
+  
+class Shader {  
+    GLuint mShaderProgram = 0;  
+    GLuint readShader(std::string shaderFileName, GLuint shaderType);  
+public:  
+    bool loadShaders(std::string vertexShaderFileName, std::string fragmentShaderFileName);  
+    void use();  
+    void cleanup();    
+};
+```
+
+`mShaderProgram`  - Contains the OpenGL handle to our shader program
+
+`readShader()`  - a helper to avoid code duplication, as the operations to load a vertex or a fragment shader differ only in a single parameter to one of the calls.
+1. `std::ifstream inFile(shaderFileName);` - create a variable to temporarily store the shader file content in a string
+	-  If `std::ifstream` can't open for reading, return 0 to signal the error
+
+2. `inFile.seekg(0, std::ios::end);` - gets length of the shader file by seeking the end and reserving the number of bytes in the destination string:
+
+3. `shaderAsText.assign()` - reads the content of ifstream into the string
+4. `inFile.close();` - close the file.
+5. `inFile.bad() || inFile.fail()` - read failed, close file and return 0
+6. Compile the shader
+	- `const char* shaderSource = shaderAsText.c_str();`
+	- Need a char array for `glShaderSource()` - uses C-style array from our string first
+
+7. Create an empty shader with the type given as a parameter
+	`GLuint shader = glCreateShader(shaderType);`
+	The only difference between loading and compiling a vertex shader and a fragment shader
+
+8. Load the shader code into the shader and the OpenGL library compiles it
+	`glShaderSource(shader, 1, (const GLchar**) &shaderSource, 0);`
+	`glCompileShader(shader);`
+
+9. Check if compilation was successful
+	`GLint isShaderCompiled;`
+	`glGetShaderiv(shader, GL_COMPILE_STATUS, &isShaderCompiled);`
+10. If successful, return the `shader`.
+
+
+`loadShaders()` : 
+Loads two files from the system and generate an OpenGL shader
+1. Load the vertex shader 1st then fragment shader. If the loading fails, return false
+2. Create the shader objects:
+	1. `glCreateProgram()` - creates an empty shader program
+	2. `glAttachShader()` - attaches both shaders that were loaded
+	3. `glLinkProgram()` - links the shaders together to create the final shader program in the graphics card memory.
+3. Check the status of the shader program link result:
+	1. `GLint isProgramLinked`;  
+	2. `glGetProgramiv(mShaderProgram, GL_LINK_STATUS, &isProgramLinked);`
+	3. If `isProgramLinked` is false, failure in linking. Return false
+4. Clean up by deleting the shaders and return `true` 
+
+`use()` : 
+Instructs the graphics card to use this shader for the next draw operation. 
+There is no `unuse()` as a shader always needs to be to avoid undefined results & generate an output to the window.
+	`glUseProgram(mShaderProgram);` - activates the shader program.
+
+`cleanup()` : 
+Frees the created OpenGL shader object at the end of our program.
+- `glDeleteProgram(mShaderProgram);`
+
+
+
