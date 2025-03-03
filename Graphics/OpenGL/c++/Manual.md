@@ -88,6 +88,61 @@ while (!glfwWindowShouldClose(mainWindow)) {
 
 The `cleanup()` destroys the window and terminates GLFW.
 
+### Rendering functionality
+Add some headers to it: 
+```c++
+#include <memory>  
+...
+#include "../Renderer/MainRenderer.h"  
+#include "../resource/Models/Model.h"  
+  
+class Window {  
+    GLFWwindow *mainWindow = nullptr;  
+    std::unique_ptr<MainRenderer> mRenderer;  
+    std::unique_ptr<Model> mModel;
+}
+```
+
+Use #smart_pointers here to avoid trouble with the memory allocation;
+`init()`:
+```c++
+bool Window::init(const unsigned int width, const unsigned int height, const std::string& title) {  
+    if (!glfwInit()) {...}
+    
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	...
+}
+```
+This instructs GLFW to create an OpenGL 4.6 window with the core profile set.
+
+```c++
+bool Window::init(...){
+	...
+	// Creating a window  
+	mainWindow = glfwCreateWindow(...);  
+	if (!mainWindow) {...}  
+	  
+	//Creating a renderer  
+	mainRenderer = std::make_unique<MainRenderer>();  
+	if (!mainRenderer->init(width, height)) {  
+	    glfwTerminate();  
+	    return false;
+	}
+	
+	
+	glfwSetWindowUserPointer(mainWindow, mainRenderer.get());  
+	glfwSetWindowSizeCallback(mainWindow, [](GLFWwindow *win, int width, int height) {  
+	    auto renderer = static_cast<MainRenderer*>(glfwGetWindowUserPointer(win));  
+	    renderer->setSize(width, height);  
+	});
+}
+```
+- Create the renderer object with the folder of the executable file
+- To have a working window resize, we need a lambda-style callback
+	- `setSize()` of the renderer is used instead of the window
+	- This will resize the OpenGL viewport and framebuffer, matching the size of the window
 ## OpenGL context
 
 Link CMake:
@@ -113,8 +168,11 @@ we can use some simple OpenGL calls inside the `Window::mainloop()`
 
 ```cpp
 void Window::mainLoop(){
-	// wait for the vertical sync 
-	glfwSwapInterval(1);
+	// Enable vertical sync to prevent tearing & flickering  
+	glfwSwapInterval(1);  
+  
+	// Get vertex and texture data from the model and feed the renderer
+	mainRenderer->uploadData(model->getVertexData());
 	...
 }
 ```
@@ -127,13 +185,18 @@ function  #glfw/background
 ```cpp
 void Window::mainLoop(){
 	...
-	//Background
-	float color = 0.0f;
-	
-	while (!glfwWindowShouldClose(mWindow)) {
-		color >= 1.0f ? color = 0.0f : color += 0.01f;
-		glClearColor(color, color, color, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+	// Background colour
+    //float colour = 0.0f;
+
+    while (!glfwWindowShouldClose(mainWindow)) {
+
+        /*// Make a grey background
+        colour >= 1.0f ? colour = 0.0f : colour += 0.01f;
+        glClearColor(colour, colour, colour, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);*/
+
+        // Draw the vertex data of the model to the back buffer
+        mainRenderer->draw();
 		
 		/* swap buffers */
 		glfwSwapBuffers(mWindow);
@@ -152,6 +215,8 @@ void Window::mainLoop(){
 
 `Front buffer` - contains the image created by the previous rendering calls.
 `Back buffer` - changes to the final picture occur in while showing the front buffer, 
+
+`mainRenderer->draw()` - Draws the vertex data of the model to the back buffer
 
 `glfwSwapBuffers()` - After the drawing of the back buffer has finished, it swaps the two buffers and displays the content of the back buffer, making the previous front buffer the new back buffer for the hidden drawing:
 
@@ -949,5 +1014,40 @@ There is no `unuse()` as a shader always needs to be to avoid undefined results 
 Frees the created OpenGL shader object at the end of our program.
 - `glDeleteProgram(mShaderProgram);`
 
+#### Sample model
+```c++
+#pragma once  
+#include <vector>  
+#include <glm/glm.hpp>  
+#include "../Renderer/MainRenderData.h"  
+  
+  
+class Model {  
+    OGLMesh vertexData{};  
+public:  
+    void init();  
+    OGLMesh getVertexData();  
+};
+```
 
+`init()` :
+Used to fill in the vectors with data, and adds a function to read out the vertex. 
+As a data element, it uses `OGLMesh` structure, which contains a `std::vector` type vector of the vertices, stores:
+- Position
+- uv
+```c++
+void Model::init() {  
+    vertexData.vertices[0].position =  glm::vec3(-0.5f, -0.5f, 0.5f);  
+	...
+    vertexData.vertices[0].uv = glm::vec2(0.0, 0.0);  
+    ...
+}
+```
 
+`getVertexData()` :
+Return the vertex data to the caller
+```c++
+OGLMesh Model::getVertexData() { 
+	return mVertexData; 
+}
+```

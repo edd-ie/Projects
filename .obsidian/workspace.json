@@ -92,7 +92,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "afde6462c99d2d73",
@@ -195,12 +196,12 @@
   },
   "active": "72c8915d21cd3941",
   "lastOpenFiles": [
+    "Concepts/C++.md",
     "Colour codes.md",
     "Graphics/OpenGL/c++/Manual.md",
     "Pasted image 20250207221216.png",
     "Untitled",
     "README.md",
-    "Concepts/C++.md",
     "Game Development/Installations.md",
     "Graphics/OpenGL/java/Test code.md",
     "Graphics/Package install CLION.md",
