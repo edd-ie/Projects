@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Colour codes.md",
+                "file": "Concepts/C++.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Colour codes"
+              "title": "C++"
             }
           },
           {
@@ -27,16 +27,15 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Concepts/C++.md",
+                "file": "Colour codes.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "C++"
+              "title": "Colour codes"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -93,7 +92,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 236.5
   },
   "right": {
     "id": "afde6462c99d2d73",
@@ -194,13 +193,13 @@
       "omnisearch:Omnisearch": false
     }
   },
-  "active": "fd71704b3674aa52",
+  "active": "72c8915d21cd3941",
   "lastOpenFiles": [
     "Colour codes.md",
     "Concepts/C++.md",
+    "Quantitative Finance/Study Plan.md",
     "Concepts/Enumerated Constants.md",
     "Quantitative Finance/LeetCode Problem Tracker.md",
-    "Quantitative Finance/Study Plan.md",
     "Quantitative Finance/Project Checklist & Resources.md",
     "Quantitative Finance/Cpp_Quant_LeetCode_Problem_List.md",
     "Graphics/OpenGL/c++/Manual.md",
