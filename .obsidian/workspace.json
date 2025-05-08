@@ -88,8 +88,7 @@
               "title": "Bookmarks"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -196,8 +195,9 @@
   },
   "active": "72c8915d21cd3941",
   "lastOpenFiles": [
-    "Colour codes.md",
+    "nodiscard.md",
     "Concepts/C++.md",
+    "Colour codes.md",
     "Quantitative Finance/Study Plan.md",
     "Concepts/Enumerated Constants.md",
     "Quantitative Finance/LeetCode Problem Tracker.md",
@@ -232,7 +232,6 @@
     "Untitled 1",
     "2024-10-30.md",
     "Android/Indoor Navigation (Labyrinth).md",
-    "gps.md",
-    "Welcome.md"
+    "gps.md"
   ]
 }

@@ -179,6 +179,27 @@ switch(type){
 }
 ```
 
+
+# Nodiscard
+#warnings 
+A way to **indicate to the compiler and to other developers that the return value of the function is intended to be used and should not be ignored.**
+- Version >> <font color="7cfc00">C++17 and higher</font>
+- A hint or a warning mechanism. 
+- If a function is marked `[[nodiscard]]` and the caller doesn't do anything with its return value (e.g., assign it to a variable, use it in an expression), the compiler can issue a warning.
+
+```c++
+[[nodiscard]] int readFile(const std::string& filename, std::string& content);
+
+int main() {
+    std::string data;
+    readFile("my_file.txt", data); // Compiler might warn that the return value is ignored
+    // Oops! We didn't check if the file was read successfully.
+    std::cout << "File content: " << data << std::endl;
+    return 0;
+}
+```
+
+
 # String 
 ## Formatting
 Simple format string ...duuh
