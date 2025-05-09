@@ -41,7 +41,8 @@ ProcessLargeObject(*pLarge);
 #lambda
 `Anonymous function` - defines a function within the body of another function
 - Can be passed as arguments
-C++ version >> <font color="7cfc00">C++11 and higher</font>
+- C++ version >> <font color="7cfc00">C++11 and higher</font>
+- Resource : [C++ Lambda](https://www.programiz.com/cpp-programming/lambda-expression)
 ## Syntax
 Without a parameter:
 ```c++
@@ -93,15 +94,36 @@ auto shift_scalar_mult = [&u, shift](double alpha)
 
 shift_scalar_mult(-1.0);
 ```
-## Resource 
-- [C++ Lambda](https://www.programiz.com/cpp-programming/lambda-expression)
 
+Accessing class variables in the lambda function:
+```c++
+Example::fx(){
+	...
+	// ax^2 + bx + c
+	auto quadratic_value = [this](double x) { 
+		return x * (a*x + b) + c; 
+	};
+	...
+}
+```
 
-
+In certain thread-based situations, it is possible that instead of the this pointer
+- a copy of the active object, `*this`, might be necessary as the lambda capture argument. 
+- C++ version >> <font color="7cfc00">C++17 and higher</font>
+```c++
+Example::fx(){
+	...
+	// ax^2 + bx + c
+	auto quadratic_value = [*this](double x) { 
+		return x * (a*x + b) + c; 
+	};
+	...
+}
+```
 # Enumerated Constants
 #Cpp #enum
 Efficient way of passing codes compared to using strings
-C++ version >> <font color="7cfc00">C++11 and higher</font>
+- C++ version >> <font color="7cfc00">C++11 and higher</font>
 
 ```c++
 enum GroupName{
@@ -470,5 +492,409 @@ int main() {
     return 0; // Destructors of v1 and v2 will be called safely
 }
 ```
+
+### Uses
+#### 1. A class as a class variable: 
+
+```c++
+class Enclose { 
+	SimpleClass sc_; 
+public: 
+	Enclose(const SimpleClass& sc); // Copy Constructor 
+	Enclose(SimpleClass&& sc); // Move Constructor
+	SimpleClass get_sc() const; // Accessor 
+}; 
+
+// Implementation: 
+Enclose::Enclose(const SimpleClass& sc) :sc_{sc} {} // Constructor 1 
+Enclose::Enclose(SimpleClass&& sc) :sc_{std::move(sc)} {} // Constructor 2 
+
+SimpleClass Enclose::get_sc() const { // Accessor 
+	return sc_; 
+}
+```
+
+Alternative with 1 constructor **PREFERED** :
+```c++
+class EncloseSingleConstructor { 
+	SimpleClass sc_; 
+public: 
+	EncloseSingleConstructor(SimpleClass sc); 
+	SimpleClass get_sc() const; 
+}; 
+
+// Constructor implementation: 
+EncloseSingleConstructor::EncloseSingleConstructor(SimpleClass sc) : sc_{std::move(sc)}{}
+
+```
+
+#### 2. Passing a data structure as a parameter
+```c++
+PatternAnalytics::PatternAnalytics(std::vector data_in /*, . . .*/) : data{std::move(data_in)} {}
+```
+
+#### 3. Anonymous Temporary Objects
+If we will not need to reuse the object being input, we could call this function with an anonymous temporary #rvalue argument
+
+```c++
+void r_val_ref(SimpleClass&& sc) { 
+	cout << "r_val_ref (&&): k = " << sc.get_val() << "\n"; 
+}
+
+
+// Use;
+r_val_ref(SimpleClass{20}); // rvalue argument
+```
+
+<font color=#ff0800><strong>Warning</strong></font> : don't use move semantics for return value i.e.:
+```c++
+// Don't do this: 
+SimpleClass f(int n) { 
+	return std::move(SimpleClass{n}); 
+} 
+// or this: 
+SimpleClass g(int n) { 
+	SimpleClass sc{n}; 
+	return std::move(sc); 
+}
+```
+
+It is not good practice and can result in suboptimal results. Instead, we should simply return the object as usual, as <font color=#ffcba4>guaranteed copy elision</font> .
+
+```c++
+SimpleClass f(int n){
+    return {n}; // Same as 'return SimpleClass{n}',
+                // using uniform initialization and
+                // automatic type deduction, introduced in C++11.
+}
+SimpleClass g(int n){
+    SimpleClass sc{n};
+    return sc;
+}
+```
+
+**Resource** : [Return value optimizations - Fluent C++](https://www.fluentcpp.com/2016/11/28/return-value-optimizations/)
+
 ## Move assignment operator
 
+A special member function that's called when you assign one object to another using the `=` operator, and the source object is an #rvalue : _typically temporary object_
+- Instead of copying the data operator <font color=#ffcba4>transfers the ownership</font> of the source's resources to the destination object.
+- Sets the temporary object's pointer to `nullptr` to prevent it from deleting the memory when it goes out of scope
+- Avoids the overhead of a deep copy
+- Optimizing resource management, especially when dealing with objects that hold significant amounts of data.
+
+### Syntax
+```c++
+MyClass& operator=(MyClass&& other) noexcept {
+    if (this != &other) {
+        // 1. Release any resources held by the current object
+        delete[] data_;
+        data_ = nullptr;
+        size_ = 0;
+
+        // 2. "Steal" the resources from the other object
+        data_ = other.data_;
+        size_ = other.size_;
+
+        // 3. Set the other object's resources to a safe state
+        other.data_ = nullptr;
+        other.size_ = 0;
+    }
+    return *this;
+}
+```
+
+## Example
+```c++
+#include <iostream>
+#include <vector>
+
+class DataHolder {
+	int* data_;
+    size_t size_;
+public:
+    DataHolder() : data_(nullptr), size_(0) {
+        std::cout << "Default constructor called" << std::endl;
+    }
+
+    DataHolder(size_t size) : size_(size), data_(new int[size]) {
+        std::cout << "Parameterized constructor called" << std::endl;
+        for (size_t i = 0; i < size_; ++i) {
+            data_[i] = i;
+        }
+    }
+
+    DataHolder(const DataHolder& other) : size_(other.size_), data_(new int[size_]) {
+        std::cout << "Copy constructor called" << std::endl;
+        for (size_t i = 0; i < size_; ++i) {
+            data_[i] = other.data_[i];
+        }
+    }
+
+    DataHolder(DataHolder&& other) noexcept : data_(other.data_), size_(other.size_) {
+        std::cout << "Move constructor called" << std::endl;
+        other.data_ = nullptr;
+        other.size_ = 0;
+    }
+
+    DataHolder& operator=(const DataHolder& other) {
+        std::cout << "Copy assignment called" << std::endl;
+        if (this != &other) {
+            delete[] data_;
+            size_ = other.size_;
+            data_ = new int[size_];
+            for (size_t i = 0; i < size_; ++i) {
+                data_[i] = other.data_[i];
+            }
+        }
+        return *this;
+    }
+
+    DataHolder& operator=(DataHolder&& other) noexcept {
+        std::cout << "Move assignment called" << std::endl;
+        if (this != &other) {
+            delete[] data_;
+            data_ = other.data_;
+            size_ = other.size_;
+            other.data_ = nullptr;
+            other.size_ = 0;
+        }
+        return *this;
+    }
+
+    ~DataHolder() {
+        std::cout << "Destructor called" << std::endl;
+        delete[] data_;
+    }
+
+    void print() const {
+        std::cout << "Size: " << size_ << ", Data: [";
+        for (size_t i = 0; i < size_; ++i) {
+            std::cout << data_[i] << (i == size_ - 1 ? "" : ", ");
+        }
+        std::cout << "]" << std::endl;
+    }
+};
+
+DataHolder create_holder(size_t size) {
+    return DataHolder(size); // Returns a temporary object (rvalue)
+}
+
+int main() {
+    DataHolder h1(5);
+    DataHolder h2;
+
+    std::cout << "Assigning temporary object to h2:" << std::endl;
+    h2 = create_holder(10); // Move assignment will likely be called
+
+    std::cout << "h1: ";
+    h1.print();
+    std::cout << "h2: ";
+    h2.print();
+
+    DataHolder h3;
+    std::cout << "Moving h1 to h3:" << std::endl;
+    h3 = std::move(h1); // Explicitly using std::move to invoke move assignment
+
+    std::cout << "h1 (after move): ";
+    h1.print(); // h1's data will likely be null
+    std::cout << "h3: ";
+    h3.print();
+
+    return 0;
+}
+```
+
+### Explanation
+When `h2 = create_holder(10);` is executed, the move assignment operator of `DataHolder` will be called (if implemented), efficiently transferring the ownership.
+
+Process breakdown:
+- **`create_holder(10)` is called:**
+    - Inside the `create_holder` function, the `DataHolder(size_t size)` constructor is indeed called with `size = 10`.
+    - This constructor allocates memory for 10 integers, initializes them, and creates a `DataHolder` object on the function's stack (or wherever the compiler deems appropriate for return value optimization).
+
+- **Returning the object:**
+    - The `return DataHolder(size);` statement in `create_holder` signals that this newly created `DataHolder` object needs to be returned to the calling function (`main`). This is where the magic of move semantics can happen.
+
+- **Assignment in `main`:**
+    - In `main`, you have an _already constructed_ `DataHolder` object named `h2` (it was default-constructed earlier).
+    - The line `h2 = create_holder(10);` attempts to _assign_ the temporary `DataHolder` object returned by `create_holder(10)` to the existing object `h2`.
+
+If you hadn't defined a move assignment operator in your `DataHolder` class, the compiler would have fallen back to using the **copy assignment operator** (the one taking a `const DataHolder&`). 
+
+This would involve allocating new memory within `h2` and copying the 10 integers from the temporary object, which is less efficient.
+
+
+# Assert
+#error #debug #error_handling
+Checks if your assumptions about the program's state are true during runtime and will halt execution if is violated.
+- Found in the `<cassert>` header (or `<assert.h>` for C-style compatibility)
+- Reference: [assert - cppreference.com](https://en.cppreference.com/w/cpp/error/assert)\
+
+```c++
+#include <cassert>
+#include <iostream>
+
+int main() {
+    int age = 25;
+    assert(age >= 0); // Assumption: age should always be non-negative
+
+    int* ptr = new int[10];
+    assert(ptr != nullptr); // Assumption: memory allocation should succeed
+
+    int index = 5;
+    assert(index >= 0 && index < 10); // Assumption: index is within bounds
+    ptr[index] = 42;
+
+    delete[] ptr;
+    ptr = nullptr;
+    assert(ptr == nullptr); // Assumption: pointer should be null after deletion
+
+    std::cout << "Program continues after assertions (if they pass)." << std::endl;
+    return 0;
+}
+```
+
+## NDEBUG
+Key to `assert`'s behaviour in different build configurations lies in a pre-processor macro called `NDEBUG` (which stands for <font color=#30D5C8>No Debug</font>).
+- **Debug Builds (default during development):** When `NDEBUG` is **not defined**, the `assert` macro is active. It performs the Boolean evaluation and the error reporting/termination if the condition is false.
+- **Release Builds (Typically when you compile for deployment):** When you define the `NDEBUG` macro (usually by adding a compiler flag like `-DNDEBUG` during compilation), 
+	- The `assert` macro is effectively disabled. 
+	- The pre-processor replaces all `assert(condition);` statements with nothing. 
+	- This means that the conditions are not evaluated, and there's no performance overhead from the `assert` calls in your release version.
+
+<font color=#ff0800><strong>NOTE : </strong></font> **Don't use `assert` for error handling that you expect in production:** 
+- `assert` is for catching bugs during development. 
+- For situations where errors are a normal part of the program's operation (e.g., invalid user input, network failures), use proper error handling mechanisms like exceptions or return codes.
+
+
+# Operator
+#compareTo 
+Overload the original function of an operator.
+- Reference for symbols that can be overloaded: [operator overloading - cppreference.com](https://en.cppreference.com/w/cpp/language/operators)
+
+Example version >> <font color=#7cfc00><strong>since C++23</strong></font>	
+```c++
+struct SwapThem
+{
+    template<typename T>
+    static void operator()(T& left, T& right) 
+    {
+        std::ranges::swap(left, right);
+    }
+ 
+    template<typename T>
+    static void operator[](T& left, T& right)
+    {
+        std::ranges::swap(left, right);
+    } 
+};
+inline constexpr SwapThem swap_them{};
+ 
+void foo()
+{
+    int a = 1, b = 2;
+ 
+    swap_them(a, b); // OK
+    swap_them[a, b]; // OK
+ 
+    SwapThem{}(a, b); // OK
+    SwapThem{}[a, b]; // OK
+ 
+    SwapThem::operator()(a, b); // OK
+    SwapThem::operator[](a, b); // OK
+ 
+    SwapThem(a, b); // error, invalid construction
+    SwapThem[a, b]; // error
+}
+```
+
+### Space ship operator
+#compareTo 
+Implement java's #compareTo functionality in C++
+- Version >> <font color=#7cfc00><strong>since C++20</strong></font>	
+```c++
+#include <compare>
+
+class Example{
+	int num, denom;
+public:
+	Example(int x, int y):num(x), denom(y){}
+
+	bool operator == (const Example& other) const = default;
+
+	std::strong_ordering operator <==> (const Exmaple& other) const{
+		if(num*other.denom < other.num*denom)
+			return std::strong_ordering::less;
+		else if(*this = other)
+			return std::strong_ordering::equivalent;
+		
+		return std::strong_ordering::greater;
+	}
+};
+```
+
+With definitions for both `==` and `<=>` in place, we can then apply any of the six comparative operators as usual:
+
+```c++
+Example f_01{1, 5};
+Example f_02{1, 2};
+
+if(f_01 <= f_02){
+    // <=> now properly evaluates the inequality 1/5 < 1/2
+    // . . .
+} else{
+    // . . .
+}
+```
+
+Using the `strong_ordering` return type means:
+- any two values can be compared
+
+The Standard Library also has a `std::partial_ordering` type that should be used for 
+- floating-point types such as double and float. 
+- This is because a floating type (e.g., double) can hold noncomparable assignments such as infinity and `NaN`.
+
+<font color=#ffcba4><strong>Note :</strong></font> floating types should never be compared directly in defining `==`.
+- Float values x and y should be determined by whether y falls within a certain tolerance of x.
+- Alternative use `std::weak_ordering` 
+
+```c++
+#include <iostream>
+#include <cmath>
+#include <compare>
+
+std::weak_ordering compare_doubles(double a, double b) {
+    if (std::isnan(a) || std::isnan(b)) {
+        if (std::isnan(a) && std::isnan(b)) {
+            return std::weakly_equal; // Consider NaN == NaN for weak ordering
+        } else if (std::isnan(a)) {
+            return std::weakly_greater; // Convention: NaN is "greater" than non-NaN
+        } else {
+            return std::weakly_less;
+        }
+    } else if (a < b) {
+        return std::weakly_less;
+    } else if (a > b) {
+        return std::weakly_greater;
+    } else {
+        return std::weakly_equal;
+    }
+}
+
+
+// compare char not caring about case a==A
+std::weak_ordering compare_chars_case_insensitive(char a, char b) {
+	// convert uppercase to lowercase
+    char lower_a = std::tolower(static_cast<unsigned char>(a));
+    char lower_b = std::tolower(static_cast<unsigned char>(b));
+
+    if (lower_a < lower_b) {
+        return std::weakly_less;
+    } else if (lower_a > lower_b) {
+        return std::weakly_greater;
+    } else {
+        return std::weakly_equal;
+    }
+}
+```

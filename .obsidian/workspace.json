@@ -22,7 +22,7 @@
             }
           },
           {
-            "id": "fd71704b3674aa52",
+            "id": "0c61c65fd084a076",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -195,9 +195,9 @@
   },
   "active": "72c8915d21cd3941",
   "lastOpenFiles": [
-    "nodiscard.md",
-    "Concepts/C++.md",
     "Colour codes.md",
+    "Concepts/C++.md",
+    "nodiscard.md",
     "Quantitative Finance/Study Plan.md",
     "Concepts/Enumerated Constants.md",
     "Quantitative Finance/LeetCode Problem Tracker.md",
