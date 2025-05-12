@@ -41,17 +41,17 @@ Creating a chess engine is an ambitious and rewarding project. C++ is an excelle
 
 3. **Development Tools**:
    - **IDE**: Use Visual Studio, CLion, or Eclipse for efficient coding and debugging.
-   - **Version Control**: Use Git for version control to manage your project’s codebase.
+   - **Version Control**: Use Git for version control to manage the project’s codebase.
 
 4. **Testing**:
-   - **Unit Tests**: Use a testing framework like Google Test or Catch2 for unit tests to ensure your engine functions correctly.
-   - **Chess GUI**: Tools like Arena or Cute Chess for testing your engine against others.
+   - **Unit Tests**: Use a testing framework like Google Test or Catch2 for unit tests to ensure the engine functions correctly.
+   - **Chess GUI**: Tools like Arena or Cute Chess for testing the engine against others.
 
 ## Considerations
 
-- **Performance**: Chess engines require high performance for move generation and search algorithms. Optimize your code for speed and efficiency.
-- **Scalability**: Ensure your multiplayer system can handle multiple users simultaneously.
-- **AI Improvements**: Continuously refine your evaluation function and search algorithms to improve your chess bot’s strength.
+- **Performance**: Chess engines require high performance for move generation and search algorithms. Optimize the code for speed and efficiency.
+- **Scalability**: Ensure the multiplayer system can handle multiple users simultaneously.
+- **AI Improvements**: Continuously refine the evaluation function and search algorithms to improve the chess bot’s strength.
 
 ## Example Code Structure
 
@@ -93,7 +93,7 @@ public:
 
 ## Conclusion
 
-C++ is a powerful and suitable language for building a chess engine, offering performance, control, and rich libraries. Leveraging OOP principles can enhance the modularity and maintainability of your project.
+C++ is a powerful and suitable language for building a chess engine, offering performance, control, and rich libraries. Leveraging OOP principles can enhance the modularity and maintainability of the project.
 
 ## Useful Links
 - Chess Programming Wiki

@@ -38,22 +38,21 @@ Java is a robust option for building a chess engine, offering extensive librarie
 
 3. **Code Repositories**:
    - **GitHub**: Explore open-source chess engines written in Java to get ideas and insights.
-   - **Lichess API**: If you want to integrate your engine with online platforms for testing or multiplayer features.
+   - **Lichess API**: to integrate the engine with online platforms for testing or multiplayer features.
 
 4. **Development Tools**:
    - **IDE**: Use an Integrated Development Environment like IntelliJ IDEA or Eclipse for efficient coding and debugging.
-   - **Version Control**: Use Git for version control to manage your project’s codebase.
+   - **Version Control**: Use Git for version control to manage the project’s codebase.
 
 5. **Testing**:
-   - **JUnit**: For writing unit tests to ensure your engine functions correctly.
-   - **Chess GUI**: Tools like Arena or Cute Chess for testing your engine against others.
+   - **JUnit**: For writing unit tests to ensure the engine functions correctly.
+   - **Chess GUI**: Tools like Arena or Cute Chess for testing the engine against others.
 
 # Considerations
-- **Performance**: Chess engines require high performance for move generation and search algorithms. Optimize your code for speed and efficiency.
-- **Scalability**: Ensure your multiplayer system can handle multiple users simultaneously.
-- **AI Improvements**: Continuously refine your evaluation function and search algorithms to improve your chess bot’s strength.
+- **Performance**: Chess engines require high performance for move generation and search algorithms. Optimize the code for speed and efficiency.
+- **Scalability**: Ensure the multiplayer system can handle multiple users simultaneously.
+- **AI Improvements**: Continuously refine the evaluation function and search algorithms to improve the chess bot’s strength.
 
-Creating a chess engine is a fantastic way to dive deep into algorithms and game theory. With Java, you have a versatile and powerful language to bring your project to life. Good luck, and happy coding!
 
 # Useful Links
 - [Chess Programming Wiki](https://www.chessprogramming.org/Main_Page)
