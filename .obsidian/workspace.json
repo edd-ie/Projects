@@ -41,16 +41,15 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Chess Engine/TensorFlow for C++.md",
+                "file": "Concepts/C++.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "TensorFlow for C++"
+              "title": "C++"
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -82,7 +81,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "tag:#lvalues",
+                "query": "nodi",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -103,7 +102,8 @@
               "title": "Bookmarks"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -208,16 +208,22 @@
       "omnisearch:Omnisearch": false
     }
   },
-  "active": "9b65ae3d7969e333",
+  "active": "72c8915d21cd3941",
   "lastOpenFiles": [
+    "Colour codes.md",
+    "Concepts/C++.md",
+    "Concepts/C++/Operator.md",
+    "Concepts/C++",
+    "Game Development/Installations.md",
+    "Game Development/Game Objects.md",
+    "Game Development/SDL.md",
+    "Chess Engine/TensorFlow for C++.md",
     "Chess Engine/Research.md",
     "Chess Engine/Building a Chess Engine in C++.md",
     "Chess Engine/Building a Chess Engine in Java.md",
     "Quantitative Finance/Study Plan.md",
     "Quantitative Finance/Project Checklist & Resources.md",
     "Quantitative Finance/LeetCode Problem Tracker.md",
-    "Concepts/C++.md",
-    "Colour codes.md",
     "nodiscard.md",
     "Concepts/Enumerated Constants.md",
     "Quantitative Finance/Cpp_Quant_LeetCode_Problem_List.md",
@@ -226,27 +232,21 @@
     "README.md",
     "Quantitative Finance",
     "Graphics/Pasted image 20250207221216.png",
-    "Game Development/Installations.md",
     "Graphics/OpenGL/java/Test code.md",
     "Graphics/OpenGL/java/Introduction.md",
-    "Game Development/Game Objects.md",
     "Concepts",
     "Graphics/OpenGL/c++",
     "Graphics/OpenGL/java",
-    "Game Development/SDL.md",
     "Graphics/OpenGL",
     "Graphics",
     "Game Development/Untitled",
     "init_flags.md",
     "Operating System/Research.md",
     "Game Development",
-    "Chess Engine/TensorFlow for C++.md",
     "Research.md",
     "Operating System",
     "Untitled.canvas",
-    "Untitled 1",
     "2024-10-30.md",
-    "Android/Indoor Navigation (Labyrinth).md",
-    "gps.md"
+    "Android/Indoor Navigation (Labyrinth).md"
   ]
 }

@@ -1,5 +1,117 @@
 #Cpp 
 
+# Class
+#oop 
+
+#Inheritance -hollow arrowhead pointing to base class
+- is a relationship
+#Composition - solid diamond pointing to containing class
+- has a relationship (strong)
+- The contained object's lifecycle is **dependent** on the containing object.
+- Often described as a "owns-a" relationship.
+#Aggregation  - hollow diamond pointing to containing class
+- has a relationship (weak)
+- The contained object can exist even if the containing object is destroyed, and vice-versa.
+- `University` has `Students`." A student can exist even if they are no longer enrolled at that particular university, and the university can exist even if a particular student graduates or leaves.
+
+| Feature      | Inheritance (is-a)  | Composition (has-a - strong) | Aggregation (has-a - weak) |
+| ------------ | ------------------- | ---------------------------- | -------------------------- |
+| Relationship | Type of             | Part of, owns                | Part of, uses              |
+| Lifecycle    | Dependent (subtype) | Dependent                    | Independent                |
+| Association  | Strong (subtype)    | Strong                       | Weak                       |
+
+## Polymorphism
+#polymorphism 
+<font color=#30D5C8><strong>Polymorphism :</strong></font> the ability of objects to take on many forms
+- <font color=#30D5C8><strong>Dynamic polymorphism :</strong></font> 
+	- #Runtime Polymorphism or Late Binding
+	- A derived object does not need to be known until runtime specific type of a derived object does not need to be known until runtime
+	- Achieved through:
+		- Virtual/Abstract functions - `virtual`
+	- Function calls are <font color=#ffcba4><strong>dynamically bound</strong></font> - The address of the function to be executed is determined when the program is running
+	- Slightly **slower** at runtime due to the overhead of <font color=#ffcba4><strong>dynamic dispatch</strong></font> (*looking up the function in the vtable*).
+	- More flexible at runtime as the behaviour can adapt based on the actual object type.
+	- **Use Cases:** 
+		- Scenarios involving inheritance hierarchies where you want to treat objects of different derived classes uniformly through a base class interface
+
+- <font color=#30D5C8><strong>Static polymorphism :</strong></font> 
+	- #Compile-time Polymorphism or Early Binding
+	- Achieved through:
+		1. Function Overloading 
+		2. Operator Overloading
+		3. Templates #generic 
+	- Function calls are <font color=#ffcba4><strong>statically bound</strong></font> - The address of the function to be executed is known before the program runs.
+	- Generally **faster** at runtime because the function call is resolved directly.
+	- Less flexible at runtime as the behaviour is determined at compile time.
+	- **Use case**;
+		- Situations where the types involved are known at compile time
+
+### Virtual functions
+#abstract #virtual
+Functions declared in a base class that are intended to be overridden (redefined) by derived classes to provide specific implementations.
+
+<font color=#ffcba4><strong>Optional Overriding :</strong></font> A virtual function in a base class can have a default implementation. 
+- Derived classes can _choose_ to override this implementation if their behaviour needs to be different.
+- Else, it inherits and uses the base class's implementation.
+```c++
+class Shape{
+public:
+	virtual std::string what_am_i() const;
+	virtual ~Shape() = default;     // Note: virtual default destructor
+}
+```
+
+### Abstract base class
+Classes that cannot be instantiated without a derived object.
+
+<font color=#ffcba4><strong>Pure virtual :</strong></font> If a base class declares a virtual function as **pure virtual** (using `= 0`), like `virtual void calculateArea() = 0;`, then the base class becomes an <font color=#30D5C8><strong>abstract base class.</strong></font> 
+- Subclasses <font color=#ff2800><strong>must provide an implementation</strong></font> for all pure virtual functions they inherit to be concrete (instantiable)
+
+The <font color=#ffcba4><strong>override</strong></font> specifier  
+- Used in the derived class to explicitly indicate that you are overriding a virtual function.
+- Helps the compiler catch errors if the signature doesn't match.
+- C++ version >> <font color="7cfc00">C++11 and higher</font>
+
+```c++
+class Shape{
+ public:
+    virtual std::string what_am_i() const;   // Returns "Shape"
+    virtual double area() const = 0;         // Pure virtual
+    virtual ~Shape() = default;            // Note: virtual default destructor
+ };
+
+class Circle final : public Shape{
+ public:
+    Circle(double radius);
+    std::string what_am_i() const override;    // Returns "Circle"
+    double area() const override;
+ private:
+    double radius_;
+ };
+```
+
+# Pointers
+## RAII
+#RAII - Resource Acquisition is initialization
+- A programming technique which says the <font color=#ffcba4>lifetime of a resource is guaranteed to be tied to its owner.</font> 
+When an owning object goes out of scope:
+- The owner is responsible for destroying its resource and returning the memory it occupied to the system.
+### Clone
+Prior to C++11 and the advent of smart pointers, a common approach to implementing RAII
+- Implementing `clone()` methods on the resource classes
+- referred to as a [virtual constructor](https://oreil.ly/5K04S)
+
+```c++
+class Resource{
+	int val;
+public:
+	Resource(int x):val(x){}
+	~Resource() = default;
+	Resource* clone(){
+		return new Resource(*this); // copy constructor
+	}
+}
+```
 # Smart Pointers
 #smart_pointer #unique_pr #shared_ptr
 A wrapper class over a pointer with an operator like `*` and `->` overloaded.
