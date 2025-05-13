@@ -1,5 +1,10 @@
 #Cpp 
 
+
+# Keywords
+- [noexcept](https://en.cppreference.com/w/cpp/language/noexcept) - function declared not to throw any exception >> C++11
+- [nodiscard](https://en.cppreference.com/w/cpp/language/attributes/nodiscard) - return value of the function must be use, compiler warning >> C++17 
+- [maybe_unused](https://en.cppreference.com/w/cpp/language/attributes/maybe_unused)- return value of the function can be ignored >> C++17 
 # Class
 #oop 
 
@@ -100,6 +105,8 @@ When an owning object goes out of scope:
 Prior to C++11 and the advent of smart pointers, a common approach to implementing RAII
 - Implementing `clone()` methods on the resource classes
 - referred to as a [virtual constructor](https://oreil.ly/5K04S)
+- Pass it to a variable as a reference.
+- Preventing it from being deleted or modified externally.
 
 ```c++
 class Resource{
@@ -111,6 +118,16 @@ public:
 		return new Resource(*this); // copy constructor
 	}
 }
+
+class Usage{
+	Resource * store;
+public:
+	Usage(const Resource& val):store(val.clone()){}
+}
+
+// Usage
+Resource a{10}
+Usage b{a};
 ```
 # Smart Pointers
 #smart_pointer #unique_pr #shared_ptr
@@ -507,6 +524,39 @@ int main() {
 ```
 
 
+# Swap
+Switch values of 2 variables
+- included in `<utility>`
+- safe when swapping two pointers, as only the memory addresses are being exchanged.
+
+Adding swap to a class:
+- declare it as a new void member function
+- It takes in the object to be copied by <font color=#ffcba4>non-const reference</font>
+- apply the `std::swap(.)` function for each data member
+- could be declared with the C++11 `noexcept` keyword
+
+```c++
+#include <utility>
+
+class Exe{
+	int val;
+	Obj* ptr;
+public:
+	Exe(int x, const Obj& y):val(x), ptr(y.clone()){}
+	void swap(Exe& src) noexcept;
+}
+
+// implementation:
+void Exe::swap(Exe& src) noexcept{
+	using std::swap;
+	swap(val, src.val);
+	swap(ptr, src.ptr);
+}
+```
+
+<font color=#ff0800>Note :</font> As long as the class has both a copy constructor and destructor (with clean-up of any member resources) defined, the copy-and-swap idiom can be applied.
+
+
 # Move semantics
 Transfer ownership of an object, as opposed to copying it, thus avoiding a potentially nontrivial performance hit due to object copy.
 
@@ -530,6 +580,102 @@ public:
 // in main()
 Obj exe1{100} 
 Obj exe2{exe1} // copy constructor
+```
+
+## Copy operator
+```c++
+class Exe{
+	int x;
+public:
+	Exe(int x):x(x){}
+	Exe* clone(){
+		return new Exe(*this); // copy constructor 
+	}
+	~Exe() = default;
+}
+
+class Obj {  
+    double val;  
+    Exe* exePtr;
+public:
+	Obj(const Exe& ref, double x):val(x), exePtr(x.clone()){}
+
+	// copy operator
+	Obj operator =(const Obj& src){
+		if (this != &src) { // Self-assignment check
+	        delete exePtr;
+	        exePtr = src.exePtr->clone();
+	        val = val.expirationTime;
+	    }
+	    return *this;
+	}
+};
+
+// usage
+Exe
+
+```
+
+### Copy and Swap
+
+Implementation of the copy assignment operator using the **"copy and swap"** idiom, in conjunction with your provided `swap` function, is often recommended option, reasons:
+1. **Exception Safety (Strong Guarantee):** The copy and swap idiom provides a strong exception safety guarantee. If an exception occurs during the creation of the copy (`OptionInfo src = *this;`), the original object (`*this`) remains in its original, valid state. This is because the assignment only happens after the copy is successfully constructed.
+
+2. **Self-Assignment Safety:** This implementation inherently handles self-assignment (`option = option;`) correctly. When you pass `*this` by value into the `src` parameter, a copy is made. If it's a self-assignment, you're essentially swapping the object with its own copy, which has no ill effects.
+
+3. **Code Reusability and Clarity:** It leverages the `swap` function, which encapsulates the logic for exchanging the member variables. This makes the copy assignment operator concise and easier to understand.
+
+4. **Reduced Code Duplication:** The core logic of copying resources is handled by the copy constructor (implicitly called when passing by value), and the swapping logic is in the `swap` member function. This reduces code duplication compared to a traditional copy assignment operator.
+
+```c++
+#include <utility>
+
+class Obj {  
+    double val;  
+    Exe* exePtr;
+public:
+	Obj(const Exe& ref, double x):val(x), exePtr(x.clone()){}
+
+	// swap
+	void swap(Obj& src) noexcept{
+		using std::swap;
+		swap(val, src.val);
+		swap(exePtr, src.exePtr);
+	}
+
+	// copy operator
+	Obj operator=(Obj src) { 
+		swap(src); 
+		return *this; 
+	}
+};
+```
+
+**How it works step-by-step:**
+
+1. **`OptionInfo& OptionInfo::operator=(OptionInfo src)`:**
+    - The parameter `src` is passed **by value**. This is the crucial part. When the copy assignment operator is called, the compiler creates a _copy_ of the right-hand side object (`rhs` in a typical `operator=`) and names it `src`. This copy is made using the **copy constructor** of `OptionInfo`.
+
+2. **`swap(src);`:**
+    - Inside the assignment operator, you call the `swap` member function, exchanging the members of the current object (`*this`) with the members of the newly created copy `src`.
+
+3. **`return *this;`:**
+    - Finally, you return a reference to the modified current object, as is standard for assignment operators.
+
+## Disable Copy
+The [delete](https://en.cppreference.com/w/cpp/keyword/delete) keyword can instead be utilized to explicitly disable copy operations, both externally and internally
+- It was added in <font color=#7cfc00>C++11</font>.
+```c++
+class Resource{
+	int val;
+public:
+	Resource(int x):val(x){}
+	~Resource() = default;
+	
+	// Copy operations disabled both externally and internally:
+	Resource(const Resource& src) = delete; 
+	Resource& operator =(const Resource& src) = delete
+}
 ```
 
 ## Move constructor
@@ -686,6 +832,22 @@ SimpleClass g(int n){
 ```
 
 **Resource** : [Return value optimizations - Fluent C++](https://www.fluentcpp.com/2016/11/28/return-value-optimizations/)
+
+
+### Disable
+```c++
+class Resource{
+	int val;
+public:
+	Resource(int x):val(x){}
+	~Resource() = default;
+	
+	// Move operations disabled both externally and internally:
+	Resource(const Resource&& src) = delete; 
+	Resource& operator =(const Resource&& src) = delete
+}
+```
+
 
 ## Move assignment operator
 
@@ -866,6 +1028,7 @@ int main() {
     return 0;
 }
 ```
+
 
 ## NDEBUG
 Key to `assert`'s behaviour in different build configurations lies in a pre-processor macro called `NDEBUG` (which stands for <font color=#30D5C8>No Debug</font>).
