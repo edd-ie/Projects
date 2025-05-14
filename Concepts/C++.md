@@ -5,6 +5,7 @@
 - [noexcept](https://en.cppreference.com/w/cpp/language/noexcept) - function declared not to throw any exception >> C++11
 - [nodiscard](https://en.cppreference.com/w/cpp/language/attributes/nodiscard) - return value of the function must be use, compiler warning >> C++17 
 - [maybe_unused](https://en.cppreference.com/w/cpp/language/attributes/maybe_unused)- return value of the function can be ignored >> C++17 
+- [nullptr](https://en.cppreference.com/w/cpp/language/nullptr) - pointer to null >> C++11
 # Class
 #oop 
 
@@ -130,10 +131,11 @@ Resource a{10}
 Usage b{a};
 ```
 # Smart Pointers
-#smart_pointer #unique_pr #shared_ptr
+#smart_pointer
 A wrapper class over a pointer with an operator like `*` and `->` overloaded.
 Similar to normal pointer but, it can deallocate and free destroyed object memory.
 - `Destructor` is automatically called when an object goes out of scope, the dynamically allocated memory would automatically be deleted
+- C++ version >> <font color="7cfc00">C++11 and higher</font>
 
 Efficient as possible both in terms of memory and performance.
 
@@ -146,19 +148,180 @@ Smart pointers are defined in the `std` namespace in the [memory](https://lea
 - Never in a parameter list, so that a subtle resource leak won't occur due to certain parameter list allocation rules. 
 
 Smart pointers have a `reset` member function that *releases ownership of the pointer*. This is useful when you want to free the memory owned by the smart pointer before the smart pointer goes out of scope
-## Types
-### Unique pointer
 
-```cpp title:uniquePtr.cpp
-// Create the object and pass it to a smart pointer
-std::unique_ptr<LargeObject> pLarge = std::make_unique<LargeObject>();
+## Unique pointer
+#unique_ptr 
+<font color=#ffcba4><strong>Use case :</strong></font> Sole (unique) ownership of the referenced address. 
+- Assures that only one unique pointer to a particular memory location can exist at one time.
+- Possession of a unique pointer is transferred using move semantics
+- Cannot be copied.
+- Simplest way to avoid leaks
+- increases readability, and has <font color=#7cfc00>zero or near zero run-time cost</font>.
 
-//Call a method on the object
-pLarge->DoSomething();
+<font color=#30D5C8>Syntax :</font>`std::unique_ptr`, with template parameter `T`
+- For <font color="7cfc00">C++14 and higher</font> recommended initialization is using : `std::make_unique
 
-// Pass a reference to a method.
-ProcessLargeObject(*pLarge);
+```c++ title:unique_ptr.cpp
+#include <memory>     // For Standard Library smart pointers
+#include <utility>    // std::move
+
+int main(){
+	std::unique_ptr<string> ptr1;
+	// . . .
+	ptr1 = std::make_unique<string>("To err is human");
+	// Alternatively (and better when possible), on one line:
+	auto ptr2 = std::make_unique<string>("To moo, bovine");
+
+	// access by derefence
+	std::cout << *ptr2;
+
+	/* Transfer ownership */
+	auto ptr3 = std::move(pt2);
+}
 ```
+
+<font color=#30D5C8>New data :</font> assigning new data automatically deletes the old one.
+<font color=#30D5C8>Delete :</font> if no longer needed before going out of scope, it can be deleted and set to `null` explicitly with its `reset()`
+
+```c++ title:ptrReset.cpp
+#include <iostream>
+#include <memory>
+
+int main() {
+    // Create a unique_ptr owning an integer
+    auto ptr1 = std::make_unique<int>(10);
+
+    // Assign a new integer to ptr1
+    ptr1.reset(new int(20)); // same as ptr1 = std::make_unique<int>(20);
+	ptr1.reset(); // same as ptr1 = nullptr
+}
+```
+
+<font color=#30D5C8>Access :</font> 
+1. `obj.get()` - The `std::unique_ptr::get()` method returns a raw pointer to the object owned by the `unique_ptr`.
+	- You must not delete the raw pointer returned by `get()`.
+2. **`&(*y)`** :
+	1. `*y` - dereferences the unique pointer, giving you a reference to the managed `Obj` object. 
+	2. `&` - takes the address of that object, effectively providing a raw pointer.
+
+```c++
+int main() {
+    auto y = std::make_unique<Obj>(10, "Hello", 3.14);
+
+    // 1. Access the raw pointer using get()
+    useObjValues(y.get());
+
+    // 2.  Use a reference
+     useObjValues(&*y);
+}
+```
+
+<font color=#30D5C8>Moving :</font> 
+`ptr2` is set to a `null` state, as `ptr3` now assumes exclusive ownership of the second `std::string object`.
+- Attempting to use `*ptr2` results in <font color=#ff2800><strong>runtime error</strong></font>.
+- If unsure always check if the point is still valid before use.
+```c++ title:ptr_confirmation.cpp
+class Obj {
+    int x;
+    std::string y;
+    double z;
+public:
+    Obj(int a, std::string b, double c) : x(a), y(b), z(c) {}
+    ~Obj() = default;
+    void print() const { 
+	    std::cout << "Obj values: x = " << x << ", y = " << y ; 
+    }
+};
+
+// transfer ownership
+void fx(std::make_unique<Obj> x){
+	auto store = std::move(x)
+	if (store) 
+		store->print();
+}
+
+// Function to use the values from the Obj.  Critically, it takes a raw pointer or a reference.
+void gx(const Obj* obj) { // Or void useObjValues(const Obj& obj)
+    if (obj)
+        std::cout << "Using Obj values: x = " << obj->getX() ;
+}
+
+int main(){
+	auto y = std::make_unique<Obj>(10, "Hello", 3.14);
+
+	// 1. Access the raw pointer using get()
+    gx(y.get());
+
+    // 2.  Use a reference
+     gx(&*y);
+
+    // y still owns the Obj.
+    y->print();
+    
+	fx(std::move(y));
+	
+	// y is now nullptr 
+	if(y) 
+		y->print(); // will not print 
+	return 0;
+}
+```
+
+## Shared pointer
+#shared_ptr 
+A safer alternative to *raw pointers* because:
+- Pointed-to memory will not be released until the last remaining shared pointer to a given shared reference goes out of scope.
+
+<font color=#30D5C8>Reference counting :</font> count of the number of active shared pointers to a common block of heap memory.
+- Pointed object persist until the count reaches zero
+- At this point will the memory be deallocated.
+- Preventing a memory leak and possible undefined behaviour at runtime.
+- see the current count `.use_count()`
+
+<font color=#ffcba4><strong>Use case :</strong></font>  only when shared ownership of a resource is required, such as :
+- An object that provides live updated market data that is shared by multiple trading tasks.
+- Multithreading situations in which a pointed-to object is shared by at least two threads and you don’t know which one will be responsible for the object’s destruction.
+
+<font color=#30D5C8>Syntax :</font>`std::shared_ptr`, with template parameter `T`
+- For <font color="7cfc00">C++14 and higher</font> recommended initialization is using : `std::make_shared`
+
+```c++
+std::shared_ptr<std::string> sp1; 
+// . . . 
+sp1 = std::make_shared("To err is expected"); 
+
+// Single line 
+auto sp2 = std::make_shared<string>("To nap is supine");
+
+// accessed by dereferencing:
+cout << format("Contents of sp_two: {}\n", *sp2);
+
+// How many pointers are there
+cout << format("sp_one count? {}\n", sp1.use_count()); // count = 1
+```
+
+<font color=#30D5C8>Multiple pointers :</font> same as raw pointers.
+<font color=#30D5C8>Delete :</font> delete and set to `null` explicitly with its `reset()` decreasing the count.
+```c++
+auto sp_one_2 = sp1; 
+auto sp_one_3 = sp_one_2;
+
+sp_one_2.reset(); 
+auto count = sp1.use_count(); // = 2
+```
+
+<font color=#ff0800>Note :</font> If the pointers are in a function, once the function is executed and goes out of scope all `shared_ptr` *will be destroyed & memory deallocated*
+
+<font color=#30D5C8>Trade-offs :</font>
+1. Greater performance overhead than raw pointers and unique pointers
+2. In [Multithreaded](https://www.oreilly.com/library/view/c-concurrency-in/9781617294693/) applications with data that is no longer just read-only, and the underlying object is shared by two or more threads.
+	- precautions need to be in place when working with multithreaded code.
+	- The value of `use_count()` is not usable in this case.
+
+
+## Weak pointer
+#weak_ptr 
+<font color=#ffcba4><strong>Use case :</strong></font> breaking cyclic dependencies that can arise where the reference count of a shared pointer never reaches zero.
 
 ## Resources
 #Cpp #research 
