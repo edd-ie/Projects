@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Concepts/C++.md",
+                "file": "Languages/C++.md",
                 "mode": "source",
                 "source": false
               },
@@ -98,8 +98,7 @@
               "title": "Bookmarks"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -166,7 +165,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Concepts/C++.md",
+                "file": "Languages/C++.md",
                 "followCursor": false,
                 "showSearch": true,
                 "searchQuery": ""
@@ -204,10 +203,12 @@
       "omnisearch:Omnisearch": false
     }
   },
-  "active": "72c8915d21cd3941",
+  "active": "08513442523df7c3",
   "lastOpenFiles": [
     "Colour codes.md",
-    "Concepts/C++.md",
+    "Languages/C++.md",
+    "Quantitative Finance/Study Plan.md",
+    "Quantitative Finance/Project Checklist & Resources.md",
     "[nodiscard.md",
     "Concepts/C++/Operator.md",
     "Concepts/C++",
@@ -218,8 +219,6 @@
     "Chess Engine/Research.md",
     "Chess Engine/Building a Chess Engine in C++.md",
     "Chess Engine/Building a Chess Engine in Java.md",
-    "Quantitative Finance/Study Plan.md",
-    "Quantitative Finance/Project Checklist & Resources.md",
     "Quantitative Finance/LeetCode Problem Tracker.md",
     "nodiscard.md",
     "Concepts/Enumerated Constants.md",
@@ -231,7 +230,7 @@
     "Graphics/Pasted image 20250207221216.png",
     "Graphics/OpenGL/java/Test code.md",
     "Graphics/OpenGL/java/Introduction.md",
-    "Concepts",
+    "Languages",
     "Graphics/OpenGL/c++",
     "Graphics/OpenGL/java",
     "Graphics/OpenGL",

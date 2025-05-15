@@ -15,3 +15,9 @@
 
 - <font color=#ff2800>Ferrari Red :</font>   ff2800
 - <font color=#ff2800><strong>Ferrari Red bold</strong></font>
+
+- <font color=#eab676>Desert sand</font> : eab676
+- <font color=#eab676><strong>Desert sand bold</strong></font>
+
+- <font color=#cd76ea>Lavender</font> : cd76ea
+- <font color=#cd76ea><strong>Lavender</strong></font>
