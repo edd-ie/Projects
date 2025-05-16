@@ -7,7 +7,7 @@
 - [maybe_unused](https://en.cppreference.com/w/cpp/language/attributes/maybe_unused)- return value of the function can be ignored >> C++17 
 - [nullptr](https://en.cppreference.com/w/cpp/language/nullptr) - pointer to null >> C++11
 
-## Using
+## using
 
 Ways to ease the pain with cryptic template types
 - `typedef` :
@@ -31,6 +31,25 @@ int main() {
 }
 
 ```
+
+## nodiscard
+#warnings 
+A way to **indicate to the compiler and to other developers that the return value of the function is intended to be used and should not be ignored.**
+- Version >> <font color="7cfc00">C++17 and higher</font>
+- A hint or a warning mechanism. 
+- If a function is marked `[[nodiscard]]` and the caller doesn't do anything with its return value (e.g., assign it to a variable, use it in an expression), the compiler can issue a warning.
+
+```c++
+[[nodiscard]] int readFile(const std::string& filename, std::string& content);
+
+int main() {
+    std::string data;
+    readFile("my_file.txt", data); // Compiler might warn that the return value is ignored
+    // Oops! We didn't check if the file was read successfully.
+    std::cout << "File content: " << data << std::endl;
+    return 0;
+}
+```
 # Class
 #oop 
 
@@ -50,7 +69,7 @@ int main() {
 | Relationship | Type of             | Part of, owns                | Part of, uses              |
 | Lifecycle    | Dependent (subtype) | Dependent                    | Independent                |
 | Association  | Strong (subtype)    | Strong                       | Weak                       |
-
+Good read - [Uniform Initialization](https://www.geeksforgeeks.org/uniform-initialization-in-c/)
 ## Polymorphism
 #polymorphism 
 <font color=#30D5C8><strong>Polymorphism :</strong></font> the ability of objects to take on many forms
@@ -1257,53 +1276,6 @@ switch(type){
 ```
 
 
-# Nodiscard
-#warnings 
-A way to **indicate to the compiler and to other developers that the return value of the function is intended to be used and should not be ignored.**
-- Version >> <font color="7cfc00">C++17 and higher</font>
-- A hint or a warning mechanism. 
-- If a function is marked `[[nodiscard]]` and the caller doesn't do anything with its return value (e.g., assign it to a variable, use it in an expression), the compiler can issue a warning.
-
-```c++
-[[nodiscard]] int readFile(const std::string& filename, std::string& content);
-
-int main() {
-    std::string data;
-    readFile("my_file.txt", data); // Compiler might warn that the return value is ignored
-    // Oops! We didn't check if the file was read successfully.
-    std::cout << "File content: " << data << std::endl;
-    return 0;
-}
-```
-
-
-# String 
-## Formatting
-Simple format string ...duuh
-```c++
-#include <format>
-int main{
-	int arr[] = {1,2,3}
-	std::string x = std::format("a = {0}, b = {2}, c = {1}", arr[0], arr[1], arr[2]); // a = 1, b = 3, c = 2
-
-	x = std::format("a = {}, b = {}, c = {}", arr[0], arr[1], arr[2]); 
-	// a = 1, b = 2, c = 3
-
-	x = std::format("a = {2}, b = {1}, c = {1}", arr[0], arr[1], arr[2]); 
-	// a = 3, b = 2, c = 2
-
-
-	enum GroupName{
-		opt1 = 100,  // default value = 0
-		opt2,    // 101
-		opt3     // 102
-	};
-
-	cout << std::format("a = {}", static_cast<int>(GroupName::opt1));
-	// a = 100
-}
-```
-
 # Math
 A list of common mathematical functions is available on [Common mathematical functions](https://en.cppreference.com/w/cpp/numeric/math)
 Contained in the Standard Library, you need :
@@ -1362,6 +1334,168 @@ int main{
 ```
 
 <font color=#ff0800>Note : </font>*constants are fixed at compile time rather than computed with each call runtime, using a <font color=#7cfc00>C++11</font> designation called* <font color=#ffcba4>constexpr</font>
+
+
+# Standard Template Library
+#STL 
+A subset of C++’s Standard Library that houses a set of container classes
+- Provides a group of algorithms applicable to those containers and other containers that follow the same coding conventions.
+- Reference - [C++ in 2005](https://www.stroustrup.com/DnE2005.pdf)
+
+STL containers are powerful due to their relationship with STL *algorithms*.
+Algorithms are expressed in terms abstraction called <font color=#eab676><strong>iterators</strong></font>, rather than on containers:
+- <font color=#30D5C8><strong>Containers :</strong></font> define how data is organized. 
+- <font color=#30D5C8><strong>Iterators :</strong></font> describe how organized data can be traversed. 
+- <font color=#30D5C8><strong>Algorithms :</strong></font> describe what you can do on the data.
+
+## Templates
+#template #generic 
+ Blueprints for functions and classes
+ - Facilitate generic programming in C++
+ - Primarily written in header files
+ - Potentially improving runtime performance.
+
+<font color=#eab676><strong>Specialization</strong></font> - compiler generating specific code for the Types using the template.
+- saving the trouble of manually writing that code for each Type.
+
+<font color=#30D5C8><strong>Function :</strong></font>
+```c++
+/* Multiplication example */
+// integers:
+ int int_square(int k)
+    return k * k;
+    
+ // real numbers (double):
+ double dbl_square(double x)
+    return x * x;
+
+ // Obj:
+ Obj obj_square(const Obj& f)
+    return f * f;    // operator* on Obj is defined
+
+/**** Alternative ****/
+template <typename T>
+ T tmpl_square(const T& t){
+    return t * t;
+ }
+
+/******* Use *******/ 
+// Primitive types
+int sq_int = tmpl_square(4); // tmpl_square(const int&) 
+double sq_real = tmpl_square(4.2); // tmpl_square(const double&)
+
+// Objects
+Obj frac{2, 3}; 
+Obj sq_frac = tmpl_square(frac);
+// uniform initialization c++
+auto sq_frac_unif = tmpl_square<Obj>({2, 3});
+
+```
+
+<font color=#30D5C8><strong>Class :</strong></font>
+```c++
+/* Class Declaration */
+template <typename T>
+export class MyPair{
+	T a, b;
+public:
+    MyPair(const T &first, const T &second) :a(first), b(second) {}
+    T get_min() const;
+ };
+
+
+/* Implementation */
+template <typename T>
+MyPair<T>::MyPair(T first, T second) :a(first), a(second) {}
+
+template <typename T>
+T MyPair<T>::get_min() const{
+	return a < b ? a : b; // Assuming operator < is defined for type T,
+}
+
+/******* Use *******/ 
+MyPair<int> mp_int{10, 26};
+int min_int = mp_int.get_min();             // OK, returns 10
+
+MyPair<Obj> mp_frac{{3, 2}, {5, 11}};
+Obj min_frac = mp_frac.get_min();      //  Returns 5/11
+```
+
+Default template parameters:
+- can omit the explicit type name from inside the angle brackets
+```c++
+template <typename T = double>
+export class MyPair{
+	T a, b;
+public:
+    MyPair(const T &first, const T &second) :a(first), b(second) {}
+    T get_min() const;
+ };
+
+/******* Use *******/ 
+MyPair<> mp{10.87, 26.243};
+int min = mp.get_min();             // OK, returns 10.87
+```
+
+
+Multiple parameters:
+-  example  `std::map<K, V> `
+```c++
+template <typename T, typename U>
+export class MyPair{
+	T a;
+	U b;
+public:
+    MyPair(const T &first, const U &second) :a(first), b(second) {}
+ };
+
+/******* Use *******/ 
+MyPair<double, int> mp{10.87, 26};
+int min = mp.get_min();             // OK, returns 10.87
+```
+
+<font color=#fd6206><strong>Footnote :</strong></font>   We could have expressed the body of`MyPair<T>::get_min()` as
+```c++
+T retval;                 // 1
+retval = a < b? a : b;    // 2
+return retval;
+```
+However, this would have require T to have :
+- a copy assignment operator `2`
+- a default constructor `1`
+
+When writing generic code:
+1. Consider what you ask of the types for which the code will be instantiated 
+2. Strive to ask only for what is required, nothing more. 
+
+*This widens the set of types for which the code will be applicable*
+
+# String 
+## Formatting
+Simple format string ...duuh
+```c++
+#include <format>
+int main{
+	int arr[] = {1,2,3}
+	std::string x = std::format("a = {0}, b = {2}, c = {1}", arr[0], arr[1], arr[2]); // a = 1, b = 3, c = 2
+
+	x = std::format("a = {}, b = {}, c = {}", arr[0], arr[1], arr[2]); 
+	// a = 1, b = 2, c = 3
+
+	x = std::format("a = {2}, b = {1}, c = {1}", arr[0], arr[1], arr[2]); 
+	// a = 3, b = 2, c = 2
+
+
+	enum GroupName{
+		opt1 = 100,  // default value = 0
+		opt2,    // 101
+		opt3     // 102
+	};
+
+	cout << std::format("a = {}", static_cast<int>(GroupName::opt1));
+	// a = 100
+}
+```
 
 
 # Array
