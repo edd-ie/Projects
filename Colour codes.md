@@ -22,5 +22,7 @@
 - <font color=#cd76ea>Lavender</font> : cd76ea
 - <font color=#cd76ea><strong>Lavender</strong></font>
 
-- <font color=#fd6206>soda orange</font>   ff2800
+- <font color=#fd6206>soda orange</font>   fd6206
 - <font color=#fd6206><strong>soda orange</strong></font>
+
+

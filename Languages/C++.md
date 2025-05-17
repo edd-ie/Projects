@@ -651,8 +651,43 @@ Example, passing a vector/string as a parameter :
 - Passing by reference allows for fast access but the object doesn't own it but is unsafe as it can be altered externally
 - To own before C++11, required deep copying the data improving safety at cost of performance
 
+<font color=#ffcba4><strong>Special members :</strong></font> 
+```c++
+default constructor  -->  X();
+destructor           -->  ~X();
+copy constructor     -->  X(X const&);
+copy assignment      -->  X& operator=(X const&);
+move constructor     -->  X(X&&);
+move assignment      -->  X& operator=(X&&);
+```
+
+<font color=#ffcba4><strong>Declaration :</strong></font> what counts as user-declared
+- Defaulted -> compiler generates a default implementation.
+- Not-declared -> compiler doesn't provide code
+- User declared -> user specified code, including keywords `default` & `delete`
+```c++
+struct X{
+	x(){};  // User defined
+	x();    // User defined
+	x() = default;  // User defined to use default
+	x() = delete;   // User defined to remove function
+};
+```
+
+|                     | default constructor                      | Destructor                               | Copy constructor                         | Copy assigment                           | Move constructo                          | Move assigment                           |
+| ------------------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- |
+| Nothing             | <font color=#30D5C8>defaulted</font>     | <font color=#30D5C8>defaulted</font>     | <font color=#30D5C8>defaulted</font>     | <font color=#30D5C8>defaulted</font>     | <font color=#30D5C8>defaulted</font>     | <font color=#30D5C8>defaulted</font>     |
+| Any constructor     | <font color=#cd76ea>Not declared</font>  | <font color=#30D5C8>defaulted</font>     | <font color=#30D5C8>defaulted</font>     | <font color=#30D5C8>defaulted</font>     | <font color=#30D5C8>defaulted</font>     | <font color=#30D5C8>defaulted</font>     |
+| default constructor | <font color=#7cfc00>User declared</font> | <font color=#30D5C8>defaulted</font>     | <font color=#30D5C8>defaulted</font>     | <font color=#30D5C8>defaulted</font>     | <font color=#30D5C8>defaulted</font>     | <font color=#30D5C8>defaulted</font>     |
+| Destructor          | <font color=#30D5C8>defaulted</font>     | <font color=#7cfc00>User declared</font> | <font color=#ff0800>defaulted</font>     | <font color=#ff0800>defaulted</font>     | <font color=#cd76ea>Not declared</font>  | <font color=#cd76ea>Not declared</font>  |
+| Copy constructor    | <font color=#cd76ea>Not declared</font>  | <font color=#30D5C8>defaulted</font>     | <font color=#7cfc00>User declared</font> | <font color=#ff0800>defaulted</font>     | <font color=#cd76ea>Not declared</font>  | <font color=#cd76ea>Not declared</font>  |
+| Copy assigment      | <font color=#30D5C8>defaulted</font>     | <font color=#30D5C8>defaulted</font>     | <font color=#ff0800>defaulted</font>     | <font color=#7cfc00>User declared</font> | <font color=#cd76ea>Not declared</font>  | <font color=#cd76ea>Not declared</font>  |
+| Move constructor    | <font color=#cd76ea>Not declared</font>  | <font color=#30D5C8>defaulted</font>     | <font color=#eab676>Deleted</font>       | <font color=#eab676>Deleted</font>       | <font color=#7cfc00>User declared</font> | <font color=#cd76ea>Not declared</font>  |
+| Move assigment      | <font color=#30D5C8>defaulted</font>     | <font color=#30D5C8>defaulted</font>     | <font color=#eab676>Deleted</font>       | <font color=#eab676>Deleted</font>       | <font color=#cd76ea>Not declared</font>  | <font color=#7cfc00>User declared</font> |
+<font color=#fd6206>context :</font> *red - check rules below*
+
 ## Rule of 3
-If any one of these 3 special functions is defined, include definitions for the remaining 2. 
+If any one of the 3 special members is defined, include definitions for the remaining 2. 
 - This can include just declaring them as `default` or `delete` where appropriate, and leaving generation of the implementations to the compiler.
 
 Special functions:
@@ -661,7 +696,7 @@ Special functions:
 3. destructor
 
 ## Rule of 5
-If any one of these five special functions is defined, include definitions for the remaining four. 
+If any one of the five special members is defined, include definitions for the remaining four. 
 - This can include just declaring them as `default` or `delete` where appropriate, and leaving generation of the implementations to the compiler.
 - For <font color="7cfc00">C++11 and higher</font>.
 - Reference - [The Rule of Zero, Five, or Six](https://www.modernescpp.com/index.php/c-core-guidelines-constructors-assignments-and-desctructors/)
@@ -669,13 +704,14 @@ If any one of these five special functions is defined, include definitions for t
 Special functions:
 1. copy constructor
 2. copy assignment operator 
-3. move constructor
-4. move assignment operator 
-5. destructor
+3. destructor
+4. move constructor
+5. move assignment operator 
 
-<font color=#cd76ea>Corollary :</font>
+<font color=#ffcba4><strong>Corollary :</strong></font>
 1. [Rule of Zero](https://www.fluentcpp.com/2019/04/23/the-rule-of-zero-zero-constructor-zero-calorie/) - If you can avoid defining the five special class functions, do 
 2. If you `default` or `delete` any copy, move, or destructor function, `default` or `delete` them all.
+
 ## Copy constructor
 #lvalue_reference
 This deep copies an object to another creating a new one in the process and retaining the original
@@ -809,7 +845,7 @@ Obj exe4 = std::move(exec2) // move constructor
 
 The move constructor can be **either user-defined or implicitly generated by the C++ compiler** under certain conditions.
 
-### Compiler-Generated Move Constructor:
+### Compiler-Generated Move Constructor (defaulted):
 The C++ compiler will implicitly generate a move constructor for a class if **all** of the following conditions are met:
 
 1. **No user-declared copy constructor:** You haven't defined your own copy constructor.
@@ -822,6 +858,14 @@ If all these conditions are true, the compiler-generated move constructor will p
 
 - For members of built-in types (like `int`, `float`, pointers), a bitwise copy occurs.
 - For members that are objects of class types, the move constructor of that member class will be called (if it exists and is accessible). If the member class doesn't have a move constructor, its copy constructor will be called instead.
+```c++
+class X : public Base{
+	Member m;
+public
+	X(X&& src): Base(static_cast<Base&&>(src)),
+		m(static_cast<Base&&>(src.m));
+}
+```
 
 ### User-Defined Move Constructor:
 
@@ -868,7 +912,7 @@ int main() {
 
 ```c++
 class Enclose { 
-	SimpleClass sc_; 
+	SimpleClass x; 
 public: 
 	Enclose(const SimpleClass& sc); // Copy Constructor 
 	Enclose(SimpleClass&& sc); // Move Constructor
@@ -876,25 +920,25 @@ public:
 }; 
 
 // Implementation: 
-Enclose::Enclose(const SimpleClass& sc) :sc_{sc} {} // Constructor 1 
-Enclose::Enclose(SimpleClass&& sc) :sc_{std::move(sc)} {} // Constructor 2 
+Enclose::Enclose(const SimpleClass& sc) :x{sc} {} // Constructor 1 
+Enclose::Enclose(SimpleClass&& sc) :x{std::move(sc)} {} // Constructor 2 
 
 SimpleClass Enclose::get_sc() const { // Accessor 
-	return sc_; 
+	return x; 
 }
 ```
 
-Alternative with 1 constructor **PREFERED** :
+Disable the copy constructor functionality : 
 ```c++
 class EncloseSingleConstructor { 
-	SimpleClass sc_; 
+	SimpleClass x; 
 public: 
 	EncloseSingleConstructor(SimpleClass sc); 
-	SimpleClass get_sc() const; 
+	SimpleClass getX() const; 
 }; 
 
 // Constructor implementation: 
-EncloseSingleConstructor::EncloseSingleConstructor(SimpleClass sc) : sc_{std::move(sc)}{}
+EncloseSingleConstructor::EncloseSingleConstructor(SimpleClass sc) : x{std::move(sc)}{}
 
 ```
 
