@@ -13,7 +13,7 @@
 
 ## Weekly Progress Tracker
 - [x] Week 1:
-- [ ] Week 2:
+- [x] Week 2:
 - [ ] Week 3:
 - [ ] Week 4:
 

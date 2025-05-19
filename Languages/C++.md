@@ -1514,6 +1514,8 @@ When writing generic code:
 
 *This widens the set of types for which the code will be applicable*
 
+[STL algorithms](https://youtu.be/2olsGf6JIkU?si=sFvZLEHBgWG6YSJp)
+
 # String 
 ## Formatting
 Simple format string ...duuh
