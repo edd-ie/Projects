@@ -140,6 +140,271 @@ class Circle final : public Shape{
  };
 ```
 
+
+# Standard Template Library
+#STL 
+A subset of C++’s Standard Library that houses a set of container classes
+- Provides a group of algorithms applicable to those containers and other containers that follow the same coding conventions.
+- Reference - [C++ in 2005](https://www.stroustrup.com/DnE2005.pdf)
+
+STL containers are powerful due to their relationship with STL *algorithms*.
+Algorithms are expressed in terms abstraction called <font color=#eab676><strong>iterators</strong></font>, rather than on containers:
+- <font color=#30D5C8><strong>Containers :</strong></font> define how data is organized. 
+- <font color=#30D5C8><strong>Iterators :</strong></font> describe how organized data can be traversed. 
+- <font color=#30D5C8><strong>Algorithms :</strong></font> describe what you can do on the data.
+
+## Templates
+#template #generic 
+ Blueprints for functions and classes
+ - Facilitate generic programming in C++
+ - Primarily written in header files
+ - Potentially improving runtime performance.
+
+<font color=#eab676><strong>Specialization</strong></font> - compiler generating specific code for the Types using the template.
+- saving the trouble of manually writing that code for each Type.
+
+<font color=#30D5C8><strong>Function :</strong></font>
+```c++
+/* Multiplication example */
+// integers:
+ int int_square(int k)
+    return k * k;
+    
+ // real numbers (double):
+ double dbl_square(double x)
+    return x * x;
+
+ // Obj:
+ Obj obj_square(const Obj& f)
+    return f * f;    // operator* on Obj is defined
+
+/**** Alternative ****/
+template <typename T>
+ T tmpl_square(const T& t){
+    return t * t;
+ }
+
+/******* Use *******/ 
+// Primitive types
+int sq_int = tmpl_square(4); // tmpl_square(const int&) 
+double sq_real = tmpl_square(4.2); // tmpl_square(const double&)
+
+// Objects
+Obj frac{2, 3}; 
+Obj sq_frac = tmpl_square(frac);
+// uniform initialization c++
+auto sq_frac_unif = tmpl_square<Obj>({2, 3});
+
+```
+
+<font color=#30D5C8><strong>Class :</strong></font>
+```c++
+/* Class Declaration */
+template <typename T>
+export class MyPair{
+	T a, b;
+public:
+    MyPair(const T &first, const T &second) :a(first), b(second) {}
+    T get_min() const;
+ };
+
+
+/* Implementation */
+template <typename T>
+MyPair<T>::MyPair(T first, T second) :a(first), a(second) {}
+
+template <typename T>
+T MyPair<T>::get_min() const{
+	return a < b ? a : b; // Assuming operator < is defined for type T,
+}
+
+/******* Use *******/ 
+MyPair<int> mp_int{10, 26};
+int min_int = mp_int.get_min();             // OK, returns 10
+
+MyPair<Obj> mp_frac{{3, 2}, {5, 11}};
+Obj min_frac = mp_frac.get_min();      //  Returns 5/11
+```
+
+Default template parameters:
+- can omit the explicit type name from inside the angle brackets
+```c++
+template <typename T = double>
+export class MyPair{
+	T a, b;
+public:
+    MyPair(const T &first, const T &second) :a(first), b(second) {}
+    T get_min() const;
+ };
+
+/******* Use *******/ 
+MyPair<> mp{10.87, 26.243};
+int min = mp.get_min();             // OK, returns 10.87
+```
+
+
+Multiple parameters:
+-  example  `std::map<K, V> `
+```c++
+template <typename T, typename U>
+export class MyPair{
+	T a;
+	U b;
+public:
+    MyPair(const T &first, const U &second) :a(first), b(second) {}
+ };
+
+/******* Use *******/ 
+MyPair<double, int> mp{10.87, 26};
+int min = mp.get_min();             // OK, returns 10.87
+```
+<font color=#fd6206><strong>Footnote :</strong></font>   We could have expressed the body of`MyPair<T>::get_min()` as
+```c++
+T retval;                 // 1
+retval = a < b? a : b;    // 2
+return retval;
+```
+However, this would have require T to have :
+- a copy assignment operator `2`
+- a default constructor `1`
+
+When writing generic code:
+1. Consider what you ask of the types for which the code will be instantiated 
+2. Strive to ask only for what is required, nothing more. 
+
+*This widens the set of types for which the code will be applicable* : [STL algorithms](https://youtu.be/2olsGf6JIkU?si=sFvZLEHBgWG6YSJp)
+
+
+<font color=#30D5C8><strong>Compile-time integral values :</strong></font>
+- Such as with the fixed-size sequential STL container
+```c++
+std::array<T, N>  // N = positive integer
+```
+
+Templates can even accept templates as parameters - `expression templates`
+
+## Containers
+ Containers can be divided into at least two categories:
+
+### Sequential containers
+These emphasize sequential traversal of the elements.
+
+#### `std::vector<T>` 
+#vector
+- dynamic array guaranteed to be allocated in contiguous memory
+- optimized for insertions and removals at its end
+- All heap memory allocation, management, and replacement is handled internally 
+
+<font color=#eab676><strong>.push_back(.) :</strong></font>
+-  Adds to the end of the vector.
+- Use the inefficient object copy constructor.
+	- If copy constructor is set to `delete` code will not compile.
+- For larger object elements, the performance hit could add up
+```c++
+vector bank;
+
+BankAccount ba01{1000.00, 0.021}; 
+bank.push_back(ba01);
+```
+- If the object is no longer need outside the vector use `std::move(.)`
+```c++
+#include <utility>
+vector bank;
+
+BankAccount ba01{1000.00, 0.021}; 
+bank.push_back(std::move(ba01));
+```
+
+<font color=#eab676><strong>.emplace_back(.) :</strong></font> 
+- For <font color="7cfc00">C++11 and higher</font> 
+- Resolved this problem from `.push_back(.)`
+- Pass the arguments to build the object without constructing it.
+	- Saving one construction (and one destruction) with every call
+	- mostly useful if the object to add to the container has not been constructed yet
+```c++
+vector bank;
+
+bank.emplace_back(1000.00, 0.021);
+```
+
+<font color=#eab676><strong>Polymorphism :</strong></font> 
+When a collection of derived objects need to be determined dynamically, in a vector
+- can be accomplished by defining a vector with a `std::unique_ptr` template parameter
+- Point to objects of derived classes via the (often abstract) base class type
+- push back each pointer onto the vector
+- When the vector goes out of scope, each `unique_ptr` cleans up after itself.
+```c++
+vector<std::unique_ptr<Payoff>> payoffs;
+
+payoffs.push_back(std::make_unique<CallPayoff>(100.0));
+payoffs.push_back(std::make_unique<PutPayoff>(100.0));
+```
+
+<font color=#eab676><strong>.size() :</strong></font> 
+- The current number of elements stored in the container.
+
+<font color=#eab676><strong>.capacity() :</strong></font> 
+- The actual size of objects that can be stored before resizing
+
+##### Allocation and contiguous memory.
+- Vector models a dynamic array that can grow when it is full
+- Insertion cost can be higher when at container’s capacity
+	- Thus contents have to be copied or moved to a new and bigger storage location
+- Can reduce the costs of these potentially costly moments, vector offers functions that let the programmer’s code decide when to change the size/capacity:
+
+If you know at least approximately how many objects will be stored in a container, you can call these functions at selected (noncritical) moments in a program to ensure that enough space will be available
+
+<font color=#ffcba4><strong>Note :</strong></font> during resize/reallocation, vector calls `move constructor` only if marked as <font color=#30D5C8><strong>noexcept</strong></font>, otherwise it will call each object’s `copy constructor`. 
+- `move` operations are faster (often significantly faster) than `copy`.
+
+<font color=#eab676><strong>.reserve() :</strong></font> 
+- changes vector capacity but not its size (number of elements).
+```c++
+ std::vector <MyClass> u;
+ u.reserve(1'000);   // The apostrophe used as a proxy for a comma
+                     // was added to the Standard in C++14
+                     // creates a vector of 1000 capacity but size 0
+```
+
+<font color=#eab676><strong>.resize() :</strong></font> 
+-  Changes both the size (number of elements) and the capacity by conceptually adding default values at the end 
+	- `0` for fundamental types such as `int` or `double`
+	- `nullptr` for pointers
+	- `default-constructed objects` for classes with such a constructor).
+
+<font color=#eab676><strong>.clear() :</strong></font> 
+Destroy each object stored in the container and reset its size to 0, capacity remains the same.
+
+
+<font color=#eab676><strong>.front(), .back(), pop_back() :</strong></font> 
+- 1st two return a reference of the objects in the position
+- `pop_back()` removes the objects from the vector and returns it
+
+#### `std::deque<T>`
+- efficient appending and removing of data elements to and from the front of the container.
+- storage is not guaranteed to be in contiguous memory
+- traversal of that container is generally less efficient as `vector`
+
+#### `std::list<T>`
+- Doubly linked list of nodes.
+- more efficient for insertions and deletions at arbitrary locations within the container
+- does not provide random access via the `[.]` operator or an `at(.)`
+- The only way to reach element `i` in a list is to iterate through the first `i elements`
+
+#### `std::array<T, N>`
+- A fixed-size array of `N` elements.
+- value of `N` must be explicitly known at compile time.
+- stored contiguously and are not dynamically allocated
+- most efficient type of sequential container for static sized data.
+- It's explicit fixed-size declaration requirement at compile time makes it unsuitable for dynamically sized data
+
+### Associative containers
+These emphasize organizing the storage in ways that make it easy to retrieve values inserted data.
+These containers include:
+- `std::set`
+- `std::map`
+
+
 # Pointers
 ## RAII
 #RAII - Resource Acquisition is initialization
@@ -1379,142 +1644,6 @@ int main{
 
 <font color=#ff0800>Note : </font>*constants are fixed at compile time rather than computed with each call runtime, using a <font color=#7cfc00>C++11</font> designation called* <font color=#ffcba4>constexpr</font>
 
-
-# Standard Template Library
-#STL 
-A subset of C++’s Standard Library that houses a set of container classes
-- Provides a group of algorithms applicable to those containers and other containers that follow the same coding conventions.
-- Reference - [C++ in 2005](https://www.stroustrup.com/DnE2005.pdf)
-
-STL containers are powerful due to their relationship with STL *algorithms*.
-Algorithms are expressed in terms abstraction called <font color=#eab676><strong>iterators</strong></font>, rather than on containers:
-- <font color=#30D5C8><strong>Containers :</strong></font> define how data is organized. 
-- <font color=#30D5C8><strong>Iterators :</strong></font> describe how organized data can be traversed. 
-- <font color=#30D5C8><strong>Algorithms :</strong></font> describe what you can do on the data.
-
-## Templates
-#template #generic 
- Blueprints for functions and classes
- - Facilitate generic programming in C++
- - Primarily written in header files
- - Potentially improving runtime performance.
-
-<font color=#eab676><strong>Specialization</strong></font> - compiler generating specific code for the Types using the template.
-- saving the trouble of manually writing that code for each Type.
-
-<font color=#30D5C8><strong>Function :</strong></font>
-```c++
-/* Multiplication example */
-// integers:
- int int_square(int k)
-    return k * k;
-    
- // real numbers (double):
- double dbl_square(double x)
-    return x * x;
-
- // Obj:
- Obj obj_square(const Obj& f)
-    return f * f;    // operator* on Obj is defined
-
-/**** Alternative ****/
-template <typename T>
- T tmpl_square(const T& t){
-    return t * t;
- }
-
-/******* Use *******/ 
-// Primitive types
-int sq_int = tmpl_square(4); // tmpl_square(const int&) 
-double sq_real = tmpl_square(4.2); // tmpl_square(const double&)
-
-// Objects
-Obj frac{2, 3}; 
-Obj sq_frac = tmpl_square(frac);
-// uniform initialization c++
-auto sq_frac_unif = tmpl_square<Obj>({2, 3});
-
-```
-
-<font color=#30D5C8><strong>Class :</strong></font>
-```c++
-/* Class Declaration */
-template <typename T>
-export class MyPair{
-	T a, b;
-public:
-    MyPair(const T &first, const T &second) :a(first), b(second) {}
-    T get_min() const;
- };
-
-
-/* Implementation */
-template <typename T>
-MyPair<T>::MyPair(T first, T second) :a(first), a(second) {}
-
-template <typename T>
-T MyPair<T>::get_min() const{
-	return a < b ? a : b; // Assuming operator < is defined for type T,
-}
-
-/******* Use *******/ 
-MyPair<int> mp_int{10, 26};
-int min_int = mp_int.get_min();             // OK, returns 10
-
-MyPair<Obj> mp_frac{{3, 2}, {5, 11}};
-Obj min_frac = mp_frac.get_min();      //  Returns 5/11
-```
-
-Default template parameters:
-- can omit the explicit type name from inside the angle brackets
-```c++
-template <typename T = double>
-export class MyPair{
-	T a, b;
-public:
-    MyPair(const T &first, const T &second) :a(first), b(second) {}
-    T get_min() const;
- };
-
-/******* Use *******/ 
-MyPair<> mp{10.87, 26.243};
-int min = mp.get_min();             // OK, returns 10.87
-```
-
-
-Multiple parameters:
--  example  `std::map<K, V> `
-```c++
-template <typename T, typename U>
-export class MyPair{
-	T a;
-	U b;
-public:
-    MyPair(const T &first, const U &second) :a(first), b(second) {}
- };
-
-/******* Use *******/ 
-MyPair<double, int> mp{10.87, 26};
-int min = mp.get_min();             // OK, returns 10.87
-```
-
-<font color=#fd6206><strong>Footnote :</strong></font>   We could have expressed the body of`MyPair<T>::get_min()` as
-```c++
-T retval;                 // 1
-retval = a < b? a : b;    // 2
-return retval;
-```
-However, this would have require T to have :
-- a copy assignment operator `2`
-- a default constructor `1`
-
-When writing generic code:
-1. Consider what you ask of the types for which the code will be instantiated 
-2. Strive to ask only for what is required, nothing more. 
-
-*This widens the set of types for which the code will be applicable*
-
-[STL algorithms](https://youtu.be/2olsGf6JIkU?si=sFvZLEHBgWG6YSJp)
 
 # String 
 ## Formatting

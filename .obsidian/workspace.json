@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Quantitative Finance/Project Checklist & Resources.md",
+                "file": "Languages/C++.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Project Checklist & Resources"
+              "title": "C++"
             }
           },
           {
@@ -203,12 +203,13 @@
       "omnisearch:Omnisearch": false
     }
   },
-  "active": "08513442523df7c3",
+  "active": "72c8915d21cd3941",
   "lastOpenFiles": [
-    "Quantitative Finance/Study Plan.md",
-    "Quantitative Finance/Project Checklist & Resources.md",
-    "Languages/C++.md",
     "Colour codes.md",
+    "Languages/C++.md",
+    "Quantitative Finance/Study Plan.md",
+    "Quantitative Finance/LeetCode Problem Tracker.md",
+    "Quantitative Finance/Project Checklist & Resources.md",
     "Pasted image 20250516204150.png",
     "[nodiscard.md",
     "Concepts/C++/Operator.md",
@@ -220,7 +221,6 @@
     "Chess Engine/Research.md",
     "Chess Engine/Building a Chess Engine in C++.md",
     "Chess Engine/Building a Chess Engine in Java.md",
-    "Quantitative Finance/LeetCode Problem Tracker.md",
     "nodiscard.md",
     "Concepts/Enumerated Constants.md",
     "Quantitative Finance/Cpp_Quant_LeetCode_Problem_List.md",
