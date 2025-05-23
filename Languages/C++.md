@@ -289,11 +289,29 @@ Templates can even accept templates as parameters - `expression templates`
 ### Sequential containers
 These emphasize sequential traversal of the elements.
 
-#### `std::vector<T>` 
+#### `vector<T>` 
 #vector
 - dynamic array guaranteed to be allocated in contiguous memory
-- optimized for insertions and removals at its end
 - All heap memory allocation, management, and replacement is handled internally 
+- efficient <font color=#ffcba4>appending and deletion</font> of data to the <font color=#ffcba4>back of the container.</font>
+- efficient <font color=#ffcba4>traversal</font> of data <font color=#ffcba4>sequentially.</font>
+- <font color=#cd76ea>When in doubt, use a vector</font>
+
+<font color=#eab676><strong>Initialization {.} vs (.):</strong></font> 
+`{.}` - inserts an entry/initialization
+`(.)` - define the size of the vector
+Reference -  [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html#Variable_and_Array_Initialization)
+```C++
+std::vector<int> v1{10};    // size() === 1,  v[0] = 10
+std::vector<int> v2(10);    // size() === 10
+
+std::vector<int> x1(100, 1);  // A vector containing 100 items: All 1s.
+std::vector<int> x2{100, 1};  // A vector containing 2 items: 100 and 1.
+```
+
+<font color=#eab676><strong>.data() :</strong></font>
+- For <font color="7cfc00">C++11 and higher</font> 
+- Returns the memory address of its first element.
 
 <font color=#eab676><strong>.push_back(.) :</strong></font>
 -  Adds to the end of the vector.
@@ -346,7 +364,7 @@ payoffs.push_back(std::make_unique<PutPayoff>(100.0));
 <font color=#eab676><strong>.capacity() :</strong></font> 
 - The actual size of objects that can be stored before resizing
 
-##### Allocation and contiguous memory.
+<font color=#fd6206><strong>Allocation and contiguous memory.</strong></font>
 - Vector models a dynamic array that can grow when it is full
 - Insertion cost can be higher when at container’s capacity
 	- Thus contents have to be copied or moved to a new and bigger storage location
@@ -380,30 +398,178 @@ Destroy each object stored in the container and reset its size to 0, capacity re
 - 1st two return a reference of the objects in the position
 - `pop_back()` removes the objects from the vector and returns it
 
-#### `std::deque<T>`
-- efficient appending and removing of data elements to and from the front of the container.
+<font color=#eab676><strong>.at(.) vs [.] :</strong></font> 
+Both used to access at specific indexes
+`.at(.)` -  provides bounds checking by *throwing an exception* for invalid indexes
+- For an error message:
+```c++
+#include <stdexcept>    // for exception class std::out_of_range
+
+vector<int> v {0, 1, 2, 3, 4, 5};     // v.size() === 5
+try{
+	int n = v.at(10);   // at(.) throws out_of_range exception
+}
+catch (const std::out_of_range& e){
+	std::cout << e.what() << "\n\n";
+}
+```
+
+<font color=#ff0800><strong>Note :</strong></font> if you believe an index could end up out of bounds, you can consider using `at(.)` instead of `[.]`.
+- checking the bounds on every access has a cost, when only when there is a doubt with respect to the validity
+
+
+#### `deque<T>`
+- efficient <font color=#ffcba4>appending and deletion</font> of data from the <font color=#ffcba4>front of the container.</font>
 - storage is not guaranteed to be in contiguous memory
 - traversal of that container is generally less efficient as `vector`
 
-#### `std::list<T>`
+ <font color=#eab676><strong>push_front() & push_back() :</strong></font> 
+-Appends an element to the front/back of a deque
+ 
+ <font color=#eab676><strong>pop_front() & pop_back() :</strong></font> 
+Removes the first element in the front/back a deque
+
+```c++
+ std::deque<int> on_deque{0, 1, 2, 3};
+ 
+// Push new elements onto the front:
+on_deque.push_front(-1);
+on_deque.push_front(-2);
+on_deque.push_back(4);
+// on_deque now contains: -2 -1 0 1 2 3 4
+
+// Remove both first and last element:
+ on_deque.pop_front();
+ on_deque.pop_back();
+ // on_deque now contains: -1 0 1 2 3
+```
+
+<font color=#eab676><strong>emplace_front(.) & emplace_back(.) :</strong></font> 
+- Construct the object in position instead of copying.
+```c++
+std::deque recs; 
+recs.emplace_back(3.0, 2.0); 
+recs.emplace_front(4.0, 3.0);
+```
+
+<font color=#eab676><strong>.at(.) vs [.] :</strong></font> 
+- Similar to `std::vector<T>`
+
+
+#### `list<T>`
 - Doubly linked list of nodes.
-- more efficient for insertions and deletions at arbitrary locations within the container
+- efficient <font color=#ffcba4>appending and deletion</font> of data from the <font color=#ffcba4>within the container.</font>
 - does not provide random access via the `[.]` operator or an `at(.)`
 - The only way to reach element `i` in a list is to iterate through the first `i elements`
+- Uses <font color=#ff2800>higher memory allocation</font>
+- <font color=#ff2800>Slower access</font> due to need of iteration
+- doesn't have <font color=#eab676><strong>.at(.) or [.] :</strong></font> 
 
-#### `std::array<T, N>`
+<font color=#eab676><strong>emplace_front(.) & emplace_back(.) :</strong></font> 
+- Construct the object in position instead of copying.
+
+ <font color=#eab676><strong>push_front() & push_back() :</strong></font> 
+-Appends an element to the front/back of a deque
+ 
+ <font color=#eab676><strong>pop_front() & pop_back() :</strong></font> 
+Removes the first element in the front/back a deque
+
+
+#### `array<T, N>`
 - A fixed-size array of `N` elements.
+- For <font color="7cfc00">C++11 and higher</font> 
 - value of `N` must be explicitly known at compile time.
 - stored contiguously and are not dynamically allocated
-- most efficient type of sequential container for static sized data.
+- most efficient <font color=#ffcba4>traversal</font> of data <font color=#ffcba4>sequentially</font> for static sized data.
 - It's explicit fixed-size declaration requirement at compile time makes it unsuitable for dynamically sized data
+- Good alternative for <font color=#30D5C8>raw/c-type arrays</font> 
+
+Supports:
+- `size()`, `at(.)`, `front()`, `back()`, and `empty()`, and the `[.]` operator
+Doesn't support:
+- `push_back(.)`, `push_front(.)`, `pop_front(.)`, or `pop_back(.)` as it's size is constant
+
+```c++
+int arr_01[]{0, 1, 2, 3};      // raw array
+std::array<int, 4> arr_02{0, 1, 2, 3};
+
+/*** C++ 17 & higher ***/
+std::array arr_03{0, 1, 2, 3}; // class template argument deduction {CTAD}
+```
 
 ### Associative containers
 These emphasize organizing the storage in ways that make it easy to retrieve values inserted data.
-These containers include:
-- `std::set`
-- `std::map`
 
+#### `set<T>`
+Stores unique elements of type `T`
+- <font color=#ffcba4>Reorders / sort</font> them whenever a new element is inserted.
+```c++
+#include <set>
+
+std::set<int> some_set{5, 1, 2, 3, 4, 3};  // 1 2 3 4 5
+```
+
+
+#### `multiset<T>`
+ - Set that accepts multiple occurrences of the same value.
+	- <font color=#ffcba4>Reorders / sort</font> them whenever a new element is inserted.
+```c++
+#include <set>
+
+std::multiset<int> some_multiset{5, 1, 2, 3, 4, 3};  // 1 2 3 3 4 5
+```
+
+#### `map<K, T>`
+Stores `key-value` pairs of elements of types `K` and `T`
+- Ensures that each key is unique but can have the same values.
+- <font color=#ffcba4>Reorders / sort</font> the keys whenever a new element is inserted.
+- uses `std::less` for comparison, which results in ascending order.
+
+```c++
+#include <map>
+
+std::map<std::string, int> some_map{
+    {"five", 5}, {"one", 1}, {"two", 2}
+};
+
+for (auto [k, v] : some_map){
+	cout << k << ": " << v << "; ";
+}
+```
+
+<font color=#30D5C8><strong>Custom objects :</strong></font>
+Use of `std::map` to store custom objects will result in <font color=#ff2800><strong>compiler error</strong></font> if :
+- No ordering is defined in the class
+- Use a type not supporting inequality operators `<` 
+
+
+#### `multimap<K, T>`
+`std::map` that accepts multiple pairs with the same key.
+- <font color=#ffcba4>Reorders / sort</font> the keys whenever a new element is inserted.
+```c++
+#include <map>
+
+std::multimap<std::string, int> some_multimap{
+    {"five", 5}, {"one", 1}, {"two", 2}, {"five", -5}, {"one", -1}
+};
+```
+
+
+#### unordered
+Similar function to their counter parts:
+- They <font color=#ffcba4>don't sort</font> the keys whenever a new element is inserted.
+- Makes <font color=#ffcba4>searches faster</font> than their ordered counterparts.
+- <font color=#ff0800>Consume more space</font> in memory
+- For <font color="7cfc00">C++11 and higher</font> 
+
+• `std::unordered_set<T>`
+• `std::unordered_multiset<T>`
+• `std::unordered_map<K, T>`
+• `std::unordered_multimap<K, T>`
+
+
+## Iterators
+Objects that can iterate over elements of a sequence.
 
 # Pointers
 ## RAII
