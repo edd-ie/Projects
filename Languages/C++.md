@@ -1,5 +1,9 @@
 #Cpp 
 
+# Resources
+#research #documentation
+- [cppreference.com](https://en.cppreference.com/w/)
+- [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
 
 # Keywords
 - [noexcept](https://en.cppreference.com/w/cpp/language/noexcept) - function declared not to throw any exception >> C++11
