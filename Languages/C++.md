@@ -288,8 +288,22 @@ std::array<T, N>  // N = positive integer
 Templates can even accept templates as parameters - `expression templates`
 
 ## Containers
- Containers can be divided into at least two categories:
+Resource - [Back to Basics: Iterators in C++ - Nicolai Josuttis - CppCon 2023](https://www.youtube.com/watch?v=26aW6aBVpk0)
 
+| Member function | Description                                                                     |
+| --------------- | ------------------------------------------------------------------------------- |
+| `begin()`       | Returns an iterator that points to the first element<br>                        |
+| `end()`         | Returns an iterator that points to the address after the last element<br>       |
+| `cbegin()`      | Returns a `const` iterator that points to the position of the first element<br> |
+| `cend()`        | Returns a `const` iterator that points to the adress after the last element<br> |
+| `size()`        | Returns the number of elements in a container                                   |
+| `empty()`       | Returns true if a container is empty<br>                                        |
+| `clear()`       | Clears all elements from a container                                            |
+<font color=#fd6206><strong>Footnote :</strong></font> Member functions that apply to all STL containers
+
+Containers can be divided into at least two categories:
+1. Sequential
+2. Associative
 ### Sequential containers
 These emphasize sequential traversal of the elements.
 
@@ -536,8 +550,14 @@ std::map<std::string, int> some_map{
     {"five", 5}, {"one", 1}, {"two", 2}
 };
 
+// Display map:
+for (const auto& pr : some_map){
+    cout << format("{} : {}\n", pr.first, pr.second);
+}
+
+// Better
 for (auto [k, v] : some_map){
-	cout << k << ": " << v << "; ";
+	cout << format("{} : {}\n", k, v);
 }
 ```
 
@@ -574,6 +594,146 @@ Similar function to their counter parts:
 
 ## Iterators
 Objects that can iterate over elements of a sequence.
+- Writing algorithms on iterators rather than writing them on containers makes algorithms more general and typically more useful.
+
+Given an iterator `iter`, you can move to next element in sequence by:
+- pre-increment operator: `++iter` (<font color=#fd6206>preferable</font>)
+- post-increment operator: `iter++`
+
+**Categories :**
+### Output iterator
+A single-pass tool that can be used for : 
+1. Writing data to an output stream, such as with `cout`
+2. Inserting data into a new container, such as at the end of a `vector`.
+ 
+### Input iterator
+A single-pass tool that can be used for :
+1. Tasks like consuming data from a stream (including such fleeting things as keyboard input). 
+- An iterator can often both write and read data, which would make it both an output and input iterator. 
+
+### Forward iterator 
+Similar to an` input iterator`, but :
+- Allows making more than one pass over the same sequence (<font color=#fd6206>if you don’t alter the elements along the way</font>)
+- Can only  go forward one element at a time.
+
+### Bidirectional iterator
+Similar to a `forward iterator`, but :
+- Lets you go backward one element at a time. (<font color=#fd6206>e.g. iterators on a list - 'doubly linked list'</font>).
+
+### Random-access iterator
+Similar to a `bidirectional iterator`, but : 
+- lets you go forward or backward `n` elements at a time efficiently.
+
+### Contiguous iterator 
+A `random-access iterator` with the added requirement that the <font color=#30D5C8>sequence is placed contiguously in memory</font> (<font color=#fd6206>e.g. iterators on a vector / an array, but not a deque</font>).
+
+
+### Usage
+<font color=#30D5C8>Example :</font>
+**Defining an iterator (contiguous) on a vector**
+1. Create the `vector` & `iterator` :
+```c++
+ // Create the iterator:
+ vector<int>::iterator pos;        // "position"
+ 
+ // A vector of integer values:
+ vector<int> v = {17, 28, 12, 33, 13, 10};
+```
+
+2. Set the `iterator` to the position of the first element, 
+	- Using the `begin()` member function on a vector.
+	- an iterator acts syntactically like a pointer.
+	- The actual element in the first position is accessed by dereferencing the iterator.
+```c++
+pos = v.begin();            // Sets iterator to point at 1st position
+                            // of the vector v
+int first_elem = *pos;      // Dereferencing pos returns 17
+```
+
+<font color=#ff2800><strong>Note : </strong></font> **`Iterators` do not validate whether you go out of bounds**
+
+The `end()` returns the address after the last element
+- Range of a container : <font color=#eab676><strong>[begin, end)</strong></font>
+- Container is empty if `v.begin() == v.end()` 
+```c++
+pos = v.end() - 1;    // access the last element *pos = 10
+```
+
+3. To reduce **verbosity**  of step `1 & 2`
+	- Both the `begin()` and `end()` on a Standard Library container will return an iterator for the sequence defined.
+```c++
+auto pos = v.begin();  // creates vector<int>::iterator pos;  
+```
+
+- Avoid modification of elements of a container, use `constant iterator` :
+	- Using `cbegin()` & `cend()`
+```c++
+vector w{17, 28, 12, 33, 13, 10}; 
+auto cpos = w.cbegin(); // cpos = const iterator
+
+++cpos; 
+*cpos = 19; // Compiler error!
+```
+
+4. To advance to the next use increments `iter++` / `++iter` :
+	- If `bidirectional` / `random-access` to move back `--iter`
+```c++
+++pos;
+int x = *pos;    // *pos = 28
+
+--pos;   // *pos = 17
+```
+
+5. Reassigning the value at a position :
+```c++
+*pos = 19;
+```
+
+6. If container allow `random-access` move the iterator by an amount using:
+```c++
+pos += 3  // *pos = 13
+pos -= 2  // *pos = 33
+```
+
+7. **Iterator-based** for loops
+	-  Used Prior to C++11
+	- range-based for loops are preferred.
+```c++
+std::vector<int>  v{17, 28, 12, 33, 13, 10};
+
+for (auto pos = v.begin(); pos != v.end(); ++pos){
+	std::cout << *pos << " ";
+}
+```
+
+<font color=#30D5C8>Example :</font>
+**Defining an iterator on associative containers**
+1. Creating a new `iterator`
+```c++
+std::map<int, double> map = {{5, 92.6}, {2, 42.4}, {1, 10.6}, {4, 3.58}, {3, 33.3}};
+
+auto pos = map.begin()
+```
+
+2. Displaying the values;
+	-  Remember map sorts the values by `key`
+```c++
+// Display 1st pair:
+ cout << pos->first << ":  " << pos->second;  // 1: 10.6
+```
+
+3. Modification:
+	- Keys are constant but values can be modified
+```c++
+++pos;
+pos->second = 100.0
+```
+
+
+
+## Algorithms
+
+
 
 # Pointers
 ## RAII

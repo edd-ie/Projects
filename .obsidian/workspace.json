@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Languages/C++.md",
+                "file": "Languages/kdb+.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "C++"
+              "title": "kdb+"
             }
           },
           {
@@ -45,8 +45,7 @@
               "title": "Graph view"
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -115,31 +114,6 @@
         "type": "tabs",
         "children": [
           {
-            "id": "42dc2c1beaabd616",
-            "type": "leaf",
-            "state": {
-              "type": "outline",
-              "state": {
-                "file": "Languages/C++.md",
-                "followCursor": false,
-                "showSearch": true,
-                "searchQuery": ""
-              },
-              "icon": "lucide-list",
-              "title": "Outline of C++"
-            }
-          },
-          {
-            "id": "72c8915d21cd3941",
-            "type": "leaf",
-            "state": {
-              "type": "git-view",
-              "state": {},
-              "icon": "git-pull-request",
-              "title": "Source Control"
-            }
-          },
-          {
             "id": "e6ed7e80fec7389d",
             "type": "leaf",
             "state": {
@@ -152,6 +126,31 @@
               },
               "icon": "lucide-tags",
               "title": "Tags"
+            }
+          },
+          {
+            "id": "42dc2c1beaabd616",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Languages/kdb+.md",
+                "followCursor": false,
+                "showSearch": true,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of kdb+"
+            }
+          },
+          {
+            "id": "72c8915d21cd3941",
+            "type": "leaf",
+            "state": {
+              "type": "git-view",
+              "state": {},
+              "icon": "git-pull-request",
+              "title": "Source Control"
             }
           },
           {
@@ -188,7 +187,7 @@
             }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "horizontal",
@@ -208,12 +207,13 @@
   },
   "active": "72c8915d21cd3941",
   "lastOpenFiles": [
-    "Colour codes.md",
+    "Pasted image 20250516204150.png",
+    "Languages/kdb+.md",
     "Languages/C++.md",
+    "Colour codes.md",
     "Quantitative Finance/Study Plan.md",
     "Quantitative Finance/LeetCode Problem Tracker.md",
     "Quantitative Finance/Project Checklist & Resources.md",
-    "Pasted image 20250516204150.png",
     "[nodiscard.md",
     "Concepts/C++/Operator.md",
     "Concepts/C++",
@@ -243,7 +243,6 @@
     "init_flags.md",
     "Operating System/Research.md",
     "Game Development",
-    "Research.md",
     "Operating System",
     "Untitled.canvas"
   ]
