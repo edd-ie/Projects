@@ -276,7 +276,7 @@ When writing generic code:
 1. Consider what you ask of the types for which the code will be instantiated 
 2. Strive to ask only for what is required, nothing more. 
 
-*This widens the set of types for which the code will be applicable* : [STL algorithms](https://youtu.be/2olsGf6JIkU?si=sFvZLEHBgWG6YSJp)
+*This widens the set of types for which the code will be applicable* : 
 
 
 <font color=#30D5C8><strong>Compile-time integral values :</strong></font>
@@ -732,7 +732,75 @@ pos->second = 100.0
 
 
 ## Algorithms
+Resources 
+- [STL algorithm header - cppreference.com](https://en.cppreference.com/w/cpp/header/algorithm)
+- [Algorithms library - cppreference.com](https://en.cppreference.com/w/cpp/algorithm/)
+- [STL algorithms video](https://youtu.be/2olsGf6JIkU?si=sFvZLEHBgWG6YSJp)
 
+Add to file using:
+`#include <algorithm>`
+
+From <font color=#7cfc00>C++ 17</font>, `STL algorithms` can be instructed to run in #parallel by simply setting an additional parameter in the algorithm argument.
+
+<font color=#30D5C8>count_if :</font>
+Counter number of occurrences without for/while loop:
+- traverse the sequence determined by the two iterators `v.begin()` & `v.end()`
+- function will be applied to each element
+- If function returns `true` count increments
+- datatype is `unsigned`
+```c++
+#include <algorithm>
+#include <vector>
+
+bool condition(x) {      // Auxiliary function / Predicate
+	return (x&1) == 1;
+}
+
+main(){}
+	std::vector v{1, 2, 3, 4, 5, 6, 7, 8, 9};
+	
+	auto c = std::count_if(v.begin(), v.end(), condition);
+	printf("Odd: %d\n", c);
+	
+	
+	/*** Lambda alternative ***/
+	auto c = std::count_if(v.begin(), v.end(), 
+		[](int x){ return (x % 2) != 0; }); 
+    printf("Count with lambda for odd numbers: %d\n", c);
+
+	/*** Capture variables from its surrounding scope ***/
+	int threshold = 5;
+	auto c_lambda_capture = std::count_if(v.begin(), v.end(), 
+		[threshold](int x){ return x > threshold;} );
+
+	// init-capture
+	auto num_within_interval = std::count_if(v.begin(), v.end(),
+        [low = 3, high = 6](int n) {return low <= n && n <= high;});
+}
+
+```
+
+associative containers: [count_if map - Stack Overflow](https://stackoverflow.com/questions/27837893/how-to-count-the-number-of-a-given-value-in-a-c-map)
+```C++
+#include <utility>        // std::pair
+ // . . .
+bool is_odd_value(const std::pair<unsigned, int>& x){
+	return (x.second % 2) != 0;
+}
+
+std::unordered_map<unsigned, int> map{
+{1, 9}, {2, 8}, {3, 7}, {4, 6}, {5, 5}, {6, 4}, {7, 3}, {8, 2}, {9, 1}};
+ 
+auto num = std::count_if(map.begin(), map.end(), is_odd_value);
+
+// Lambda
+auto num = std::count_if(map.begin(), map.end(), 
+	[map](std::pair<unsigned, int> const &p) {
+        return p.second == value;} );
+```
+
+## Ranges
+Introduced in <font color=#7cfc00>C++ 20</font> provides abstractions that are more intuitive than specifying the `begin` and `end` iterator positions every time a container is to have an `STL algorithm` applied.
 
 
 # Pointers
@@ -743,7 +811,7 @@ When an owning object goes out of scope:
 - The owner is responsible for destroying its resource and returning the memory it occupied to the system.
 ## Clone
 Refer to <font color=#ffcba4><strong>Rule of 3</strong></font>
-Prior to C++11 and the advent of smart pointers, a common approach to implementing RAII
+Prior to <font color=#7cfc00>C++ 11</font> and the advent of smart pointers, a common approach to implementing RAII
 - Implementing `clone()` methods on the resource classes
 - referred to as a [virtual constructor](https://oreil.ly/5K04S)
 - Pass it to a variable as a reference.
@@ -1833,6 +1901,15 @@ Example::fx(){
 	...
 }
 ```
+
+<font color="ffcba4">Init-capture</font> - create a new variable inside the lambda's closure, and initialize it with a value
+- C++ version >> <font color="7cfc00">C++14 and higher</font>
+```c++
+auto checkInterval = [low = 3, high = 6](int n) {
+	return low <= n && n <= high;
+};
+```
+
 # Enumerated Constants
 #Cpp #enum
 Efficient way of passing codes compared to using strings
