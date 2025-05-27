@@ -735,7 +735,7 @@ pos->second = 100.0
 Resources 
 - [STL algorithm header - cppreference.com](https://en.cppreference.com/w/cpp/header/algorithm)
 - [Algorithms library - cppreference.com](https://en.cppreference.com/w/cpp/algorithm/)
-- [STL algorithms video](https://youtu.be/2olsGf6JIkU?si=sFvZLEHBgWG6YSJp)
+- [105 STL Algorithms in under an Hr - CppCon”](https://www.youtube.com/watch?v=2olsGf6JIkU)
 
 Add to file using:
 `#include <algorithm>`

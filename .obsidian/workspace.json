@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Languages/C++.md",
+                "file": "Languages/kdb+.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "C++"
+              "title": "kdb+"
             }
           },
           {
@@ -134,13 +134,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Languages/C++.md",
+                "file": "Languages/kdb+.md",
                 "followCursor": false,
                 "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of C++"
+              "title": "Outline of kdb+"
             }
           },
           {
@@ -208,9 +208,9 @@
   "active": "72c8915d21cd3941",
   "lastOpenFiles": [
     "Colour codes.md",
+    "Languages/kdb+.md",
     "Languages/C++.md",
     "Pasted image 20250516204150.png",
-    "Languages/kdb+.md",
     "Quantitative Finance/Study Plan.md",
     "Quantitative Finance/LeetCode Problem Tracker.md",
     "Quantitative Finance/Project Checklist & Resources.md",
