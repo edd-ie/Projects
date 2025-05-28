@@ -104,6 +104,35 @@ Use keyword  [within](https://code.kx.com/q/ref/within/) to filter data in a ran
 select from trips where date within 2009.01.10 2009.01.31
 ```
 
+## Filter by
+Nested queries are commonly required in SQL where filter criteria require aggregations in the context of some other column. 
+- For example, getting all records where the ride duration is less than the average for that taxi’s vendor.
+```q
+// Get the average duration per vendor and save resulting table in a variable
+resBy: select avgDuration:avg duration by vendor from jan09
+
+// Using 'lj' to join the average duration column to our table
+// Don't worry about this now, joins are discussed in a later section
+select from jan09 lj resBy where duration < avgDuration
+```
+The syntax of `fby` is `(aggregation;data) fby group`, as query below. Compare the above statement to how it was done without `fby`.
+```q
+select max fare from jan09 where duration < (avg;duration) fby vendor
+```
+
+Examples:
+```q
+// Which payment type produces the highest average tip when only trips with a fare larger than the average for each vendor is considered?
+ax:select avg tip by payment_type from jan09
+	where (fare > (avg;fare) fby vendor);
+show select payment_type from ax where tip = max tip;
+
+// Which vendor has the largest number of trips when only considering trips shorter than the average duration for each vendor? 
+ay:select trips:count i by vendor from jan09 
+	where (duration < (avg;duration) fby vendor)
+show select vendor from ay where trips = max trips
+```
+
 ## Performance
 To time performance of a query in terms of `time(t)` or `space(s)` or both
 - Precede the query with `\ts`
@@ -176,4 +205,14 @@ select count i by date from jan09
 
 // What is the highest tip and average tip per payment_type?
 select Highest:max tip, Average:avg tip by payment_type from jan09
+```
+
+
+# Compare
+Compare the result of 2 queries if equal using `~`
+- `0b` = `false`
+- `1b` = `true`
+```q
+query1~query2
+// 0b
 ```

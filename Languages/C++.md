@@ -803,7 +803,7 @@ auto num = std::count_if(map.begin(), map.end(),
         return p.second == value;} );
 ```
 
-## Heap
+### Heap
 <font color=#ffcba4><strong>Definition</strong></font> - binary tree structure that satisfies the heap properties:
 1. Highest(or lowest) priority element is at the root
 2. Children must be larger than parent ( _if lowest is at root_ ) and vice versa
@@ -873,7 +873,7 @@ int main()
 ```
 
 
-## Sort
+### Sort
 1) Elements are [sorted](https://en.cppreference.com/w/cpp/algorithm.html#Requirements "cpp/algorithm") with respect to `operator <` (until C++20) `std::less{}`[since C++20](https://en.cppreference.com/w/cpp/utility/functional/less.html).
 2) Elements are sorted with respect to `comp`.
 
@@ -921,21 +921,173 @@ int main()
 }
 ```
 
-[n-th element](https://en.cppreference.com/w/cpp/algorithm/nth_element.html) - `std::nth_element(start, n, end)`
+[n-th element](https://en.cppreference.com/w/cpp/algorithm/nth_element.html) - `std::nth_element(start, start + n, end)`
 - Place only the `n-th` element in position in `ascending` order.
+- Elements to the left will be smaller the `n-th` and right larger (*not sorted*)
 -  Add `std::greater{}` for descending order
+```c++
+#include <algorithm>
+#include <array>
 
-- [std::stable_sort - cppreference.com](https://en.cppreference.com/w/cpp/algorithm/stable_sort.html)
-- [std::sort - cppreference.com](https://en.cppreference.com/w/cpp/algorithm/sort.html)
+int main(){
+	std::vector<int> v{5, 10, 6, 4, 3, 2, 6, 7, 9, 3};
+    printVec(v);
+ 
+    auto n = v.begin() + v.size() / 2;
+    std::nth_element(v.begin(), n, v.end());
+    // v[v.size() / 2] 6
+	// v = {3, 2, 3, 4, 5, 6, 10, 7, 9, 6};
+
+	std::nth_element(v.begin(), v.begin() + 1, v.end(), std::greater{});
+	// v[1] = 9
+	// v = {10, 9, 6, 7, 6, 3, 5, 4, 3, 2};
+}
+```
+
+- [std::stable_sort](https://en.cppreference.com/w/cpp/algorithm/stable_sort.html)
+- [std::sort](https://en.cppreference.com/w/cpp/algorithm/sort.html)
 - [std::inplace_merge - cppreference.com](https://en.cppreference.com/w/cpp/algorithm/inplace_merge.html) - merge sort.
 
 
-## Portioning
+### Portioning
 
+
+### For_each
+Applies a `unary function`(<font color=#ffcba4>takes one argument</font>) to each element of a single container.
+- Syntax : `std::for_each(start, end, fx)` 
+-  If `UnaryFunc` is not [CopyConstructible](https://en.cppreference.com/w/cpp/named_req/CopyConstructible.html "cpp/named req/CopyConstructible"), the [behaviour is undefined](https://en.cppreference.com/w/cpp/language/ub.html "cpp/language/ub").
+```c++
+#include <string>
+#include <algorithm>
+ // . . .
+using std::string;
+std::deque<int> q{1, 2, 3, 4, 5, 6, 7, 8, 9};
+std::vector<string> s{"Fender", "Rickenbacker", "Alembic", "Gibson"};
+
+auto prt = [](const auto& x) {print_this(x);};
+
+std::for_each(q.begin(), q.end(), prt);
+std::for_each(s.begin(), s.end(), prt);
+
+std::ranges::for_each(q, prn); 
+std::ranges::for_each(s, prn);
+```
+
+
+### Transform
+Provides methods to modify the target containers:
+1. Apply a function across a container and replace its elements with the results. 
+2. Apply a function across a container and place the results in a separate container
+- Syntax : `std::transform(start, end, startForPlacing, fx)`
+- Source requires `begin()` and `end()`
+- Target requires `begin()`
+```c++
+#include <algorithm>
+
+std::vector<int> v{1, 2, 3, 4, 5, 6, 7, 8, 9};
+std::transform(v.begin(), v.end(), v.begin(),
+    [](int k) {return tmpl_square(k);});
+
+std::ranges::transform(v, v.begin(), [](int k) {return tmpl_square(k);})
+```
+
+To insert to back of a container:
+```c++
+#include <iterator>        // std::back_inserter
+#include <algorithm>
+
+std::vector<int> v{1, 2, 3, 4, 5, 6, 7, 8, 9};
+std::deque dq;
+
+std::transform(v.begin(), v.end(), 
+	std::back_inserter(dq), [](int n) {return tmpl_square(n) + 0.5;});
+
+std::ranges::transform(v, std::back_inserter(dq), 
+	[](int n) {return tmpl_square(n) + 0.5;});
+```
+
+### Begin & End
+As of <font color=#7cfc00>C++ 11</font> `std::begin(.)`, `std::end(.)`, `std::cbegin(.)`,  `std::cend(.)` were added.
+- Provides a generalization with C-style arrays without `.begin()` etc.
+- Removes need for `.begin()`
+```C++
+int c_array_ints[] = {10, 20, 30, 45, 50, 60};
+
+// Copy to vector:
+vector<int> v_ints(std::begin(c_array_ints), std::end(c_array_ints));
+
+// Copy vector to list:
+std::list<int> list_ints(std::begin(v_ints), std::end(v_ints));
+
+// Apply algorithms to C-style arrays:
+std::transform(std::begin(c_array_ints), std::end(c_array_ints),
+    std::begin(c_array_ints), [](int k) {return tmpl_square(k);});
+```
+
+
+### Parallel
+As of <font color=#7cfc00>C++ 17</font> parallel algorithms are available to the standard library (in `<algorithm>`) using:
+- `std::execution::seq`
+- `std::execution::par` 
+- `std::execution::par_unseq`. 
+- Header `#include <execution>`
+
+These policies allow you to hint to the compiler and library that an algorithm (like `std::sort`, `std::for_each`, `std::transform`) can be executed in parallel.
+
+Typically need to link against a **threading library** (like `TBB` - Threading Building Blocks for `GCC/Clang`, or the default parallel backend for `MSVC`).
+
+- **For GCC/Clang (Linux/macOS):**
+```Bash
+g++ -std=c++17 -O3 -Wall -pthread -ltbb your_program_name.cpp -o your_program_name
+# Or for Clang, you might need specific flags depending on your TBB setup:
+# clang++ -std=c++17 -O3 -Wall -pthread -stdlib=libc++ -lc++abi your_program_name.cpp -o your_program_name
+```
+(Note: `pthread` is for general threading support, `-ltbb` links the TBB library, which is a common backend for parallel algorithms in GCC/Clang.)
+
+- **For MSVC (Windows):**
+```Bash
+    cl /std:c++17 /O2 /MD /EHsc your_program_name.cpp
+```
+ (`MSVC`'s standard library implementation usually has its own parallel backend built-in, so explicit linking like TBB isn't always needed.)
 
 ## Ranges
-Introduced in <font color=#7cfc00>C++ 20</font> provides abstractions that are more intuitive than specifying the `begin` and `end` iterator positions every time a container is to have an `STL algorithm` applied.
+Provides more intuitive than specifying the `begin` and `end` iterator positions every time a container is to have an `STL algorithm` applied.
+- Requires <font color=#7cfc00>C++ 20</font> and higher
+- Used when operating on the whole container 
+- Added using `#include <ranges>`
+- Declaration `std::ranges::...`
+- passing a `range` into an `STL algorithm` is more concise than passing in `iterator` positions.
 
+Example <font color=#30D5C8>count_if :</font>
+```c++
+#include <ranges>
+ // . . .
+ 
+ std::vector<int> int_vec . . .;
+ std::list<int> int_list . . .;
+ 
+ num_odd = std::ranges::count_if(int_vec, is_odd);
+ num_odd = std::ranges::count_if(int_list, is_odd);
+```
+
+Example <font color=#30D5C8>for_each :</font>
+```c++
+#include <string>
+#include <ranges>
+ // . . .
+using std::string;
+std::deque<int> q{1, 2, 3, 4, 5, 6, 7, 8, 9};
+std::vector<string> s{"Fender", "Rickenbacker", "Alembic", "Gibson"};
+ 
+auto prn = [](const auto& x) {print_this(x);};
+
+std::ranges::for_each(q, prn);
+std::ranges::for_each(s, prn);
+```
+
+<font color=#fd6206><strong>Footnote :</strong></font>
+ • Some `STL algorithms` have not yet been updated for ranges.
+ • Parallel execution policies are not yet available with ranges (currently <font color=#7cfc00>C++ 23</font>).
 
 # Pointers
 ## RAII

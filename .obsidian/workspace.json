@@ -34,16 +34,6 @@
               "icon": "lucide-file",
               "title": "Colour codes"
             }
-          },
-          {
-            "id": "9b65ae3d7969e333",
-            "type": "leaf",
-            "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
-            }
           }
         ]
       }
@@ -207,12 +197,18 @@
   },
   "active": "72c8915d21cd3941",
   "lastOpenFiles": [
-    "Colour codes.md",
-    "Languages/C++.md",
-    "resources/Cpp17-land.png",
     "Languages/kdb+.md",
-    "resources/move-semantics.png",
+    "Languages/C++.md",
+    "Colour codes.md",
     "resources/Algorithms-map.png",
+    "Game Development/Installations.md",
+    "Graphics/GLFW CLION.md",
+    "Chess Engine/chess engine notes.md",
+    "Graphics/OpenGL/c++/C++ OpenGL.md",
+    "Graphics/OpenGL/java/Java-OpenGL.md",
+    "Graphics/OpenGL/java/Test code.md",
+    "resources/Cpp17-land.png",
+    "resources/move-semantics.png",
     "resources",
     "Quantitative Finance/Study Plan.md",
     "Quantitative Finance/LeetCode Problem Tracker.md",
@@ -220,23 +216,17 @@
     "[nodiscard.md",
     "Concepts/C++/Operator.md",
     "Concepts/C++",
-    "Game Development/Installations.md",
     "Game Development/Game Objects.md",
     "Game Development/SDL.md",
     "Chess Engine/TensorFlow for C++.md",
-    "Chess Engine/Research.md",
     "Chess Engine/Building a Chess Engine in C++.md",
     "Chess Engine/Building a Chess Engine in Java.md",
     "nodiscard.md",
     "Concepts/Enumerated Constants.md",
     "Quantitative Finance/Cpp_Quant_LeetCode_Problem_List.md",
-    "Graphics/OpenGL/c++/Manual.md",
-    "Graphics/Package install CLION.md",
     "README.md",
     "Quantitative Finance",
     "Graphics/Pasted image 20250207221216.png",
-    "Graphics/OpenGL/java/Test code.md",
-    "Graphics/OpenGL/java/Introduction.md",
     "Languages",
     "Graphics/OpenGL/c++",
     "Graphics/OpenGL/java",
