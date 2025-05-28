@@ -740,7 +740,11 @@ Resources
 Add to file using:
 `#include <algorithm>`
 
+![[Algorithms-map.png]]
+
 From <font color=#7cfc00>C++ 17</font>, `STL algorithms` can be instructed to run in #parallel by simply setting an additional parameter in the algorithm argument.
+
+![[Cpp17-land.png]]
 
 <font color=#30D5C8>count_if :</font>
 Counter number of occurrences without for/while loop:
@@ -798,6 +802,136 @@ auto num = std::count_if(map.begin(), map.end(),
 	[map](std::pair<unsigned, int> const &p) {
         return p.second == value;} );
 ```
+
+## Heap
+<font color=#ffcba4><strong>Definition</strong></font> - binary tree structure that satisfies the heap properties:
+1. Highest(or lowest) priority element is at the root
+2. Children must be larger than parent ( _if lowest is at root_ ) and vice versa
+Algorithms to manipulate data on the #heap 
+
+[Convert](https://en.cppreference.com/w/cpp/algorithm/make_heap.html) container to a heap : `std::make_heap(a, b)`
+1) The constructed heap is with respect to `operator <` (until C++20) `std::less{}`[since C++20](https://en.cppreference.com/w/cpp/utility/functional/less.html).
+2) The constructed heap is with respect to `comp`.
+	- [comparison function](https://en.cppreference.com/w/cpp/named_req/Compare.html) object which returns `true` if the first argument is _less_ than the second.
+```c++
+#include <algorithm>
+#include <vector>
+
+int main(){ 
+    std::vector<int> v{3, 2, 4, 1, 5, 9}; 
+    
+    std::make_heap(v.begin(), v.end()); 
+    // v = 9 5 4 3 2 1
+}
+```
+
+[Insert](https://en.cppreference.com/w/cpp/algorithm/push_heap.html) into a heap : `std::push_heap(a, b)`
+- Bubble up into position an inserted element
+```c++
+#include <algorithm>
+#include <vector>
+ 
+int main()
+{
+    std::vector<int> v{3, 1, 4, 1, 5, 9};
+ 
+    std::make_heap(v.begin(), v.end());
+    // after make_heap: 9 5 4 1 1 3
+ 
+    v.push_back(6);
+    // after make_heap: 9 5 4 1 1 3 6
+ 
+    std::push_heap(v.begin(), v.end());
+    // after push_heap: 9 5 6 1 1 3 4
+}
+```
+
+[Remove](https://en.cppreference.com/w/cpp/algorithm/pop_heap.html) root element : `std:pop_heap(a, b)`
+- Swaps the value in the position `first` and the value in the position `last - 1` 
+- Makes the subrange `[first, last - 1)` into a heap. 
+- This has the effect of removing the first element from the [heap](https://en.cppreference.com/w/cpp/algorithm.html#Heap_operations "cpp/algorithm")
+```c++
+#include <algorithm>
+#include <vector>
+ 
+int main()
+{
+    std::vector<int> v{3, 1, 4, 1, 5, 9};
+ 
+    std::make_heap(v.begin(), v.end());
+    // after make_heap: 9 5 4 1 1 3
+     
+    std::pop_heap(v.begin(), v.end()); 
+	// after pop_heap:  5 3 4 1 1 9
+ 
+    int largest = v.back();
+    // largest element: 9
+ 
+    v.pop_back(); 
+	// after pop_back:  5 3 4 1 1
+}
+```
+
+
+## Sort
+1) Elements are [sorted](https://en.cppreference.com/w/cpp/algorithm.html#Requirements "cpp/algorithm") with respect to `operator <` (until C++20) `std::less{}`[since C++20](https://en.cppreference.com/w/cpp/utility/functional/less.html).
+2) Elements are sorted with respect to `comp`.
+
+[Sorts](https://en.cppreference.com/w/cpp/algorithm/sort_heap.html) a heap : `std::sort_heap`
+- Converts the [heap](https://en.cppreference.com/w/cpp/algorithm.html#Heap_operations "cpp/algorithm") `[first, last )` into a sorted range. 
+- The heap property is no longer maintained.
+- Similar to calling `std::pop_heap` n-time
+	1) The heap is with respect to `operator <` (until C++20) `std::less{}`[since C++20](https://en.cppreference.com/w/cpp/utility/functional/less.html).
+	2) The heap is with respect to `comp`.
+```c++
+#include <algorithm>
+#include <vector>
+ 
+int main()
+{
+    std::vector<int> v{3, 1, 4, 1, 5, 9};
+    std::make_heap(v.begin(), v.end());
+    // after make_heap: 9 5 4 1 1 3
+    
+    std::sort_heap(v.begin(), v.end());
+    // after sort_heap, v: 1 1 3 4 5 9
+```
+
+
+[Partially sort](https://en.cppreference.com/w/cpp/algorithm/partial_sort) : `std::partial_sort(first, middle, last)`
+- Rearranges elements such that the range `[first, middle)` contains the sorted `middle − first` smallest elements.
+- The order of the remaining elements in the range `[middle, last)` is random.
+- Add `std::greater{}` for descending order
+```c++
+#include <algorithm>
+#include <array>
+
+int main()
+{
+    std::array<int, 10> s{5, 7, 4, 2, 8, 6, 1, 9, 0, 3};
+    
+    std::partial_sort(s.begin(), s.begin() + 3, s.end());
+    // |0 1 2 7| 8 6 5 9 4 3
+    
+    std::partial_sort(s.rbegin(), s.rbegin() + 4, s.rend());
+    // 4 5 6 7 8 |9 3 2 1 0|
+    
+    std::partial_sort(s.rbegin(), s.rbegin() + 5, s.rend(), std::greater{});
+    // 4 3 2 1 |0 5 6 7 8 9|
+}
+```
+
+[n-th element](https://en.cppreference.com/w/cpp/algorithm/nth_element.html) - `std::nth_element(start, n, end)`
+- Place only the `n-th` element in position in `ascending` order.
+-  Add `std::greater{}` for descending order
+
+- [std::stable_sort - cppreference.com](https://en.cppreference.com/w/cpp/algorithm/stable_sort.html)
+- [std::sort - cppreference.com](https://en.cppreference.com/w/cpp/algorithm/sort.html)
+- [std::inplace_merge - cppreference.com](https://en.cppreference.com/w/cpp/algorithm/inplace_merge.html) - merge sort.
+
+
+## Portioning
+
 
 ## Ranges
 Introduced in <font color=#7cfc00>C++ 20</font> provides abstractions that are more intuitive than specifying the `begin` and `end` iterator positions every time a container is to have an `STL algorithm` applied.

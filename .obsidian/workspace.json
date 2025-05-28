@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Languages/kdb+.md",
+                "file": "Languages/C++.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "kdb+"
+              "title": "C++"
             }
           },
           {
@@ -134,13 +134,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Languages/kdb+.md",
+                "file": "Languages/C++.md",
                 "followCursor": false,
                 "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of kdb+"
+              "title": "Outline of C++"
             }
           },
           {
@@ -208,9 +208,12 @@
   "active": "72c8915d21cd3941",
   "lastOpenFiles": [
     "Colour codes.md",
-    "Languages/kdb+.md",
     "Languages/C++.md",
-    "Pasted image 20250516204150.png",
+    "resources/Cpp17-land.png",
+    "Languages/kdb+.md",
+    "resources/move-semantics.png",
+    "resources/Algorithms-map.png",
+    "resources",
     "Quantitative Finance/Study Plan.md",
     "Quantitative Finance/LeetCode Problem Tracker.md",
     "Quantitative Finance/Project Checklist & Resources.md",
@@ -243,7 +246,6 @@
     "init_flags.md",
     "Operating System/Research.md",
     "Game Development",
-    "Operating System",
     "Untitled.canvas"
   ]
 }
