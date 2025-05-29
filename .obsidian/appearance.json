@@ -1,4 +1,6 @@
 {
   "accentColor": "",
-  "baseFontSize": 16
+  "baseFontSize": 18,
+  "textFontFamily": "Segoe UI,Bodoni 72 Oldstyle,Bodoni 72,Ink Free,Comic Sans MS,Papyrus",
+  "baseFontSizeAction": true
 }

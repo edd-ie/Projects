@@ -92,8 +92,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 242.5,
-    "collapsed": true
+    "width": 242.5
   },
   "right": {
     "id": "afde6462c99d2d73",
@@ -197,9 +196,9 @@
   },
   "active": "72c8915d21cd3941",
   "lastOpenFiles": [
-    "Languages/kdb+.md",
-    "Languages/C++.md",
     "Colour codes.md",
+    "Languages/C++.md",
+    "Languages/kdb+.md",
     "resources/Algorithms-map.png",
     "Game Development/Installations.md",
     "Graphics/GLFW CLION.md",

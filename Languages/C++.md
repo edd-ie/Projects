@@ -746,8 +746,23 @@ From <font color=#7cfc00>C++ 17</font>, `STL algorithms` can be instructed to ru
 
 ![[Cpp17-land.png]]
 
+### Count
+<font color=#30D5C8>count :</font>
+Counter number of occurrences that are equal to a value
+```c++
+#include <algorithm>
+#include <vector>
+
+int main(){}
+	std::vector v{1, 2, 3, 4, 2, 5, 2, 6, 7};
+
+	auto count_val_2 = std::count(v.begin(), v.end(), 2); // count_val_2 = 3
+}
+```
+
+
 <font color=#30D5C8>count_if :</font>
-Counter number of occurrences without for/while loop:
+Counter number of occurrences that meet a condition without for/while loop:
 - traverse the sequence determined by the two iterators `v.begin()` & `v.end()`
 - function will be applied to each element
 - If function returns `true` count increments
@@ -802,6 +817,8 @@ auto num = std::count_if(map.begin(), map.end(),
 	[map](std::pair<unsigned, int> const &p) {
         return p.second == value;} );
 ```
+
+
 
 ### Heap
 <font color=#ffcba4><strong>Definition</strong></font> - binary tree structure that satisfies the heap properties:
@@ -949,6 +966,68 @@ int main(){
 - [std::inplace_merge - cppreference.com](https://en.cppreference.com/w/cpp/algorithm/inplace_merge.html) - merge sort.
 
 
+### Search
+<font color=#fd6206><strong>Note : </strong></font>  Returns the `.end()` iterator when no element is found
+
+<font color=#ffcba4><strong>Linear Search</strong></font>
+`std::find` :
+Returns an `iterator` to the first occurrence of a value in the sequence. 
+- Comparisons are made with operator `==` on the elements and the value you are trying to find
+- Not suitable for floating-point values.
+```c++
+#include <iterator>        // for std::distance(.)
+
+vector<int> ints{747, 377, 707, 757, 727, 787, 777, 717, 247, 737, 767};
+int n = 757;
+
+// No auxiliary function:
+auto ipos = std::find(ints.begin(), ints.end(), n);
+
+if (ipos != ints.end())
+    cout << format("Found value {} at index {}\n",
+        n, std::distance(ints.begin(), ipos));
+//  Found value 757 at index 3
+```
+The [std::distance(start, stop)](https://en.cppreference.com/w/cpp/iterator/distance.html), declared in `<iterator>` 
+- Returns the number of positions between `start` & `stop`.
+
+`std::find_if` :
+Returns an `iterator` to the first element for which a predicate yields true in the sequence.
+```c++
+vector<double> reals{0.5, 1.6, -2.3, 0.85, -3.2, 2.5, 1.8, -0.72};
+
+ // Look for the first occurrence of a negative real value x in reals.
+ // An auxiliary function is employed in the case of find_if:
+ auto rpos = std::find_if(reals.begin(), reals.end(),
+    [](double x) {return x < 0.0;});
+ 
+ if (rpos != reals.end())
+    std::cout << std::format("First negative value is {}\n", *rpos);
+//  First negative value is -2.3
+```
+
+<font color=#ffcba4><strong>Binary Search</strong></font>
+`std::binary_search` :
+Returns an `iterator` to the first occurrence of a value in the sorted sequence. 
+- Comparisons are made with operator `==` on the elements and the value you are trying to find
+- Not suitable for floating-point values.
+```c++
+#include <iterator>        // for std::distance(.)
+
+vector<int> ints{747, 377, 707, 757, 727, 787, 777, 717, 247, 737, 767};
+int n = 757;
+
+std::sort(ints.begin(), ints.end());
+
+if (std::binary_search(ints.begin(), ints.end(), n))
+    cout << std::format("Found value {}\n", n);
+
+auto ipos = std::ranges::binary_search(ints, n);
+
+cout << format("Found value {} at index {}\n", n,std::distance(ints.begin(), ipos));
+```
+
+
 ### Portioning
 
 
@@ -1004,6 +1083,49 @@ std::transform(v.begin(), v.end(),
 
 std::ranges::transform(v, std::back_inserter(dq), 
 	[](int n) {return tmpl_square(n) + 0.5;});
+```
+
+### Copy
+More in #move_semantics
+
+Use the copy constructor to copy objects of <font color=#ffcba4>same type</font>
+```c++
+ std::vector<int> v{1, 2, 3, 4, 5};
+ auto w = v;
+```
+
+To copy `STL Containers` of <font color=#ffcba4>different type</font> but same `dataType`:
+```c++
+std::vector<int> v{1, 2, 3, 4, 5};
+
+std::deque<int> queue(std::begin(v), std::end(v));
+std::list<int> list(v.begin(), v.end());
+```
+
+`std::copy` & `std::ranges::copy`  exist, but sequence constructors are preferable.
+
+### Move
+More in #move_semantics 
+- Must have move constructor that is `noexcept`
+
+`std::move`
+To move to a container of the <font color=#ffcba4>same type</font> making original `nullptr`
+```c++
+ std::vector<int> v{1, 2, 3, 4, 5};
+ auto w = std::move(v);
+```
+
+To move an existing container or to `STL Containers` of <font color=#ffcba4>different type</font> :
+```c++
+#include <iterator>        // std::back_inserter
+ // . . .
+
+std::deque<int> dq;
+std::list<int> lst;
+
+std::move(v.begin(), v.end(), std::back_inserter(dq));
+std::ranges::move(u, std::back_inserter(lst));
+
 ```
 
 ### Begin & End
@@ -1088,6 +1210,46 @@ std::ranges::for_each(s, prn);
 <font color=#fd6206><strong>Footnote :</strong></font>
  • Some `STL algorithms` have not yet been updated for ranges.
  • Parallel execution policies are not yet available with ranges (currently <font color=#7cfc00>C++ 23</font>).
+
+
+# Function Objects - Functors
+#Functor - an object of a class that **overloads the function-call operator `operator()`**.
+- Makes instances of that class behave like functions. 
+- Can "call" them using parentheses, just like a regular function.
+
+<font color=#30D5C8>Uses :</font>
+1. <font color=#ffcba4><strong>State :</strong></font> can have member variables, which allows them to maintain "_state_" between calls.
+2. <font color=#ffcba4><strong>Polymorphism :</strong></font> (though less common than with `std::function`): can be used polymorphically if dealing with abstract base classes or `std::function`.
+3. <font color=#ffcba4><strong>Combinability :</strong></font> composable with STL algorithms.
+
+```C++
+class Quadratic {
+	double a, b, c;
+public:
+    Quadratic(double x, double y, double z):
+        a{x}, b{y}, c{z} {} 
+
+	// Overloaded function-call operator
+    double operator()(double x) const {
+        return (a * x + b) * x + c; // quadratic calculation
+    }
+};
+```
+
+- **State (`a`, `b`, `c`):** The coefficients `x`, `y`, and `x` are stored as private member variables (`a_`, `b_`, `c_`). This is the "state" of the `Quadratic` object.
+- **Constructor:** The constructor allows you to create instances of `Quadratic` with specific coefficients. 
+- **`operator()(double x) const`:** When  "called" the `q` object (e.g., `q(5.0)`), this `operator()` is executed. It uses the `a`, `b`, and `c` values that were stored when `q` was constructed to perform the calculation .
+$$
+ax^2+bx+c
+$$
+
+```c++
+Quadratic q{2.0, 4.0, 2.0};
+std::vector<double> v{-1.4, -1.3, -1.2, -1.1, 0.0, 1.1, 1.2, 1.3, 1.4}; // Input data
+
+std::deque<double> y; // Output container
+std::ranges::transform(v, std::back_inserter(y), q); // 2. Pass the functor to std::ranges::transform
+```
 
 # Pointers
 ## RAII
@@ -1593,7 +1755,7 @@ std::weak_ordering compare_chars_case_insensitive(char a, char b) {
 
 
 # Move semantics
-Transfer ownership of an object, as opposed to copying it, thus avoiding a potentially nontrivial performance hit due to object copy.
+#move_semantics  - Transfer ownership of an object, as opposed to copying it, thus avoiding a potentially nontrivial performance hit due to object copy.
 - Reference - [Engineering Distinguished Speaker Series: Howard Hinnant](https://www.youtube.com/watch?v=vLinb2fgkHk)
 
 Example, passing a vector/string as a parameter :
@@ -1633,7 +1795,7 @@ struct X{
 | Copy assigment      | <font color=#30D5C8>defaulted</font>     | <font color=#30D5C8>defaulted</font>     | <font color=#ff0800>defaulted</font>     | <font color=#7cfc00>User declared</font> | <font color=#cd76ea>Not declared</font>  | <font color=#cd76ea>Not declared</font>  |
 | Move constructor    | <font color=#cd76ea>Not declared</font>  | <font color=#30D5C8>defaulted</font>     | <font color=#eab676>Deleted</font>       | <font color=#eab676>Deleted</font>       | <font color=#7cfc00>User declared</font> | <font color=#cd76ea>Not declared</font>  |
 | Move assigment      | <font color=#30D5C8>defaulted</font>     | <font color=#30D5C8>defaulted</font>     | <font color=#eab676>Deleted</font>       | <font color=#eab676>Deleted</font>       | <font color=#cd76ea>Not declared</font>  | <font color=#7cfc00>User declared</font> |
-<font color=#fd6206>context :</font> *red - check rules below*
+<font color=#fd6206>context :</font> _red - check rules below_
 
 ## Rule of 3
 If any one of the 3 special members is defined, include definitions for the remaining 2. 
@@ -2297,6 +2459,145 @@ double exeFx(double theta){
 
 ```
 
+## Math constants
+Resource : [Mathematical constants](https://en.cppreference.com/w/cpp/numeric/constants#:~:text=The%20standard%20library%20specializes%20mathematical%20constant%20variable%20templates,longdouble%2C%20and%20fixed%20width%20floating-point%20types%20%28since%20C%2B%2B23%29%29.)
+To use these constants, we must:
+- include the `numbers`
+- Each must be scoped with the std::numbers namespace.
+
+```c++
+#include <numbers>
+
+int main{
+	double area =  std::numbers::pi * (4*4);
+	// or
+	using namespace std::numbers;
+	double math_inv_sqrt_two_pi = inv_sqrtpi / sqrt2;	
+}
+```
+
+<font color=#ff0800>Note : </font>*constants are fixed at compile time rather than computed with each call runtime, using a <font color=#7cfc00>C++11</font> designation called* <font color=#ffcba4>constexpr</font>
+
+
+## Numeric Algorithms
+Algorithms that perform mathematical operations
+- Under `Standard Library` header, `numeric`
+
+`std::iota` :
+Generates a sequence of incremented values
+- Useful for testing
+- Generating a fixed schedule of time increments
+```c++
+#include <numeric>
+ //. . .
+vector<int> w(6);
+std::iota(w.begin(), w.end(), -2.5);
+// -2.5 -1.5 -0.5 0.5 1.5 2.5
+```
+
+
+`std::accumulate` :
+Computes the sum of elements in a container.
+- Result is a scalar value.
+```c++
+double sum_of_reals = std::accumulate(w.begin(), w.end(), 0.0);
+// 0.0 + -2.5 + -1.5 + -0.5 + 0.5 + 1.5 + 2.5 == 0.0
+```
+Can be generalized to perform other binary operation:
+- Use header [functional](https://en.cppreference.com/w/cpp/header/functional.html)
+- Multiplication, Minus, division, mod, negation …etc.
+```c++
+#include <functional>        // std::multiplies, etc
+ //. . .
+auto prod = std::accumulate(w.begin(), w.end(), 1.0, 
+	std::multiplies<double>());
+// 1.0 × −2.5 × −1.5×⋯×2.5 = −3.515625
+```
+
+
+`std::ranges::fold_left`
+`<numeric>` doesn't have `ranges` versions (as of <font color=#7cfc00>C++23</font>)
+Similar to `std::accumualate` but does not default to the addition operator
+```c++
+int sum_of_ints = std::ranges::fold_left(v, 0, std::plus<int>());  // = 621
+
+double prod_of_reals = std::ranges::fold_left(w, 1.0,
+    std::multiplies<double>());                              
+// = -3.515625
+```
+
+
+`std::inner_product` :
+Computes the dot product from two containers
+- Result is a scalar value.
+```C++
+int dot_prod = std::inner_product(v.begin(), v.end(), u.begin(), 0);
+// 0 is an initial value that is added to the dot product
+```
+Can be abstracted for any two operations
+- sum & minus, product & sum, …etc.
+```c++
+vector<double> y(w.size());        // 6 elements
+
+std::iota(y.begin(), y.end(), 1.5);
+double sum_diffs = std::inner_product(w.begin(), w.end(), 
+	y.begin(), 0.0, std::plus<double>(), std::minus<double>());
+// −4+ (−4)⋯+ (−4) = −24
+```
+
+
+`std::adjacent_difference` :
+Computes the difference of each element and its predecessor
+- Result is the original with elements replaced with modified values
+- Alternatively a separate container where the values are inserted.
+Computes:
+$$
+y_i = x_i - x_{i-1}
+$$
+For each `i = 1, ...,n` and place the result  in a new container / in the original by replacing the elements :
+$$
+\{x_0, y_1, y_2, ..., y_{n-1}, y_n \}
+$$
+Consider using a `deque` as the target container in order to pop `x0` off the front of the container and store only the differenced values.
+```c++
+ std::vector<int> u{100, 101, 103, 106, 110, 115, 121};
+ std::deque<int> adj_diffs;
+ 
+std::adjacent_difference(u.begin(), u.end(), std::back_inserter(adj_diffs));        
+// adj_diffs = 100 1 2 3 4 5 6
+
+adj_diffs.pop_front();  // adj_diffs now = 1 2 3 4 5 6
+```
+Can specify an operation other than the default:
+```c++
+std::deque<double> adj_sums{-2.5, -1.5, -0.5, 0.5, 1.5, 2.5};
+std::adjacent_difference(adj_sums.begin(), adj_sums.end(),
+    adj_sums.begin(), std::plus<double>());
+
+adj_sums.pop_front();        // adj_sums now = -4 -2 0 2 4
+```
+
+
+`std::partial_sum` :
+Computes the cumulative sums at each element in a container (like _CDF_ in stats)
+- Result is the original with elements replaced with modified values
+- Alternatively a separate container where the values are inserted.
+```c++
+vector<int> z{10, 11, 13, 16, 20, 25, 31};
+vector<int> part_sums;
+
+part_sums.reserve(z.size());
+std::partial_sum(z.begin(), z.end(), std::back_inserter(part_sums));
+// Result: part_sums  = 10 21 34 50 70 95 126
+```
+Can specify an operation other than the default:
+```c++
+vector<int> part_prods(z.size());
+
+std::partial_sum(z.begin(), z.end(), part_prods.begin(), std::multiplies<int>());
+ // Result: part_prods = 10 110 1430 22880 457600 11440000 354640000
+```
+
 
 ## Computing polynomials
 It is more efficient to apply factoring per Horner’s method and reduce the number of multiplicative operations
@@ -2317,25 +2618,6 @@ double f(double x){
     return x * (x * (x * (8.0 * x + 7.0) + 4.0 * x) - 10.0) - 6.0;
 }
 ```
-
-## Mathematical constants
-Resource : [Mathematical constants](https://en.cppreference.com/w/cpp/numeric/constants#:~:text=The%20standard%20library%20specializes%20mathematical%20constant%20variable%20templates,longdouble%2C%20and%20fixed%20width%20floating-point%20types%20%28since%20C%2B%2B23%29%29.)
-To use these constants, we must:
-- include the `numbers`
-- Each must be scoped with the std::numbers namespace.
-
-```c++
-#include <numbers>
-
-int main{
-	double area =  std::numbers::pi * (4*4);
-	// or
-	using namespace std::numbers;
-	double math_inv_sqrt_two_pi = inv_sqrtpi / sqrt2;	
-}
-```
-
-<font color=#ff0800>Note : </font>*constants are fixed at compile time rather than computed with each call runtime, using a <font color=#7cfc00>C++11</font> designation called* <font color=#ffcba4>constexpr</font>
 
 
 # String 
