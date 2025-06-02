@@ -736,6 +736,8 @@ Resources
 - [STL algorithm header - cppreference.com](https://en.cppreference.com/w/cpp/header/algorithm)
 - [Algorithms library - cppreference.com](https://en.cppreference.com/w/cpp/algorithm/)
 - [105 STL Algorithms in under an Hr - CppCon”](https://www.youtube.com/watch?v=2olsGf6JIkU)
+- [New Algorithms in C++23 - cpponsea](https://youtu.be/uYFRnsMD9ks?si=1XMDbQiTNl5mFAvQ)
+- [STL Algorithms in Action - CppCon](https://www.youtube.com/watch?v=eidEEmGLQcU)
 
 Add to file using:
 `#include <algorithm>`
@@ -1180,6 +1182,11 @@ Provides more intuitive than specifying the `begin` and `end` iterator positions
 - Declaration `std::ranges::...`
 - passing a `range` into an `STL algorithm` is more concise than passing in `iterator` positions.
 
+Resource:
+- [How to make a container from a C++20 range](https://timur.audio/how-to-make-a-container-from-a-c20-range)
+- [Back to Basics: (Range) Algorithms in C++ - CppCon](https://www.youtube.com/watch?v=eJCA2fynzME)
+- [Effective Ranges: A Tutorial for Using C++2x Ranges - CppCon 2023](https://www.youtube.com/watch?v=QoaVRQvA6hI)
+
 Example <font color=#30D5C8>count_if :</font>
 ```c++
 #include <ranges>
@@ -1210,6 +1217,98 @@ std::ranges::for_each(s, prn);
 <font color=#fd6206><strong>Footnote :</strong></font>
  • Some `STL algorithms` have not yet been updated for ranges.
  • Parallel execution policies are not yet available with ranges (currently <font color=#7cfc00>C++ 23</font>).
+
+### Range views
+Summary use - <font color=#ffcba4>Data filtering.</font>
+Allows certain operations to be performed by using the elements of a container without the overhead from copying data and generating temporary container objects.
+- `Non-owning`, similar to a reference
+- Can be `mutating` or `nonmutating`
+- Include `<ranges>`
+
+ Resource 
+ - [Range-v3: User Manual](https://ericniebler.github.io/range-v3/index.html#tutorial-quick-start)
+ - [View classes | Microsoft Learn](https://learn.microsoft.com/en-us/cpp/standard-library/view-classes?view=msvc-170)
+
+Functional behaviour allows composition of many functions, similar to [piping in Linux](https://linuxsimply.com/what-is-piping-in-linux/).
+These pipelines of operations are also performed *lazily*. 
+- Combine operations on views that will be deferred and performed only when needed. 
+- Leads to fewer loops, less copying of data, and overall better throughput.
+- From <font color=#7cfc00>C++ 20</font>
+
+#### Range adaptor
+Used to create a range view.
+Examples:
+ `std::views::take`  - Takes the first n elements of a view and discards the rest
+ `std::views::filter` -  Filters a set of elements according to a predicate
+ `std::views::transform` - Modifies elements of a view based on an auxiliary function (without modifying the original values in the source range)
+ `std::views::drop` - Removes the first n elements of a view
+
+_Given a vector, take the 1st 5 elements, filter elements than –2. Square each value of this new view and remove the first two elements of squares_
+```c++
+#include <ranges>
+ // . . .
+std::vector<double> w(10);
+std::iota(w.begin(), w.end(), -5.5);  // Filling in the vector
+
+auto take_five = std::views::take(w, 5);
+for(double x : take_five) {print_this(x);}
+// −5.5, − 4.5, − 3.5, − 2.5, − 1.5
+
+ auto two_below = std::views::filter(take_five, 
+	 [](double x) {return x < -2.0;})
+// −5.5, − 4.5, − 3.5, − 2.5
+
+auto squares = std::views::transform(two_below, 
+	[](double x) {return x * x;});
+// 30.25, 20.25, 12.25, 6.25
+
+auto drop_two = std::views::drop(squares, 2);
+// 12.25, 6.25
+```
+Use `auto` as the return  type is long, example : 
+``` c++
+//take_five 
+std::ranges::take_view<std::ranges::ref_view
+	<std::vector<double,std::allocator<double>>>>
+```
+
+
+#### Chaining views
+**Composition** of `range adaptors`, with the result of one taken in as input to the next.
+- This is done with the pipe operator ( `|` ),
+_Same example as range adaptor:_
+```c++
+auto drop_two = w | std::views::take(5)
+    | std::views::filter([](double x) {return x < -2.0;})
+    | std::views::transform([](double x) {return x * x;})
+    | std::views::drop(2);
+```
+
+
+#### Manipulation & storage
+ As `views` are `ranges`, they can be used as range expressions in range-based for loops.
+_Example : copy the results from the above view into a vector_
+```c++
+std::vector<double> u;
+u.reserve(take_five.size());    // Note there is a size() member
+
+for (auto x : take_five){
+	u.push_back(x);
+}
+```
+
+_You can start with unfiltered data and filter as you go :_
+```c++
+for (auto x : w | std::views::take(5)){
+    print_this(x);    // -5.5 -4.5 -3.5 -2.5 -1.5
+}
+
+/*** multiple chained views ***/
+for (auto x : w | std::views::take(5)
+        | std::views::transform([](double x) {return x * x;})){
+    print_this(x);    // 30.25 20.25 12.25 6.25 2.25
+}
+```
 
 
 # Function Objects - Functors
@@ -2618,6 +2717,9 @@ double f(double x){
     return x * (x * (x * (8.0 * x + 7.0) + 4.0 * x) - 10.0) - 6.0;
 }
 ```
+
+
+## Random Number generation
 
 
 # String 
