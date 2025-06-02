@@ -1,4 +1,4 @@
-#kdp #quant #q 
+#kdp #quant #Q 
 Table query language like #sql.
 
 # Resources
@@ -38,28 +38,35 @@ Get table meta data:
 meta tableName
 ```
 
-## Select
+# Select
 If you have used SQL, you will find the syntax of qSQL queries very similar.
 
-### Select all
+## Select all
 - `qSQL` is like `SQL` but does not require a `*` to select all columns
 ```q
 select from tableName
 ```
 
-### Select specific
+## Select specific
 - Table is partitioned using the <font color=#fd6206><strong>1st column named.</strong></font>
 ```q
 select col1, col3, col2 from tableName
 ```
 
-### custom named column/s:
+## custom named column/s:
 - Assign a name using `column_name:value`
 ```q
 select duration, total: fare + tip, fare, tip from trips
 ```
 
-### Indexing
+# Count
+Count number of records meeting a condition:
+```q
+count select from jan09 where passengers > 5
+// 48821
+```
+
+## Indexing
 A virtual column `i` maps to a record index in the table. 
 - A simple aggregation can be obtained by taking the count of this virtual column.
 ```q
@@ -168,26 +175,6 @@ count jan09
 ```
 
 
-# Aggregations
-Analytics can be run without performing the filter query again. 
-
-[`sum`](https://code.kx.com/q/ref/sum/) is one of many built-in aggregations. Other built-in aggregations include, but are not limited to
-
-- [`avg`](https://code.kx.com/q/ref/avg/#avg) - average (mean)
-- [`med`](https://code.kx.com/q/ref/med/) - median
-- [`min`](https://code.kx.com/q/ref/min/) - minimum value
-- [`max`](https://code.kx.com/q/ref/max/) - maximum value
-- [`count`](https://code.kx.com/q/ref/count/) - number of values
-
-Reference: [Mathematics and statistics](https://code.kx.com/q/basics/math/)
-```q
-// sum of both the `fare` and `tip` columns. 
-select sum fare, sum tip from jan09
-
-// Calculate the minimum and maximum tip from the `jan09` table.
-select Max:max tip, Min:min tip from jan09
-```
-
 # Grouping
 Arrange the result using specific columns.
 - keyword `by`
@@ -216,3 +203,141 @@ Compare the result of 2 queries if equal using `~`
 query1~query2
 // 0b
 ```
+
+
+# Update
+
+Use `update` to change the data.
+```q
+// Update maximum number of passengers to be 5 
+// Save changes by reassigning back to jan09
+jan09: update passengers: 5 from jan09 where passengers > 5
+```
+
+## Add column
+```q
+// add a column with the weighted average fare per passenger:
+jan09:update wAvgfare:passengers wavg fare from jan09
+
+meta jan09 //new column has been added to the end of the table
+```
+
+
+# Delete
+Use `delete` with  condition for specific without for general
+```q
+count jan09  //number of records before deleting rows
+
+// Always reassign to save changes
+jan09:delete from jan09 where duration=00:00:00.000
+count jan09  //number of records after deleteing rows 
+```
+
+<font color=#ff2800>nyi</font> - _not yet implemented_ error : query doesn't exits
+```q
+jan09:delete vendor from jan09 where month=2009.01
+```
+
+
+# Time
+Time series analysis / temporal arithmetic
+[Data types - [12, 19]](https://code.kx.com/q/basics/datatypes/)
+
+_The `pickup_time` column in the data has a type of `timestamp`. convert the `pickup_time` values to their `minute` values (including hours and minutes), and group the data based on this time frame._
+```q
+select pickup_time, pickup_time.second, pickup_time.minute, pickup_time.hh from jan09
+```
+
+  
+Aggregate further on time by using `xbar` to bucket the minutes into hours. Group the minutes into 60-unit buckets to produce hours:
+```q
+select count i by 60 xbar pickup_time.minute from jan09 
+	where date = 2009.01.10
+// Filter by hour
+
+// Show the largest tip for each 15-minute timespan during the month of January.
+select  max tip by 15 xbar pickup_time.minute from jan09 
+	where date > 2008.12 and date < 2009.02
+
+// Break this information down by vendor.
+select  max tip by 15 xbar pickup_time.minute, vendor from jan09 
+	where date > 2008.12 and date < 2009.02
+```
+
+
+# Math
+
+## Order  of operation
+#Q **evaluation is from right-to-left**.  This simple rule holds everywhere; there are <font color=#ffcba4><strong>no priorities</strong></font>.
+```q
+100*2+5
+// 700
+```
+
+To impose and order use `()` 
+
+## xbar
+Rounds down to the nearest divisor 
+```q
+3 xbar 1 2 3 4 5 6 7 8 9 31
+// 0 0 3 3 3 6 6 6 9 30
+```
+
+## Aggregations
+Analytics can be run without performing the filter query again. 
+
+[`sum`](https://code.kx.com/q/ref/sum/) is one of many built-in aggregations. Other built-in aggregations include, but are not limited to
+
+- [`avg`](https://code.kx.com/q/ref/avg/#avg) - average (mean)
+- [`med`](https://code.kx.com/q/ref/med/) - median
+- [`min`](https://code.kx.com/q/ref/min/) - minimum value
+- [`max`](https://code.kx.com/q/ref/max/) - maximum value
+- [`count`](https://code.kx.com/q/ref/count/) - number of values
+
+Reference: [Mathematics and statistics](https://code.kx.com/q/basics/math/)
+```q
+// sum of both the `fare` and `tip` columns. 
+select sum fare, sum tip from jan09
+
+// Calculate the minimum and maximum tip from the `jan09` table.
+select Max:max tip, Min:min tip from jan09
+```
+
+
+# Keys
+A table can be keyed in a number of ways, however the easiest is to use the [`xkey`](https://code.kx.com/q/ref/keys/#xkey) function
+```q
+`date xkey table //we are keying on date 
+1!table          //we are keying on the first column 
+3!table          //we can key on N number of columns
+```
+
+## Unkey
+Remove key from table:
+```q
+0!table
+```
+
+
+# Joins
+Reference  -  [Joins | Basics - kdb+ and q documentation](https://code.kx.com/q/basics/joins/)
+
+## Left join
+Left table takes precedence , keyword `lj` -  [left join](https://code.kx.com/q/ref/lj/)
+For each record in `x`, the result has one record with the columns of `y` joined to columns of `y`:
+- if there is a matching record in `y`, it is joined to the `x` record; common columns are replaced from `y`.
+- if there is no matching record in `y`, common columns are left unchanged, and new columns are null
+The `lj` operator requires that at least the right hand table argument be keyed.
+- unkeyed left = unkeyed join.
+
+```q
+// select date and precipitation from the weather table
+// key the result on date
+// join to the unkeyed table jan09C (0! unkeys the table)
+jan09W:jan09C lj `date xkey select date, precip from weather 
+jan09W
+
+jan09W:jan09C lj select avg precip by date from weather //using the by clause to key
+```
+
+<font color=#fd6206><strong>Note :</strong></font> both have same columns ,left table will be overridden by right table
