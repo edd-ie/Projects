@@ -748,79 +748,52 @@ From <font color=#7cfc00>C++ 17</font>, `STL algorithms` can be instructed to ru
 
 ![[Cpp17-land.png]]
 
-### Count
-<font color=#30D5C8>count :</font>
-Counter number of occurrences that are equal to a value
-```c++
-#include <algorithm>
-#include <vector>
+### Prefix
+`stable_` 
+- algorithm will keep the original order of elements that weren't affected by its function.
+`is_`
+- Checks for a predicate
+`is_*_until`
+- Performs a function unit the predicate is false
 
-int main(){}
-	std::vector v{1, 2, 3, 4, 2, 5, 2, 6, 7};
+### Suffix
+`_copy` - performs the action in a new container
+`_if` - performs the action if predicate is **true**
 
-	auto count_val_2 = std::count(v.begin(), v.end(), 2); // count_val_2 = 3
-}
-```
+### Queries
+[std::all_of, std::any_of, std::none_of](https://en.cppreference.com/w/cpp/algorithm/none_of.html)
+- Checks if unary predicate p returns true for all elements in the range `[`first`,` last`)`.   _empty == true_
+- Checks if unary predicate p returns true for at least one element in the range `[`first`,` last`)`.  _empty == false_
+- Checks if unary predicate p returns true for none of the elements in the range `[`first`,` last`)`.  _empty == true_
 
+| [ranges::all_of  ranges::any_of  ranges::none_of](https://en.cppreference.com/w/cpp/algorithm/ranges/all_any_none_of.html "cpp/algorithm/ranges/all any none of")<br>(C++20) | checks if a predicate is true for all, any or none of the elements in a range  <br>(algorithm function object) |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 
-<font color=#30D5C8>count_if :</font>
-Counter number of occurrences that meet a condition without for/while loop:
-- traverse the sequence determined by the two iterators `v.begin()` & `v.end()`
-- function will be applied to each element
-- If function returns `true` count increments
-- datatype is `unsigned`
-```c++
-#include <algorithm>
-#include <vector>
+- [std::equal](https://en.cppreference.com/w/cpp/algorithm/equal.html)
 
-bool condition(x) {      // Auxiliary function / Predicate
-	return (x&1) == 1;
-}
+### Fill
+Populate a container with values
+- [std::fill - cppreference.com](https://en.cppreference.com/w/cpp/algorithm/fill.html)
+- [generate](https://en.cppreference.com/w/cpp/algorithm/generate.html) - fill using a function
+- [ranges::fill](https://en.cppreference.com/w/cpp/algorithm/ranges/fill.html "cpp/algorithm/ranges/fill")
+- [fill_n](https://en.cppreference.com/w/cpp/algorithm/fill_n.html "cpp/algorithm/fill n")
+- [iota](https://en.cppreference.com/w/cpp/algorithm/iota.html) - sequentially increasing values, starting with `value` and repetitively  `++value.`
 
-main(){}
-	std::vector v{1, 2, 3, 4, 5, 6, 7, 8, 9};
-	
-	auto c = std::count_if(v.begin(), v.end(), condition);
-	printf("Odd: %d\n", c);
-	
-	
-	/*** Lambda alternative ***/
-	auto c = std::count_if(v.begin(), v.end(), 
-		[](int x){ return (x % 2) != 0; }); 
-    printf("Count with lambda for odd numbers: %d\n", c);
+### Replace
+- [std::replace, std::replace_if](https://en.cppreference.com/w/cpp/algorithm/replace.html
+- [replace_copy replace_copy_if](https://en.cppreference.com/w/cpp/algorithm/replace_copy.html "cpp/algorithm/replace copy")
+- [ranges::replace ranges::replace_if](https://en.cppreference.com/w/cpp/algorithm/ranges/replace.html "cpp/algorithm/ranges/replace")
 
-	/*** Capture variables from its surrounding scope ***/
-	int threshold = 5;
-	auto c_lambda_capture = std::count_if(v.begin(), v.end(), 
-		[threshold](int x){ return x > threshold;} );
+### Remove
+- [std::remove, std::remove_if](https://en.cppreference.com/w/cpp/algorithm/remove.html)
+- [remove_copy remove_copy_if](https://en.cppreference.com/w/cpp/algorithm/remove_copy.html "cpp/algorithm/remove copy")
+- [unique](https://en.cppreference.com/w/cpp/algorithm/unique.html "cpp/algorithm/unique")
+- [ranges::removeranges::remove_if](https://en.cppreference.com/w/cpp/algorithm/ranges/remove.html "cpp/algorithm/ranges/remove")
+- [remove](https://en.cppreference.com/w/cpp/io/c/remove) - files
+- [remove remove_all](https://en.cppreference.com/w/cpp/filesystem/remove.html "cpp/filesystem/remove") -files
 
-	// init-capture
-	auto num_within_interval = std::count_if(v.begin(), v.end(),
-        [low = 3, high = 6](int n) {return low <= n && n <= high;});
-}
-
-```
-
-associative containers: [count_if map - Stack Overflow](https://stackoverflow.com/questions/27837893/how-to-count-the-number-of-a-given-value-in-a-c-map)
-```C++
-#include <utility>        // std::pair
- // . . .
-bool is_odd_value(const std::pair<unsigned, int>& x){
-	return (x.second % 2) != 0;
-}
-
-std::unordered_map<unsigned, int> map{
-{1, 9}, {2, 8}, {3, 7}, {4, 6}, {5, 5}, {6, 4}, {7, 3}, {8, 2}, {9, 1}};
- 
-auto num = std::count_if(map.begin(), map.end(), is_odd_value);
-
-// Lambda
-auto num = std::count_if(map.begin(), map.end(), 
-	[map](std::pair<unsigned, int> const &p) {
-        return p.second == value;} );
-```
-
-
+### Erase
+[std::erase, std::erase_if](https://en.cppreference.com/w/cpp/container/vector/erase2)
 
 ### Heap
 <font color=#ffcba4><strong>Definition</strong></font> - binary tree structure that satisfies the heap properties:
@@ -963,6 +936,29 @@ int main(){
 }
 ```
 
+[qsort](https://en.cppreference.com/w/cpp/algorithm/qsort.html) - `std::qsort(ptr, count, bytesSize, comp)`
+- `ptr` - pointer to the array to sort
+- count - number of elements in the array
+- `size` - size of each element in the array in bytes
+- `comp` - comparison function which 
+	- *neg : a < b*  & _pos : a > b_
+	- `int cmp(const void *a, const void *b);`
+```c++
+std::array a{-2, 99, 0, -743, INT_MAX, 2, INT_MIN, 4};
+ 
+std::qsort(a.data(), a.size(), sizeof(decltype(a)::value_type),
+    [](const void* x, const void* y){
+        const int arg1 = *static_cast<const int*>(x);
+        const int arg2 = *static_cast<const int*>(y);
+        const auto cmp = arg1 <=> arg2;
+        if (cmp < 0) return -1;
+        if (cmp > 0) return 1;
+        return 0;
+    }
+); // -2147483648 -743 -2 0 2 4 99 2147483647
+```
+
+
 - [std::stable_sort](https://en.cppreference.com/w/cpp/algorithm/stable_sort.html)
 - [std::sort](https://en.cppreference.com/w/cpp/algorithm/sort.html)
 - [std::inplace_merge - cppreference.com](https://en.cppreference.com/w/cpp/algorithm/inplace_merge.html) - merge sort.
@@ -1030,8 +1026,71 @@ cout << format("Found value {} at index {}\n", n,std::distance(ints.begin(), ipo
 ```
 
 
-### Portioning
+[equal_range](http://www.en.cppreference.com/w/cpp/algorithm/equal_range.html) - `std::equal_range(first, last, value)`
+Returns a range containing all elements equivalent to value in the partitioned range `[`first`,` last`)`. _sorted_
 
+
+### Permutation
+Rearranging a container
+#### Partition
+Splitting a container by a condition
+
+[Partition](http://www.en.cppreference.com/w/cpp/algorithm/partition.html) - `std::partition(begin, end, p)`
+Reorders `[`first`,` last`)` in such a way that all elements for which the predicate p returns true precede all elements for which predicate `p` returns false. 
+- Relative order of the elements is not preserved.
+```c++
+
+std::vector<int> v{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+// Original vector: 0 1 2 3 4 5 6 7 8 9 
+
+auto it = std::partition(v.begin(), v.end(), 
+	[](int i) {return i % 2 == 0;});
+// Partitioned vector: 0 8 2 6 4 5 3 7 1 9 
+```
+
+[partition_point](http://www.en.cppreference.com/w/cpp/algorithm/partition_point.html) - `std::partition_point(begin, end, p)`
+Returns the first element in the `std::partition` container that doesn't meet `p`
+```c++
+std::array v{1, 2, 3, 4, 5, 6, 7, 8, 9};
+auto is_even = [](int i) { return i % 2 == 0; };
+std::partition(v.begin(), v.end(), is_even);
+
+const auto pp = std::partition_point(v.cbegin(), v.cend(),
+	is_even); 
+const auto i = std::distance(v.cbegin(), pp);
+// Partition point is at 4; v[4] = 5
+```
+
+
+#### Rotation
+[rotate](https://en.cppreference.com/w/cpp/algorithm/rotate.html) - `std::rotate`
+Performs a left rotation on a range of elements.
+ - swaps the elements in the range `[`first`,` last`)` in such a way that the elements in `[`first`,` middle`)` are placed after the elements in `[`middle`,` last`)` while the orders of the elements in both ranges are preserved.
+```c++
+std::vector<int> v{0, 1, 2, 2, 3, 4, 5, 7, 7, 10};
+
+std::rotate(v.begin(), v.begin() + 1, v.end());
+// simple rotate left:	1 2 2 3 4 5 7 7 10 0
+
+std::rotate(v.rbegin(), v.rbegin() + 1, v.rend());
+// simple rotate right:	0 1 2 2 3 4 5 7 7 10
+```
+
+| [rotate_copy](https://en.cppreference.com/w/cpp/algorithm/rotate_copy.html "cpp/algorithm/rotate copy")                   | copies and rotate a range of elements                                     |
+| ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| [ranges::rotate](https://en.cppreference.com/w/cpp/algorithm/ranges/rotate.html "cpp/algorithm/ranges/rotate")<br>(C++20) | rotates the order of elements in a range  <br>(algorithm function object) |
+
+#### Reverse
+[std::reverse](https://en.cppreference.com/w/cpp/algorithm/reverse.html)
+```c++
+std::vector<int> v {1, 2, 3};
+std::reverse(v.begin(), v.end());
+// after reverse, v = 3 2 1
+```
+
+| [reverse_copy](https://en.cppreference.com/w/cpp/algorithm/reverse_copy.html "cpp/algorithm/reverse copy")                   | creates a copy of a range that is reversed                                 |
+| ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| [ranges::reverse](https://en.cppreference.com/w/cpp/algorithm/ranges/reverse.html "cpp/algorithm/ranges/reverse")<br>(C++20) | reverses the order of elements in a range  <br>(algorithm function object) |
 
 ### For_each
 Applies a `unary function`(<font color=#ffcba4>takes one argument</font>) to each element of a single container.
@@ -1105,6 +1164,20 @@ std::list<int> list(v.begin(), v.end());
 ```
 
 `std::copy` & `std::ranges::copy`  exist, but sequence constructors are preferable.
+- [std::ranges::copy_backward, std::ranges::copy_backward_result ](https://en.cppreference.com/w/cpp/algorithm/ranges/copy_backward)
+
+
+| [ranges::copy ranges::copy_if](https://en.cppreference.com/w/cpp/algorithm/ranges/copy.html "cpp/algorithm/ranges/copy")                                 | copies a range of elements to a new location                                       |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| [ranges::copy_n](https://en.cppreference.com/w/cpp/algorithm/ranges/copy_n.html "cpp/algorithm/ranges/copy n")                                           | copies a number of elements to a new location                                      |
+| [ranges::remove_copy ranges::remove_copy_if](https://en.cppreference.com/w/cpp/algorithm/ranges/remove_copy.html "cpp/algorithm/ranges/remove copy")     | copies a range of elements omitting those that satisfy specific criteria           |
+| [ranges::replace_copy ranges::replace_copy_if](https://en.cppreference.com/w/cpp/algorithm/ranges/replace_copy.html "cpp/algorithm/ranges/replace copy") | copies a range, replacing elements satisfying specific criteria with another value |
+| [ranges::reverse_copy](https://en.cppreference.com/w/cpp/algorithm/ranges/reverse_copy.html "cpp/algorithm/ranges/reverse copy")                         | creates a copy of a range that is reversed                                         |
+| [ranges::rotate_copy](https://en.cppreference.com/w/cpp/algorithm/ranges/rotate_copy.html "cpp/algorithm/ranges/rotate copy")                            | copies and rotate a range of elements                                              |
+| [ranges::unique_copy](https://en.cppreference.com/w/cpp/algorithm/ranges/unique_copy.html "cpp/algorithm/ranges/unique copy")<br><br>(C++20)             | creates a copy of some range of elements that contains no consecutive duplicates   |
+| [ranges::move](https://en.cppreference.com/w/cpp/algorithm/ranges/move.html "cpp/algorithm/ranges/move")                                                 | moves a range of elements to a new location                                        |
+| [ranges::move_backward](https://en.cppreference.com/w/cpp/algorithm/ranges/move_backward.html "cpp/algorithm/ranges/move backward")                      | moves a range of elements to a new location in backwards order                     |
+| [copy_backward](https://en.cppreference.com/w/cpp/algorithm/copy_backward.html "cpp/algorithm/copy backward")                                            | copies a range of elements in backwards order                                      |
 
 ### Move
 More in #move_semantics 
@@ -1130,6 +1203,18 @@ std::ranges::move(u, std::back_inserter(lst));
 
 ```
 
+### Swap
+[swap](https://en.cppreference.com/w/cpp/algorithm/swap.html) - `std::swap(a, b)`
+- Swaps the values `a` and `b`..
+- Swaps the arrays `a` and `b`. Equivalent to [std::swap_ranges](https://en.cppreference.com/w/cpp/algorithm/swap_ranges.html)(a, a + N, b).
+_Same data type & size_
+
+| [ranges::swap](https://en.cppreference.com/w/cpp/utility/ranges/swap.html "cpp/utility/ranges/swap")<br>(C++20) | swaps the values of two objects  <br>(customization point object)     |
+| --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| [iter_swap](https://en.cppreference.com/w/cpp/algorithm/iter_swap.html "cpp/algorithm/iter swap")               | swaps the elements pointed to by two iterators                        |
+| [swap_ranges](https://en.cppreference.com/w/cpp/algorithm/swap_ranges.html "cpp/algorithm/swap ranges")         | swaps two ranges of elements                                          |
+| [exchange](https://en.cppreference.com/w/cpp/utility/exchange.html "cpp/utility/exchange")<br>(C++14)           | replaces the argument with a new value and returns its previous value |
+
 ### Begin & End
 As of <font color=#7cfc00>C++ 11</font> `std::begin(.)`, `std::end(.)`, `std::cbegin(.)`,  `std::cend(.)` were added.
 - Provides a generalization with C-style arrays without `.begin()` etc.
@@ -1148,6 +1233,19 @@ std::transform(std::begin(c_array_ints), std::end(c_array_ints),
     std::begin(c_array_ints), [](int k) {return tmpl_square(k);});
 ```
 
+
+### Set
+[set_difference](https://en.cppreference.com/w/cpp/algorithm/set_difference.html) - `std::set_difference()`
+- Find elements in set `a`  that are not in set `b`
+[set_union](https://en.cppreference.com/w/cpp/algorithm/set_union.html) - `std::set_union`
+- Set `c = (a+b)-ab`
+
+| [set_intersection](https://en.cppreference.com/w/cpp/algorithm/set_intersection.html "cpp/algorithm/set intersection")                         | computes the intersection of two sets                           |
+| ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| [set_symmetric_difference](https://en.cppreference.com/w/cpp/algorithm/set_symmetric_difference.html "cpp/algorithm/set symmetric difference") | computes the symmetric difference between two sets              |
+| [ranges::set_union](https://en.cppreference.com/w/cpp/algorithm/ranges/set_union.html "cpp/algorithm/ranges/set union")<br>(C++20)             | computes the union of two sets  <br>(algorithm function object) |
+| [includes](https://en.cppreference.com/w/cpp/algorithm/includes.html "cpp/algorithm/includes")                                                 | returns `true` if one sequence is a subset of another           |
+| [merge](https://en.cppreference.com/w/cpp/algorithm/merge.html "cpp/algorithm/merge")                                                          | merges two sorted ranges                                        |
 
 ### Parallel
 As of <font color=#7cfc00>C++ 17</font> parallel algorithms are available to the standard library (in `<algorithm>`) using:
@@ -2581,6 +2679,79 @@ int main{
 ## Numeric Algorithms
 Algorithms that perform mathematical operations
 - Under `Standard Library` header, `numeric`
+
+### Count
+<font color=#30D5C8>count :</font>
+Counter number of occurrences that are equal to a value
+```c++
+#include <algorithm>
+#include <vector>
+
+int main(){}
+	std::vector v{1, 2, 3, 4, 2, 5, 2, 6, 7};
+
+	auto count_val_2 = std::count(v.begin(), v.end(), 2); // count_val_2 = 3
+}
+```
+
+
+<font color=#30D5C8>count_if :</font>
+Counter number of occurrences that meet a condition without for/while loop:
+- traverse the sequence determined by the two iterators `v.begin()` & `v.end()`
+- function will be applied to each element
+- If function returns `true` count increments
+- datatype is `unsigned`
+```c++
+#include <algorithm>
+#include <vector>
+
+bool condition(x) {      // Auxiliary function / Predicate
+	return (x&1) == 1;
+}
+
+main(){}
+	std::vector v{1, 2, 3, 4, 5, 6, 7, 8, 9};
+	
+	auto c = std::count_if(v.begin(), v.end(), condition);
+	printf("Odd: %d\n", c);
+	
+	
+	/*** Lambda alternative ***/
+	auto c = std::count_if(v.begin(), v.end(), 
+		[](int x){ return (x % 2) != 0; }); 
+    printf("Count with lambda for odd numbers: %d\n", c);
+
+	/*** Capture variables from its surrounding scope ***/
+	int threshold = 5;
+	auto c_lambda_capture = std::count_if(v.begin(), v.end(), 
+		[threshold](int x){ return x > threshold;} );
+
+	// init-capture
+	auto num_within_interval = std::count_if(v.begin(), v.end(),
+        [low = 3, high = 6](int n) {return low <= n && n <= high;});
+}
+
+```
+
+associative containers: [count_if map - Stack Overflow](https://stackoverflow.com/questions/27837893/how-to-count-the-number-of-a-given-value-in-a-c-map)
+```C++
+#include <utility>        // std::pair
+ // . . .
+bool is_odd_value(const std::pair<unsigned, int>& x){
+	return (x.second % 2) != 0;
+}
+
+std::unordered_map<unsigned, int> map{
+{1, 9}, {2, 8}, {3, 7}, {4, 6}, {5, 5}, {6, 4}, {7, 3}, {8, 2}, {9, 1}};
+ 
+auto num = std::count_if(map.begin(), map.end(), is_odd_value);
+
+// Lambda
+auto num = std::count_if(map.begin(), map.end(), 
+	[map](std::pair<unsigned, int> const &p) {
+        return p.second == value;} );
+```
+
 
 `std::iota` :
 Generates a sequence of incremented values
