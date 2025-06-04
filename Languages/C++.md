@@ -4,6 +4,7 @@
 #research #documentation
 - [cppreference.com](https://en.cppreference.com/w/)
 - [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
+- [The C++ Standards Committee - ISOCPP](https://www.open-std.org/jtc1/sc22/wg21/)
 
 # Keywords
 - [noexcept](https://en.cppreference.com/w/cpp/language/noexcept) - function declared not to throw any exception >> C++11
@@ -2891,6 +2892,144 @@ double f(double x){
 
 
 ## Random Number generation
+Resources :
+- [Pseudo-random number generation - cppreference.com](https://en.cppreference.com/w/cpp/numeric/random.html)
+- [Random Number Generation in C++11](https://open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3551.pdf)
+- [EnginesAndDistributions.cpp - LearningModernCppFinance/Ch06](https://github.com/QuantDevHacks/LearningModCppFinance/blob/main/Ch06/EnginesAndDistributions.cpp)
+
+Algorithms :
+- Uniform random number generator - [Mersenne Twister](https://www.math.sci.hiroshima-u.ac.jp/m-mat/MT/ARTICLES/mt.pdf)
+
+<font color=#30D5C8><strong>Engine :</strong></font>
+An object that generates a sequence of large pseudorandom integer values based on an initializing unsigned integer seed.
+- For each seed, a different sequence will be generated. 
+- If no seed is provided, a default seed is used
+
+`std::default_random_engine`
+- For relatively casual, inexpert, and/or lightweight use.
+- Will produce same numbers in different pc using same compilers (_gcc, msvsc, …_)
+```c++
+#include <random>
+// . . .
+
+using std::vector, std::cout;
+// gen is a functor, created with seed 100 and callable with no argument
+
+std::default_random_engine gen{100};
+for (int i = 0; i < 10; ++i){
+    // Random integers generated without specifying a distribution:
+    cout << gen() << " ";
+}
+```
+
+`std::mt19937_64`
+-  64-bit Mersenne Twister engine
+- Best numerical results in financial applications
+- Has the longest nonrepeating sequence with the most desirable spectral characteristics
+
+
+### Distribution
+<font color=#30D5C8><strong>Distribution object :</strong></font>
+It is also a functor, but one that takes in the engine object as the argument.
+- Each time the functor is called, the next value in the engine sequence is generated
+- Then it applies a transformation that provides a random draw from that particular distribution.
+- Depends on the state of an engine object.
+
+Return types :
+- Continuous distributions => `double`
+- Discrete distributions => `int`
+
+`std::uniform_real_distribution<T>` 
+- Default type `double`
+- Example : _a uniform distribution of real (floating-point) numbers on the interval \[0,1)_
+```c++
+#include <random>;
+
+std::vector<double> unifs(10);
+std::default_random_engine def{30};        // seed = 30
+std::uniform_real_distribution<double> unif_rand_dist{0.0, 1.0};
+// Generate 10 uniform variates from [0.0, 1.0) and set
+// as elements in the vector 'unifs':
+
+for (double& x : unifs)
+    x = unif_rand_dist(def);
+
+for (double& x : unifs) cout << x << " ";
+```
+
+`std::normal_distribution<T
+- **generating random values** following `normal distribution.`
+- Takes the `mean` and `standard deviation` as its constructor arguments, 
+- Defaults = `0, 1`
+- Default type `double`
+```c++
+std::vector<double> norms(10);
+std::mt19937_64 mt{40};
+std::normal_distribution<> st_norm_rand_dist{};
+ 
+ // Generate 10 standard normal variates and
+ // set as elements in the vector 'norms':
+for (double& x : norms) 
+	x = st_norm_rand_dist(mt)
+
+for (double x : norms) cout << x << " ";
+```
+
+
+`std::student_t_distribution<>`
+- **generating random variates** from the `t-distribution.`
+- can be fit to the fatter tails (higher kurtosis) typical in financial returns data that are often not adequately captured with a normal distribution
+
+`std::poisson_distributionn<T>`
+- **generating random values** following `poisson distribution.`
+- Used for modelling the number of arrivals of tick data between two points in time
+
+```c++
+ std::vector<double> t_draws(10);
+ std::vector<double> p_draws(10);
+ 
+ std::mt19937_64 mt{25};
+ std::student_t_distribution<> stu{3};
+ std::poisson_distribution<> pssn{7.5};
+ 
+for (auto& x : t_draws)
+    x = stu(mt);
+
+for (auto& x : p_draws)
+    x = pssn(mt);
+
+//t-distribution:
+// 1.25949  0.305159 0.433721 -2.05798 -0.162776-0.48614 -1.22187 -1.0295    6.28576  0.834214
+
+// Poisson distribution:
+// 7 9 6 9 6 7 6 9 5 10
+```
+
+
+
+## Shuffle
+Randomly rearranges the elements of a container with random-access iterators 
+- Uses a random number generation engine as its source for randomness
+- It was added to the Standard Library in <font color=#7cfc00>C++11</font>.
+
+`std::shuffle(begin, end, engine)`
+```c++
+#include <algorithm>
+ // . . .
+std:: mt19937_64 mt{0};
+std::vector<int> v{1, 2, 3};
+ 
+std::shuffle(v.begin(), v.end(), mt);
+```
+
+`std::ranges::shuffle(container, engine)`
+- From <font color=#7cfc00>C++20</font>.
+```c++
+ #include <ranges>
+ // . . .
+ // Ranges version of shuffle:
+ std::ranges::shuffle(v, mt);
+```
 
 
 # String 
