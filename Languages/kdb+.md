@@ -7,6 +7,98 @@ Table query language like #sql.
 - [Reference card](https://code.kx.com/q/ref/)
 - [Datatypes](https://code.kx.com/q/ref/#datatypes)
 
+
+# Data structures
+## Lists
+Similar to vector
+- Resource - [code.kx - q4m - lists](https://code.kx.com/q4m3/3_Lists/)
+
+`simple list`  :
+List has items of same type
+- Creating from a table
+```q
+// Extracting a column
+vtsfares:select fare from trips where date = 2009.01.01, vendor=`VTS
+
+// Creating the list
+fares: vtsfares`fare
+
+// confirm if it is a list
+type fares  // result 9h
+// 0 < number < 20: a simple list
+```
+
+`general list` :
+List with items of different types - `0h`
+
+- `Pair` : 2 simple list
+```q
+// Extracting a column
+vtsfares:select fare from trips where date = 2009.01.01, vendor=`VTS
+vtstips:select tip from trips where date = 2009.01.01, vendor=`VTS
+
+// Creating the list
+fares: vtsfares`fare
+tips: vtstips`tip
+
+namePair:(fares;tips)
+```
+
+- `empty` list
+```q
+empty:()
+```
+
+- `mixed` list - joining entities of different types with the comma operator
+```q
+general:2018.01.01,102,`hello,enlist "world"
+// 2018.01.01 102 `hello "world
+```
+
+# Casting
+ `$` used to [cast](https://code.kx.com/q/ref/cast/)
+```q
+`float$1 2 //using it's symbol name 
+"f"$1 2  //using it's character letter
+9h$1 2   //using it's short value
+`long$() //list of type long
+```
+
+# Subset
+Use `n sublist name` to get  1st `n`  values of `name`
+- `-n sublist name` to get  last `n`  values of `name`
+```q
+10 sublist fares
+-10 sublist fares
+
+// get the second 10 elements in the list
+sub:20 sublist fares;
+-10 sublist sub
+//***Alternatives***
+-10 sublist 20 sublist fares  // ...1
+10 10 sublist fares           // ...2
+```
+
+<font color=#fd6206>Note</font> - number of elements it returns is _capped_ at the size of the list that it operates on
+
+[Take operator `#`](https://code.kx.com/q/ref/take/) returns exactly the number of items you specify:
+```q
+count 10000000 # fares          // 10000000
+count 10000000 sublist fares    // 124208
+```
+
+# Sorting
+`asc`
+- Sort in ascending order with duplicates
+
+`asc distinct`
+- Sort in ascending order, only unique
+
+```q
+sortedFares:asc fares
+sortedUniqueFares:asc distinct fares
+```
+
 # Tables
 See available table in database:
 ```q
@@ -328,6 +420,7 @@ For each record in `x`, the result has one record with the columns of `y` joi
 - if there is a matching record in `y`, it is joined to the `x` record; common columns are replaced from `y`.
 - if there is no matching record in `y`, common columns are left unchanged, and new columns are null
 The `lj` operator requires that at least the right hand table argument be keyed.
+- meaning `join on`
 - unkeyed left = unkeyed join.
 
 ```q
@@ -341,3 +434,25 @@ jan09W:jan09C lj select avg precip by date from weather //using the by clause to
 ```
 
 <font color=#fd6206><strong>Note :</strong></font> both have same columns ,left table will be overridden by right table
+
+## Bi - Temporal joins
+Joins related to `time`
+
+### As-of join
+`aj[matching columns;t1;t2]` - [aj join](https://code.kx.com/q/ref/aj/)
+
+Given the data we have, we could ask what were the latest pick-ups for each vendor, as of a particular time.
+- Creates a temporary time table with a minimum date time for each vendor
+
+Example
+_3 reports of individuals who have lost their phone or wallet who were picked up shortly before the time who said how many passengers were in the taxi. Which vendor were they riding with?_
+```q
+// Records of time of travel
+timetab:([] passengers:1 2 3; event_time:2009.01.06D03:30:00+00:30*til 3)
+
+// look up the table to find out what was the last trip taken at each of the times above
+aj[`passengers`event_time;timetab;
+	select passengers, event_time:pickup_time, vendor, pickup_time 
+	from jan09]
+```
+
