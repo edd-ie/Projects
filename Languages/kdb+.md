@@ -49,12 +49,76 @@ namePair:(fares;tips)
 empty:()
 ```
 
+list of 1 item:
+```q
+enlist 1023
+(), 120332 // alternative
+```
+
 - `mixed` list - joining entities of different types with the comma operator
 ```q
 general:2018.01.01,102,`hello,enlist "world"
 // 2018.01.01 102 `hello "world
 ```
 
+
+Amending a list:
+A simple list can be indexed into using the `@` operator:
+```q
+2* til 5  //0 2 4 6 8
+@[sampleFares;(2*til 5)]
+```
+
+The `@` operator can be applied with further arguments so that the list can be altered. Below we replace the items at positions `2*til 5` with `99f`.
+
+```q
+// index into sampleFares
+// using list of indexes (2*til 5)
+// assign these values - :
+// the value 99f
+@[sampleFares;(2*til 5);:;99f]
+```
+
+Below we use `+` instead of `:` – instead of replacing the items, we add `99f` to them.
+```q
+@[sampleFares;(2*til 5);+;99f]
+```
+
+The above is not a persistent change - it will make a copy of the `fares` list with a single value changed and display the result at the terminal, but there is no change to the `fares` list.
+
+To persist the change, prefix the name of the list with a back-tick; or assign the result to a name:
+```q
+test:@[fares;(2*til 4);:;0Nf]
+test
+@[`fares;(2*til 4);:;0Nf]
+fares
+```
+
+Extend a list by appending to to it using the [Join operator `,`](https://code.kx.com/q/ref/join/).
+```q
+fares,:12.34
+-10#fares    // inspect the end of the list to see the appended value
+```
+
+_Amend the fares list to replace the null values to be equal to the average value._
+```q
+@[fares;where null fares;:;avg fares]
+```
+
+# null
+Check for null 
+- returns: `0b / 1b`
+```q
+any null fares
+```
+
+This is exactly equivalent to using `any[null[fares]]` 
+
+The [`null` keyword](https://code.kx.com/q/ref/null/) flags nulls.
+- Return indexes
+```q
+where null fares
+```
 # Casting
  `$` used to [cast](https://code.kx.com/q/ref/cast/)
 ```q
@@ -170,6 +234,41 @@ select count i from trips
     where date = min date, passengers < 2
 ```
 
+Access values in a list with indexing
+```q
+namelist[3] // value at index 3, starts from 0
+```
+
+_Use indexing to find the middle value in the `sortedFares` list. _
+```q
+size:"i"$((count sortedFares)%2)
+sortedFares[size]
+
+// or
+sortedFares [`long$(count sortedFares)%2]
+```
+
+first & last values:
+```q
+//first
+first listN
+1 sublist listN
+
+// last
+last listN
+-1 sublist listN
+```
+## till
+Generates numbers or fetches value till the specified amount
+```q
+til 5  // 0 1 2 3 4
+
+// 1st 5 values
+fare[til 5]
+
+// Extract the 11th to the 20th elements from the fares list
+fares[10 + til 10]
+```
 
 # Filter
 Just as in SQL, table results can be filtered by expressions following a `where`. 
@@ -395,6 +494,20 @@ select sum fare, sum tip from jan09
 select Max:max tip, Min:min tip from jan09
 ```
 
+## Random
+Resource - [Roll, Deal, Permute](https://code.kx.com/q/ref/deal/)
+
+Roll operator `?` :
+- Get `n` random records from a list: `n?list`
+```q
+record:10?recordlist;
+```
+- Get `n` values:
+```q
+3?1 2 4 6 3 2
+// 1 6 4
+```
+
 
 # Keys
 A table can be keyed in a number of ways, however the easiest is to use the [`xkey`](https://code.kx.com/q/ref/keys/#xkey) function
@@ -456,3 +569,5 @@ aj[`passengers`event_time;timetab;
 	from jan09]
 ```
 
+# Overloading
+Resource - [Overloaded glyphs](https://code.kx.com/q/ref/overloads/)

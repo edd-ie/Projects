@@ -2926,6 +2926,12 @@ for (int i = 0; i < 10; ++i){
 -  64-bit Mersenne Twister engine
 - Best numerical results in financial applications
 - Has the longest nonrepeating sequence with the most desirable spectral characteristics
+```c++
+#include <random>
+
+std::mt19937_64 mt{seed}; // uniform initialization syntax
+std::mt19937_64 mt(seed); // direct initialization syntax
+```
 
 
 ### Distribution
