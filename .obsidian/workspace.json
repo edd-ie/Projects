@@ -107,8 +107,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 242.5,
-    "collapsed": true
+    "width": 242.5
   },
   "right": {
     "id": "afde6462c99d2d73",
@@ -213,6 +212,7 @@
   "active": "72c8915d21cd3941",
   "lastOpenFiles": [
     "Languages/C++.md",
+    "Quantitative Finance/Project Checklist & Resources.md",
     "Languages/kdb+.md",
     "Colour codes.md",
     "resources/Algorithms-map.png",
@@ -227,7 +227,6 @@
     "resources",
     "Quantitative Finance/Study Plan.md",
     "Quantitative Finance/LeetCode Problem Tracker.md",
-    "Quantitative Finance/Project Checklist & Resources.md",
     "[nodiscard.md",
     "Concepts/C++/Operator.md",
     "Concepts/C++",

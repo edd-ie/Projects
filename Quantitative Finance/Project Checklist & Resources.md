@@ -34,3 +34,4 @@ Use this list to guide your portfolio projects and strengthen your quant skills 
 - 📊 [Investopedia](https://www.investopedia.com) – accessible finance concepts
 - 💡 [LeetCode](https://leetcode.com) – coding interview prep (use C++ track)
 - 📂 [Eigen](https://eigen.tuxfamily.org) – C++ matrix library (for quant math)
+- [Coggit - Your Calculation Tool Website](https://coggit.com/freetools)

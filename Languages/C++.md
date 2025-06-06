@@ -3038,7 +3038,7 @@ std::shuffle(v.begin(), v.end(), mt);
 ```
 
 
-# String 
+# Strings
 ## Formatting
 Simple format string ...duuh
 ```c++
@@ -3066,24 +3066,8 @@ int main{
 ```
 
 
-# Array
-Reference: [std::array - cppreference.com](https://en.cppreference.com/w/cpp/container/array)
-A `std::array` container is an array with the number of elements fixed at <font color="ffcba4">compile time</font>. 
-- It was added to the Standard Library in <font color=#7cfc00>C++11</font>.
-- For newer features version >> <font color="7cfc00">C++17 and higher</font>
-
-```c++
-#include <array>
-
-int main{
-	std::array<dataType, size_t> nameArray
-
-	std::array<int, 3> a1{{1, 2, 3}};
-}
-```
-
-
-# Assert
+# Errors
+## Assert
 #error #debug #error_handling
 Checks if your assumptions about the program's state are true during runtime and will halt execution if is violated.
 - Found in the `<cassert>` header (or `<assert.h>` for C-style compatibility)
@@ -3113,8 +3097,7 @@ int main() {
 }
 ```
 
-
-## NDEBUG
+`NDEBUG :`
 Key to `assert`'s behaviour in different build configurations lies in a pre-processor macro called `NDEBUG` (which stands for <font color=#30D5C8>No Debug</font>).
 - **Debug Builds (default during development):** When `NDEBUG` is **not defined**, the `assert` macro is active. It performs the Boolean evaluation and the error reporting/termination if the condition is false.
 - **Release Builds (Typically when you compile for deployment):** When you define the `NDEBUG` macro (usually by adding a compiler flag like `-DNDEBUG` during compilation), 
@@ -3126,7 +3109,7 @@ Key to `assert`'s behaviour in different build configurations lies in a pre-proc
 - `assert` is for catching bugs during development. 
 - For situations where errors are a normal part of the program's operation (e.g., invalid user input, network failures), use proper error handling mechanisms like exceptions or return codes.
 
-# Exceptions
+## Exceptions
 Reference - [Exception Handling - The C++ Programming Language, 4th Edition](https://www.oreilly.com/library/view/the-c-programming/9780133522884/ch13.xhtml#ch13lev1sec2)
 Throwing an exception:
 ```c++
@@ -3135,3 +3118,6 @@ void fx(){
 	throw std::runtime_error{"Error: stop!!"}
 }
 ```
+
+
+# Concurrency & Parallelism

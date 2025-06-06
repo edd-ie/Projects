@@ -105,6 +105,153 @@ _Amend the fares list to replace the null values to be equal to the average valu
 @[fares;where null fares;:;avg fares]
 ```
 
+
+## Dictionary
+[Dictionaries](https://code.kx.com/q/basics/dictsandtables/) are first-class objects in q.
+- `Hashmaps`
+
+Make a dictionary from a list of keys and a list of values :
+- Use the [Dict operator `!`](https://code.kx.com/q/ref/dict/)
+```q
+d:`a`b!0 1
+d
+// a| 0
+// b| 1
+```
+
+access a value:
+```q
+d[`a]
+// 0
+```
+
+Update existing values:
+```q
+d[`a]:2
+d
+// a| 2
+// b| 1
+```
+
+Add new key-value:
+```q
+d[`c]:3
+d
+// a| 2
+// b| 1
+// c| 3
+```
+
+Combine to another dictionary :
+1. Add values of two dictionaries
+```q
+d1:`a`b`c`d!5 6 7 8
+d+d1 // add values for common keys
+// a| 7
+// b| 7
+// c| 10
+// d| 8
+```
+
+2. Join two dictionaries, prioritising values from the right-hand dictionary
+```q
+// Typical application is updating a snapshot with deltas
+d,d1 // catenation - updates values for common keys, inserts new keys. .
+// a| 6
+// b| 7
+// c| 7
+// d| 8
+```
+
+Get key / value :
+```q
+key k
+value k
+```
+
+Dictionary of lists:
+```q
+x:`a`b`c!(til 5; 2*til 5; 3*til 5)
+
+// Random vals
+dict:`a`b`c!(3?10i;3?10i;3?10i)
+
+// Add a new key, `d` with double the values of key `a`.
+x[`d]:(2*x[`a])
+```
+
+
+## Tables
+Any list of 'like dictionaries' is a table. 
+
+Table from a list of like dictionaries:
+-  Multiple dictionaries with the same key 
+- `(dict1; dict2)`
+```q
+(`a`b!0 1;`a`b!2 3)
+// a b
+// ---
+// 0 1
+// 2 3
+```
+
+Table using [table notation](https://code.kx.com/q/kb/faq/#table-notation) :
+```q
+([]a:0 2;b:1 3)
+```
+
+Table from  [column dictionaries](https://code.kx.com/q/kb/faq/#flip-a-column-dictionary).  
+- Making a table from dictionaries
+```q
+flip `a`b!(0 2;1 3)  // Transposing data
+
+dict:`a`b`c!(3?10i;3?10i;3?10i)
+tab:flip dict
+```
+
+Adding table :
+```q
+([]a:0 2;b:1 3)+([]a:4 5;b:6 7)
+// a b
+// ---
+// 4 7
+// 7 10
+```
+
+Tables can be keyed to create a [keyed table](https://code.kx.com/q/kb/faq/#keyed-tables).
+1. Specify key columns with the [`xkey` keyword](https://code.kx.com/q/ref/xkey/)
+```q
+k:`a xkey ([]a:0 2;b:1 3)
+// a| b
+// -| -
+// 0| 1
+// 2| 3
+
+tabKeyed:`b xkey tab2   // Making b column the key in tab2
+```
+2. Specify key columns in the table notation.
+```q
+([a:0 2]b:1 3)
+([a:0 2;b:1 3]c:4 5)
+// a b| c
+// ---| -
+// 0 1| 4
+// 2 3| 5
+```
+
+_A keyed table is a dictionary where both key and values are tables:_
+
+Get key / value :
+```q
+key k
+value k
+```
+
+Join a table to the bottom of another:
+```q
+tabP:(tab,tab)
+```
+
 # null
 Check for null 
 - returns: `0b / 1b`
@@ -509,6 +656,14 @@ record:10?recordlist;
 ```
 
 
+## Operators
+Power:
+```q
+a xexp 2 // a^2
+```
+
+
+
 # Keys
 A table can be keyed in a number of ways, however the easiest is to use the [`xkey`](https://code.kx.com/q/ref/keys/#xkey) function
 ```q
@@ -571,3 +726,44 @@ aj[`passengers`event_time;timetab;
 
 # Overloading
 Resource - [Overloaded glyphs](https://code.kx.com/q/ref/overloads/)
+
+
+# Functions
+Functions are called with the arguments in square brackets `[]`
+- unary (single argument) function, we can omit the square brackets
+- Reference - [Function notation](https://code.kx.com/q/basics/function-notation/)
+```q
+max[10 11 12]  // functional notation
+max[10;11;12]  // functional notation
+max 10 11 12   // infix notation
+```
+
+Creating a function using `{}` :
+- index the last `}` q is weird.
+```q
+f:{} // empty function
+
+// Explicit parameters
+fx:{[x; y]
+	a: x%y;
+	b:1.609*a;
+	
+	:b; // return
+	}
+
+// Implicit parameters
+gx{
+	a: x%y;
+	1.609*a // return
+	}
+```
+
+Print within the function:
+```q
+fx{[x; y]
+	show a: x%y;  // Printing a
+	b:1.609*a;
+	
+	:a; // return
+	}
+```
