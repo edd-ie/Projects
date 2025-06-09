@@ -767,3 +767,72 @@ fx{[x; y]
 	:a; // return
 	}
 ```
+
+
+# Iterators
+Perform looping
+- Used to called `adverbs`
+
+## Mapping
+In this instance, we can use: [Map iterators](https://code.kx.com/q/ref/maps/)
+- `each`
+- `each-both`
+- [Each-right and Each-left](https://code.kx.com/q/ref/maps/#each-left-and-each-right)
+
+`Each` : can only modifies monadic functions (1 parameter)
+```q
+L:("the";"quick";"brown";"fox")
+count L       // 
+count each L  // 3 5 5 3
+type each L   // 10 10 10 10h
+
+add:{x+x}
+add each 3 6 8   // 6 12 16
+```
+
+`each-both` : To modify a multivalent function, 
+- `#` which gets a subset of the data:  
+```q
+3#L       // returned the first three items of the list
+3#'L      // returned the first three items of each item
+3#''L     // returns the first three items of each item repeated 3 times 
+```
+
+`Each left` : Uses values on the left to perform a function on right values
+- `left fx\: right`
+```q
+1 2 +\: 3 4 5   // Add left to each right
+// 4 5 6
+// 5 6 7
+```
+
+`Each right` : Uses values on the right to perform a function on left values
+- `left fx/: right`
+```q
+1 2 +\: 3 4 5   // Add right to each left
+// 4 5 
+// 5 6
+// 6 7
+```
+
+## Accumulating
+Apply a function repeatedly to the results of successive evaluations. The function is first applied to the entire (first) argument; then to the result of that; then to the result of that; and so on. _recursion_
+
+There are two accumulators in q. They both apply a function the same way; but one returns the result of each iteration; the other only the result of the last iteration. The iterators are:
+- Scan (\\)
+- Over (/)
+
+```q
+N:1 4 7 10                         / numeric list
++/[N]                             / sum      (Over)   
++\[N]                             / sum      (Scan)   
+*/[N]                             / product  (Over)
+*\[N]                             / products (Scan)
+-/[N]                             / diff (Over)
+
+// 22
+// 1 5 12 22
+// 280
+// 1 4 28 280
+// -20
+```
