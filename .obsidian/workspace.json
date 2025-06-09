@@ -49,8 +49,7 @@
               "title": "kdb+"
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -107,7 +106,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 242.5
+    "width": 242.5,
+    "collapsed": true
   },
   "right": {
     "id": "afde6462c99d2d73",
@@ -138,13 +138,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Languages/kdb+.md",
+                "file": "Languages/C++.md",
                 "followCursor": false,
                 "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of kdb+"
+              "title": "Outline of C++"
             }
           },
           {
@@ -211,10 +211,10 @@
   },
   "active": "72c8915d21cd3941",
   "lastOpenFiles": [
-    "Languages/C++.md",
-    "Quantitative Finance/Project Checklist & Resources.md",
-    "Languages/kdb+.md",
     "Colour codes.md",
+    "Languages/C++.md",
+    "Languages/kdb+.md",
+    "Quantitative Finance/Project Checklist & Resources.md",
     "resources/Algorithms-map.png",
     "Game Development/Installations.md",
     "Graphics/GLFW CLION.md",

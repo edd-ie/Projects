@@ -3121,3 +3121,97 @@ void fx(){
 
 
 # Concurrency & Parallelism
+Features that enable running parallel tasks
+- `Task-based concurrency` from <font color=#7cfc00>C++11</font>.
+- `Parallel algorithms` from <font color=#7cfc00>C++17</font>.
+
+
+## Task-based concurrency
+<font color=#ffcba4>Data race</font>  : when a given object (such as an `int` or `bool`) is accessed concurrently by at least two threads, with at least one thread modifying the object, all without synchronization.
+
+`Task-based concurrency` : the spawning, management, and deactivating of threads in concurrency library
+
+`std::future` [cppreference.com](https://en.cppreference.com/w/cpp/thread/future.html)
+- An object that abstracts away the responsibilities associated with thread construction and start-up necessary to execute a specific task asynchronously.
+- Abstract away whether a thread of execution needs to be started on demand or whether that thread is taken from a pool of threads that are already running.
+- Include `<future>` : [cppreference.com](https://en.cppreference.com/w/cpp/header/future.html)
+- Created with the `std::async(.)` : [cppreference.com](https://en.cppreference.com/w/cpp/thread/async.html)
+	- pass as many arguments as required to the function it is asked to run concurrently
+	- result will become available after that task has been completed
+	- Can be obtained by calling the `get()`, this blocks the calling thread until the task’s execution is completed.
+```c++
+#include <future>
+
+int sqr(intx)
+	return x*X;
+
+
+int i = 5;
+auto ftr = std::async(sqr, i);  // sqr is the function, i = 5 is its argument
+cout << std::format("Square of {} is {}\n", i, ftr.get());
+
+/** Container **/
+std::vector<int> x(25);
+std::iota(x.begin(), x.end(), 0);       // 0, 1, 2, ..., 24
+std::vector<std::future<int>> v;
+
+for (auto k : x)
+	v.push_back(std::async(square_val, k));
+
+std::vector<int> y(v.size());
+std::ranges::transform(v, y.begin(),
+	[](std::future<int> &fut){return fut.get();});
+```
+
+Resource:
+- Making `async` more reliable using _launch policy_ - [std::async task-based parallelism](https://eli.thegreenplace.net/2016/the-promises-and-challenges-of-stdasync-task-based-parallelism-in-c11/)
+- [Effective Modern C++[Book]](https://www.oreilly.com/library/view/effective-modern-c/9781491908419/)
+
+
+## Parallel Algorithms
+Most `STL algorithms`, as of <font color=#7cfc00>C++17</font>, have overloads with an extra argument <font color=#ffcba4>its execution policy</font> that instructs it to run in #parallel.
+- Include `<execution>` : [cppreference.com](https://ch.cppreference.com/w/cpp/header/execution.html)
+- Can be parameterized with a thread safe (_preferably_) `auxiliary function` (often a predicate)
+- Can be either non modifying or modifying
+
+```c++
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <random>
+#include <execution>
+// Generate large number of normal variates:
+std::mt19937_64 mt(25);
+std::normal_distribution<> nd;
+auto next_norm = [&mt, &nd](){return nd(mt);};
+const unsigned n = 500;
+std::vector<double> norms(n);
+std::generate(norms.begin(), norms.end(), next_norm);
+
+auto max_norm = std::max_element(std::execution::par,
+    par_norms.begin(), par_norms.end());
+```
+
+Some algorithm that are parallel by default:
+1. `std::reduce` - substitute for `std::accumulate`
+2. `std::transform_reduce` - sub for `std::inner_product`
+
+<font color=#30D5C8>Performance & guidance :</font> [A Case Against Blind Use of C++ Parallel Algorithms](https://accu.org/journals/overload/29/161/teodorescu/)
+- Small amounts of data might execute sequentially regardless of the execution policy used as the argument.
+- Small data could conversely exhibit worse performance if the parallel request is honoured.
+
+<font color=#ffcba4><strong>Execution policies</strong></font> : [NVIDIA HPC Compilers User's Guide](https://docs.nvidia.com/hpc-sdk/compilers/hpc-compilers-user-guide/index.html#stdpar-use)
+`std::execution::par` 
+- Parallel execution policy is requested and hence not required
+
+`std::execution::seq`
+- Sequential execution policy, Ensures that the algorithm may not be run in parallel 
+- Not be exactly the same as when no execution policy but is similar
+
+`std::execution::par_unseq`
+- Parallel unsequenced policy, Indicates that an algorithm may be executed in parallel and vectorized
+- #vectorized refers to executions on platforms such as `Single Instruction Multiple Data` (SIMD) with a graphics processing unit (GPU)
+
+ `std::execution::unseq` 
+ - This is related to #vectorized operations executed in parallel on each individual thread
+ - From <font color=#7cfc00>C++20</font>
