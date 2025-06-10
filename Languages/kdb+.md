@@ -836,3 +836,46 @@ N:1 4 7 10                         / numeric list
 // 1 4 28 280
 // -20
 ```
+
+# CSV
+## Saving
+```q
+summary:0!select num:count i, sum distance by vendor from trips where month = max month 
+
+save `$":",.trn.nbdir,"/data/summary.csv"
+```
+
+# Loading
+To read in a text file, we need to specify the type of each column, along with the delimiter used to separate columns.
+
+We can check the types in *summary* using meta.
+```q
+meta summary
+```
+
+Use this information to load in the csv file to a table as follows
+```q
+newsummary:("SJF";enlist csv) 0: `$":",.trn.nbdir,"/data/summary.csv"
+
+meta newsummary
+```
+
+# Json
+## Saving
+Achieve this using the `save` function.
+```q
+save `$":",.trn.nbdir,"/data/summary.json"
+```
+
+## Loading
+JSON has some idea of data-types. However, since everything in JSON is either an _number_ or a _string_, the `vendor` and `num` columns have changed type..
+```q
+load `$":",.trn.nbdir,"/data/summary.json"
+meta summary
+```
+
+We can convert them to _long_ and _symbol_ respectively, using `update`.
+```q
+update "S"$vendor, "j"$num from `summary
+meta summary
+```
