@@ -49,7 +49,8 @@
               "title": "kdb+"
             }
           }
-        ]
+        ],
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -138,13 +139,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Languages/C++.md",
+                "file": "Languages/kdb+.md",
                 "followCursor": false,
                 "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of C++"
+              "title": "Outline of kdb+"
             }
           },
           {
@@ -211,8 +212,8 @@
   },
   "active": "72c8915d21cd3941",
   "lastOpenFiles": [
-    "Colour codes.md",
     "Languages/C++.md",
+    "Colour codes.md",
     "Languages/kdb+.md",
     "Quantitative Finance/Project Checklist & Resources.md",
     "resources/Algorithms-map.png",

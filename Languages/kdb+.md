@@ -879,3 +879,106 @@ We can convert them to _long_ and _symbol_ respectively, using `update`.
 update "S"$vendor, "j"$num from `summary
 meta summary
 ```
+
+
+# QIPC
+Communication between processes is managed via` tcp/ip`. - a server process listens for connections on a port, and processes any requests - a client process initiates a connection to a server and sends commands to be executed
+
+Any q process can act as a client, a server, or both.
+Communications can be synchronous (wait for a result to be returned) or asynchronous (no wait and no result returned).
+## Initializing a q server 
+A q server is initialized simply by specifying the port to listen on.
+```q
+\p
+```
+
+
+## Running a kdb+/q client 
+We can also connect to a kdb+/q server from a q client.
+First we will start a server process, listening on port 5001.
+```q
+system"nohup env QHOME=/opt/kx/q q ",.trn.nbdir,"/scripts/server.q -p 5001 >/dev/null 2>&1 &"
+```
+connect using  `hopen`
+```q
+h:hopen 5001
+h
+```
+
+The result is a _handle_, which we will use to communicate with the server.
+
+The simplest way to communicate is to send q commands, as strings, to execute on the server.
+- For example, to get a list of tables.
+```q
+h"tables[]"
+
+// inspect specific tables
+h"populations"
+
+// Execute queries
+h"select sum population from populations" 
+```
+
+If we do not require a result, we can send an `async` message using the negative handle.
+```q
+neg[h]"a:123"
+
+// Which we can then inspect (with a sync message)
+h"a"
+```
+
+
+## Publishing/Subscribing
+`Async` messaging is often used to publish messages to subscriber processes.
+- [KDB+ Architecture Overview](https://www.tutorialspoint.com/kdbplus/kdbplus_architecture.htm)
+- [Architecture  - q documentation](https://code.kx.com/q/architecture/)
+	_subscribe to the server process to receive `apprequests` messages (i.e. requests for pickup)_.
+```q
+h"sub[]"
+```
+
+The server will now begin sending us _`apprequests`_ messages, which we can process in the (currently undefined) function `upd`.
+```q
+show apprequests:h"apprequests"
+meta apprequests
+
+// define the callback function, `upd`, to handle the incoming updates.
+upd:{`apprequests upsert x;}
+
+// see the `apprequests` table begin to grow
+apprequests
+
+// query the table directly
+select num:count i by vendor from apprequests
+```
+
+However, more efficient to aggregate the data on arrival to keep a real-time count.
+```q
+// first define a table to store results, and then update the `upd`
+numrequests:select num:count i by vendor from apprequests
+
+upd:{
+  `apprequests upsert x;
+  numrequests[x`vendor]+:1
+  }
+```
+Using the `upd` function above, we can create an alert. 
+	_publish an alert if the vendor is for BBB and the longitude is greater than -74.0 so we can inform the driver of their next trip:_
+```q
+upd:{
+    .debug.x:x;
+  `apprequests upsert x;
+  numrequests[x`vendor]+:1;
+    if[`BBB = x`vendor;
+        if[-74.0<x`long;
+            0N!"A trip for BBB has arrived at the long of ",string x`long
+        ]
+    ];
+  }
+```
+
+Close the connection via the command `hclose`. 
+- This will prevent any further updates to the local table.
+```q
+hclose h
+```
