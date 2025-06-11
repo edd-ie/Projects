@@ -3215,3 +3215,203 @@ Some algorithm that are parallel by default:
  `std::execution::unseq` 
  - This is related to #vectorized operations executed in parallel on each individual thread
  - From <font color=#7cfc00>C++20</font>
+
+
+# Date & Time
+To handle date calculations in the past, C++had two options: 
+1. Write date classes and functions
+2. Use a commercial or open source external library
+
+Since <font color=#7cfc00>C++20</font> a date class war introduce that is determined by the integer year, month, and day values.
+- Relies on <font color=#7cfc00>C++11</font> `std::chrono` foundation of durations, time points, and the system clock
+- [Date and time library - cppreference.com](https://en.cppreference.com/w/cpp/chrono.html
+- [A date and time library based on the C++11/14/17 - GitHub](https://github.com/HowardHinnant/date)
+- [Accompanying documentation](https://howardhinnant.github.io/date/date.html)
+- [Compute various facts about a date - Stack Overflow](https://stackoverflow.com/questions/59418514/using-c20-chrono-how-to-compute-various-facts-about-a-date)
+
+`<chrono>` abstractions:
+- `Duration of time` - A method of measurement over a given time interval, such as in units of minutes, days, or milliseconds 
+- `time point` -  A duration of time relative to an epoch, such as the Unix epoch, January 1, 1970 (1970-1-1) 
+- `Clock` - The object that specifies the epoch and normalizes duration measurements
+
+`std::chrono::year_month_day`
+- An class used to represent a standard date.
+- Constructor takes in: `std::chrono::year`, `std::chrono::month` & `std::chrono::day` objects.
+```c++
+#include <chrono>
+ // . . .
+std::chrono::year_month_day ymd{std::chrono::year{2022},
+    std::chrono::month{11}, std::chrono::day{14}};
+```
+The `/` operator has also been overloaded to define a `year_month_day` object.
+```c++
+std::chrono::year_month_day date = std::chrono::year{2022} /
+	std::chrono::month{11} / std::chrono::day{15};
+```
+Alternative
+```c++
+std::chrono::year_month_day alt_slash {std::chrono::year{2022} / std::chrono::November / 16};
+
+/** For yyyy/mm/dd format **/
+std::chrono::year_month_day ymd_alt_numerical{
+	std::chrono::year{2022} / 11 / 17};
+
+/** For mm/dd/yyyy format **/
+auto mdy = std::chrono::November / 19 / 2022;
+```
+A set of `chrono literals`, representing years and days, can be used at construction by:
+- Placing the `std::chrono` namespace into the scope of function
+- As long as the first parameter is obvious, the other integer values can be used on their own
+```c++
+void chrono_literals(){
+    using namespace std::chrono_literals;
+    
+    std::chrono::year_month_day ymd_lit_1{2024y / 9 / 16d};    // yyyy/mm/dd
+    std::chrono::year_month_day ymd_lit_2{10d/ 10 / 2025y};    // dd/mm/yyyy
+    std::chrono::year_month_day ymd_lit_3 = 7 / 16d / 2024y;   // mm/dd/yyyy
+    
+    // Can also combine with month constants (mm/dd/yyyy):
+    std::chrono::year_month_day ymd_lit_4 = std::chrono::October / 
+	    26d / 1973y;
+    // . . .
+ }
+```
+
+Bringing the entire `std::chrono` namespace into the local scope, will grant access to `chrono literals` and improve readability:
+```c++
+using namespace std::chrono; 
+// . . . 
+year_month_day ymd_lit_commas {year{1999}, month{11}, day{11}}; 
+year_month_day ymd_in_october = October / 26 / 1973;
+```
+
+The `yyyy-mm-dd` format is the [ISO Standard date format.](https://www.iso.org/iso-8601-date-and-time-format.html)
+
+## Counting
+A` year_month_day` date can also be measured in terms of the number of `days` since an _epoch_, with the `system_clock`.
+- Unix epoch `January 1, 1970`
+
+```c++
+using namespace std::chrono; 
+
+year_month_day epoch{year{1970}, month{1}, day{1}};
+year_month_day epoch_plus_1{year{1970}, month{1}, day{2}}; 
+year_month_day epoch_minus_1{year{1969}, month{12}, day{31}};
+
+int first_days_test = sys_days(epoch).time_since_epoch().count();       //  0
+first_days_test = sys_days(epoch_plus_1).time_since_epoch().count();    //  1
+first_days_test = sys_days(epoch_minus_1).time_since_epoch().count();   // -1
+```
+
+
+Accessor Functions for Year, Month, and Day
+```c++
+ymd.year() // returns std::chrono::year 
+ymd.month() // returns std::chrono::month 
+ymd.day() // returns std::chrono::day
+```
+
+
+Number of days between two dates.
+```c++
+#include <chrono>
+//...
+using namespace std::chrono;
+year_month_day ymd{2022y/11/14d};
+year_month_day ymd_later{2023y/5/14d};
+    
+int diff = (sys_days(ymd_later.) - sys_days(ymd)).count();
+std::cout << "The result is: " << diff << " days\n";
+```
+
+
+Number of years/months between two dates.
+```c++
+ // returns 2023 - 2022 = 1:
+ int year_diff = (ymd_later.year() - ymd.year()).count();
+ // returns 11 - 5 = 6:
+ int month_diff = (ymd_later.month() - ymd.month()).count();
+ // returns returns 14 - 14 = 0
+ int day_diff = (ymd_later.day() - ymd.day()).count();
+```
+
+All can be cast to integral types, but an important point to be aware:
+- year can be cast to an `int`
+- month or day needs to be cast to `unsigned`:
+```c++
+int the_year = static_cast(ymd.year()); // 2022 (int) 
+unsigned the_month = static_cast(ymd.month()); // 11 (unsigned) 
+unsigned the_day = static_cast(ymd.day()); // 14 (unsigned)
+```
+
+
+## Checking Validity
+Instead of throwing an exception, it is left up to the programmer to check whether a date is valid
+- Accomplished with the Boolean `ok()`
+```c++
+using namespace std::chrono;
+year_month_day ymd{year{2022}, month{11}, day{14}};
+ 
+// torf: "true or false"
+bool torf = ymd.ok();               // true
+
+year_month_day negative_year{year{-1000}, October, day{10}};
+torf = negative_year.ok();          // true – negative year is valid
+
+year_month_day ymd_invalid{year{2018}, month{2}, day{31}};
+torf = ymd_invalid.ok();            // false
+
+year_month_day ymd_completely_bogus{year{-2004}, month{19}, day{58}};
+torf = ymd_completely_bogus.ok();   // false
+```
+
+
+<font color=#30D5C8><strong>Checking leap year :</strong></font>
+```c++
+year_month_day ymd_leap{year{2024}, month{10}, day{26}};
+bool torf = ymd_leap.year().is_leap();        // true
+```
+
+<font color=#30D5C8><strong>Checking last day of the month :</strong></font>
+No member function available on `year_month_day`
+- A workaround exists using a separate class `year_month_day_last`
+```c++ 
+// std::chrono::last:  Last day of a given month:
+year_month_day_last eom_apr{year{2009} / April / last};
+auto last_day = static_cast<unsigned>(eom_apr.day());    // result = 30
+
+year_month_day ymd_eom{year{2009}, month{4}, day{30}};
+torf = ymd_eom == eom_apr;        // Returns true
+
+
+// Get num days in month:
+year_month_day ymd = year{2024} / 2 / 21;
+year_month_day_last eom{year{ymd.year()} / month{ymd.month()} / last};
+last_day = static_cast(eom.day()); // result = 29
+
+// year_month_day_last  to a year_month_day
+ymd = eom_apr; // ymd is now 2009-04-30
+```
+
+## Weekdays & Weekends
+The` std::chrono` namespace contains a `weekday` class that represents each day of the week
+- [C++ Chrono determine whether day is a weekend? - Stack Overflow](https://stackoverflow.com/questions/52776999/c-chrono-determine-whether-day-is-a-weekend)
+```c++
+// Define a year_month_day date that falls on a business day (Wednesday)
+year_month_day ymd_biz_day{year{2022}, month{10}, day{26}};    // Wednesday
+ 
+// Its day of the week can be constructed as a weekday object:
+weekday dw{sys_days(ymd_biz_day)};
+
+unsigned iso_code = dw.iso_encoding();
+cout << ymd_biz_day << ", " << dw << ", " << iso_code << "\n";
+// 2022-10-26, Wed, 3
+
+
+// As a function:
+bool is_weekend(const std::chrono::year_month_day& ymd){
+	using namespace std::chrono;
+	weekday dw{sys_days(ymd)};
+	return dw.iso_encoding() >= 6;
+}
+```
