@@ -3344,6 +3344,11 @@ unsigned the_month = static_cast(ymd.month()); // 11 (unsigned)
 unsigned the_day = static_cast(ymd.day()); // 14 (unsigned)
 ```
 
+<font color=#30D5C8><strong>Day Count Basis :</strong></font>
+Convert the interval between two dates into time measured in years 
+- Usually referred to as a `year fraction` for shorter intervals.
+
+
 
 ## Checking Validity
 Instead of throwing an exception, it is left up to the programmer to check whether a date is valid
@@ -3415,3 +3420,96 @@ bool is_weekend(const std::chrono::year_month_day& ymd){
 	return dw.iso_encoding() >= 6;
 }
 ```
+
+## Math
+<font color=#30D5C8><strong>Years :</strong></font>
+Number of years being added needs to be expressed as a `std::chrono::years` object, an alias for a duration representing 1 year.
+```c++
+// Start with 2002-11-14
+year_month_day ymd_01{year{2002}, month{11}, day{14}};
+
+ymd_01 += years{2};     // ymd_01 is now 2004-11-14
+ymd_01 += years{18};    // ymd_01 is now 2022-11-14
+```
+
+<font color=#ff0800><strong>Note :</strong></font> If the date is the last day of February in a leap year could lead to an invalid year.
+- It doesn't through an exception thus must be handled by developer.
+```c++
+year_month_day ymd_feb_end{year{2016}, month{2}, day{29}};
+ymd_feb_end += years{2};    // Invalid result: 2018-02-29
+```
+
+<font color=#30D5C8><strong>Months :</strong></font>
+ Similar to years but requires handling :
+ - multiple end-of-month edge cases because of the different numbers of days 
+ - February during a leap year
+```c++
+using namespace std::chrono;
+// . . .
+year_month_day ymd_02{year{2022}, month{2}, day{16}};
+ymd_02 += months{2};        // Result: 2022-04-16
+ymd_02 += months{18};       // Result: 2023-10-16
+
+ymd -= months{2}; // Result: 2023-08-16
+
+year_month_day ymd_eom_03{year{2016}, month{2}, day{29}};
+ymd_eom_03 += months{12};    // 2017-02-29 is not a valid date
+```
+
+Bounds checking :
+```c++
+auto add_months = [](year_month_day& ymd, unsigned mths) { 
+	using namespace std::chrono; 
+	ymd += months(mths); // Naively attempt the addition
+	 
+	if (!ymd.ok()) {  // If fails set to last day of the month
+		ymd = ymd.year() / ymd.month() / day{last_day_of_the_month(ymd)}; 
+	} 
+};
+```
+
+<font color=#30D5C8><strong>Days :</strong></font>
+No `+=` operator is defined for adding days.
+- Obtain the `sys_days` equivalent before adding
+- assign equal to the days
+- [Add a number of days  - Stack Overflow](https://stackoverflow.com/questions/62734974/how-do-i-add-a-number-of-days-to-a-date-in-c20-chrono)
+```c++
+year_month_day ymd_03{year{2022}, month{10}, day{7}};
+
+// Obtain the sys_days equivalent of ymd_03, and then add three days:
+auto add_days = sys_days(ymd_03) + days(3);    // ymd_03 still = 2022-10-07
+
+ymd_03 = add_days;  // Implicit conversion to year_month_day 
+					// ymd_03 is now = 2022-10-10
+```
+
+
+## Date Class Wrapper
+Managing all the intricacies of `std::chrono` dates can eventually become complicated.
+- Wrap them in a class based on a `year_month_day` member.
+- Calls are implemented once behind interfacing member
+
+<font color=#30D5C8><strong>functionality :</strong></font>
+`Constructors (three)`
+- Integral year, month, and day parameters
+- `std::chrono::year_month_day` parameter
+- `Default` constructor
+
+ `Accessors`
+-  Integral values for the year, month, and day of the date
+-  Serial date
+-  Underlying `std::chrono::year_month_day`
+ 
+ `Properties of a date`
+-  Check whether it falls on the last day of the month
+- Check whether it falls during a leap year
+- Retrieve the number of days in its month
+ 
+ `Arithmetic operators`
+- Subtraction operator returning number of days between two dates `(-)`
+- Equality of two dates `(==)`
+- Date inequalities: does the date fall before or after a given date `(<=>)`
+ 
+ `Modifying member functions`
+- Add years, months, and days to a date
+- Roll a weekend date to a business date - move date falling on a weekend forward to the next business day (Monday), assuming no holidays
