@@ -3038,6 +3038,109 @@ std::shuffle(v.begin(), v.end(), mt);
 ```
 
 
+
+## Linear Algebra
+
+Since <font color=#7cfc00>C++98</font> `std::valarray`is used to provide vectorized operations and functions highly suitable for matrix and vector math. [Supplementary Chapter](https://cppstdlib.com/cppstdlib_supplementary.pdf)
+- [std::valarray - cppreference.com](https://en.cppreference.com/w/cpp/numeric/valarray.html)
+
+Over the year addition libraries have surfaced:
+- [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page)
+- [Armadillo: C++ library for linear algebra & scientific computing](https://arma.sourceforge.net/)
+- [blaze-lib / blaze — Bitbucket](https://bitbucket.org/blaze-lib/blaze/src/master/)
+- [Boost Basic Linear Algebra](https://www.boost.org/doc/libs/1_82_0/libs/numeric/ublas/doc/index.html)
+- [CUDA-X GPU-Accelerated Libraries | NVIDIA Developer](https://developer.nvidia.com/gpu-accelerated-libraries#linear-algebra)
+- [Comparison of linear algebra libraries - Wikipedia](https://en.wikipedia.org/wiki/Comparison_of_linear_algebra_libraries)
+
+As of <font color=#7cfc00>C++23</font> `std::mdspan` multi dimensional array representation has been introduced
+
+<font color=#ffcba4><strong>Lazy evaluation</strong></font> - defers calculations until they are needed, thus reducing inefficiencies that result from temporary object creation and assignments.
+
+Further performance & generality can be obtained by wrapping the mathematical expressions inside <font color=#ffcba4>expression templates</font>.
+- [Expression templates - resource](https://devtut.github.io/cpp/expression-templates.html#a-basic-example-illustrating-expression-templates)
+
+### Lazy evaluation
+Assuming you have 4 vectors in the mathematical sense, each with the same fixed number of elements. `v1, v2, v3, v4`
+- store the sum in `y`
+- Assuming: dealing only with “real” vectors represented by `vector<double>` types
+
+```c++
+#include <cassert>
+
+std::vector<double> operator +(const std::vector<double>& a, const std::vector<double>& b) {  
+    assert(a.size() == b.size());  
+  
+    std::vector<double> result;  
+    result.reserve(a.size());  
+  
+    for (size_t i = 0; i < a.size(); ++i)  
+        result.push_back(a[i] + b[i]);   
+    return result;  
+}
+
+vector<double> v_01{1.0, 2.0, 3.0};  
+vector<double> v_02{1.5, 2.5, 3.5};  
+vector<double> v_03{4.0, 5.0, 6.0};  
+vector<double> v_04{4.5, 5.5, 6.5};  
+auto y = v_01 + v_02 + v_03 + v_04;  
+std::ranges::for_each(y, printArr);        // 11 15 19
+```
+
+Each time the + operator is called, an additional vector object is generated:
+	`operator+(operator+(operator+(v_01, v_02), v_03), v_04)`
+As the number of vectors (say, `m` ) and the number of elements in each vector (say, `n`)gets larger, this generalizes to the following:
+- `m−1` vector objects created: `m−2` temporary + return object (`y`)
+- `(m−1)n` assignments to temporary double values
+
+<font color=#30D5C8><strong>Improvements :</strong></font>
+Expressing the addition element-wise across each index of each of the vectors, resulting in a more “efficient [vector] summation using a single pass."
+- Total number of assignments is significantly reduced 
+- Creation of temporary vector objects eliminated
+- Improving efficiency for “large” `m` & `n` 
+- deferring the calculations until they are actually needed
+- implement it inside the definition of the square bracket ([]) operator on a class
+- nothing happens otherwise unless or until we explicitly invoke the [] operator
+_example case where `m = 4`._
+
+```c++
+class SumOfFourVectors {
+    const std::vector<double>& a_, b_, c_, d_;
+public:
+    SumOfFourVectors(const std::vector<double>& a, 
+    const std::vector<double>& b, const std::vector<double>& c, 
+    const std::vector<double>& d) : a_{a}, b_{b}, c_{c}, d_{d} {
+        assert(a.size() == b.size());
+        assert(b.size() == c.size());
+        assert(c.size() == d.size());
+    }
+    
+    double operator[](size_t i) const{
+        return a_[i] + b_[i] + c_[i] + d_[i];
+    }
+};
+
+vector<double> v_01{1.0, 2.0, 3.0};  
+vector<double> v_02{1.5, 2.5, 3.5};  
+vector<double> v_03{4.0, 5.0, 6.0};  
+vector<double> v_04{4.5, 5.5, 6.5};  
+  
+SumOfFourVectors y{v_01, v_02, v_03, v_04};  
+vector<double> vec_sum{y[0], y[1], y[2]};  
+std::ranges::for_each(vec_sum, printArr);        // 11 15 19
+```
+
+Alternatively, using the results as arguments in another function
+```c++
+auto r = f(y[0], y[1], y[2]);
+
+double sum_of_1st_elems = y[0]; 
+double sum_of_3rd_elems = y[2];
+```
+
+
+### Expression templates
+
+
 # Strings
 ## Formatting
 Simple format string ...duuh

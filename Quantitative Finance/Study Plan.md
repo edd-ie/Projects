@@ -14,8 +14,8 @@
 ## Weekly Progress Tracker
 - [x] Week 1:
 - [x] Week 2:
-- [ ] Week 3:
-- [ ] Week 4:
+- [x] Week 3:
+- [x] Week 4:
 
 ---
 
@@ -31,7 +31,7 @@
 - Projects (Returns, Sharpe Ratio)
 
 ### Weekly Progress Tracker
-- [ ] Week 1:
+- [x] Week 1:
 - [ ] Week 2:
 - [ ] Week 3:
 - [ ] Week 4:
