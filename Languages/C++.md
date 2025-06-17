@@ -3051,6 +3051,7 @@ Over the year addition libraries have surfaced:
 - [Boost Basic Linear Algebra](https://www.boost.org/doc/libs/1_82_0/libs/numeric/ublas/doc/index.html)
 - [CUDA-X GPU-Accelerated Libraries | NVIDIA Developer](https://developer.nvidia.com/gpu-accelerated-libraries#linear-algebra)
 - [Comparison of linear algebra libraries - Wikipedia](https://en.wikipedia.org/wiki/Comparison_of_linear_algebra_libraries)
+- [“The Blaze High Performance Math Library" - CppCon](https://www.youtube.com/watch?v=w-Y22KrMgFE)
 
 As of <font color=#7cfc00>C++23</font> `std::mdspan` multi dimensional array representation has been introduced
 
@@ -3139,11 +3140,151 @@ double sum_of_3rd_elems = y[2];
 
 
 ### Expression templates
+- [C++ | Expression templates](https://devtut.github.io/cpp/expression-templates.html#a-basic-example-illustrating-expression-templates)
+```c++
+// Expression template class for vector addition  
+template <typename U, typename V>  
+class VectorAddExpr{  
+    const U& u_;  
+    const V& v_;  
+public:  
+    VectorAddExpr(const U& u, const V& v) : u_{u}, v_{v}    {  
+        assert(u_.size() == v_.size());  
+    }  
+  
+    double operator[](size_t idx) const {  
+        return u_[idx] + v_[idx];  
+    }  
+  
+    std::size_t size() const {  
+        return u_.size();  
+    }  
+  
+};  
+  
+// Helper function (operator +) to supplement  
+// the expression template for vector addition:  
+template <typename U, typename V>  
+VectorAddExpr<U, V> operator +(const U& u, const V& v)  
+{  
+    return {u, v};  
+}
+
+//...
+auto result = v_01 + v_02 + v_03 + v_04;  
+vector<double> z{result[0], result[1], result[2]};  
+std::ranges::for_each(z, printArr); // 11 15 19
+```
+
+
+### Eigen
+[Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) - C++ template library for linear algebra: matrices, vectors, numerical solvers, and related algorithms.
+Used by:
+- [TensorFlow](https://www.tensorflow.org/)
+- [Stan Math Library](https://mc-stan.org/tools/#developer-tools-and-apis)
+- [ATLAS experiment-tracking software - CERN](https://iopscience.iop.org/article/10.1088/1742-6596/608/1/012047/pdf)
+
+Read :
+- [Eigen Library for Matrix Algebra in C++ | QuantStart](https://www.quantstart.com/articles/Eigen-Library-for-Matrix-Algebra-in-C/)
+- [Eigen: Lazy Evaluation and Aliasing](https://eigen.tuxfamily.org/dox/TopicLazyEvaluation.html)
+
+```c++
+#include <Eigen/Dense>
+ . . .
+ Eigen::Matrix3d dbl_mtx            // 3x3 matrix of double
+ {
+    {10.64, 41.28, 21.63},
+    {41.95, 87.45, 13.68},
+    {22.47, 57.34, 8.631}
+ };
+ Eigen::Matrix4i int_mtx            // 4x4 matrix of int
+ {
+    {24, 0, 23, 13},
+    {8, 75, 0, 98},
+    {11, 60, 1, 3 },
+    {422, 55, 11, 55}
+ };
+```
+
+`Eigen::Matrix` object, the `<<` stream operator is overloaded
+```c++
+cout << dbl_mtx << "\n\n";
+cout << int_mtx << "\n\n";
+
+/*** The output is: ***/
+// 10.64 41.28 21.63
+// 41.95 87.45 13.68
+// 22.47 57.34 8.631
+ 
+//  24   0  23  13
+//   8  75   0  98
+//  11  60   1   3
+// 422  55  11  55
+
+cout << dbl_mtx.col(0) << "\n\n"; 
+cout << int_mtx.row(2) << "\n\n";
+// 10.64 
+// 41.95 
+// 22.47
+
+//  11  60   1   3
+```
+
+<font color=#30D5C8><strong>Dynamic matrix</strong></font>
+Matrix of `doubles` with unknown dimensions `mxn`
+- Data taken at construction:
+```c++
+using Eigen::MatrixXd;
+MatrixXd mtx_01{
+    {1.0, 2.0, 3.0},
+    {4.0, 5.0, 6.0},
+    {7.0, 8.0, 9.0},
+    {10.0, 11.0, 12.0}
+};
+```
+- Size specific using `default` constructor
+```c++
+using Eigen::MatrixXd;
+MatrixXd mtx_02{};
+mtx_02.resize(2, 2);
+ 
+// Use stream operator to load elements separated by commas,
+// in row-major order:
+mtx_02 << 10.0, 12.0, 14.0, 16.0;
+```
+Alternative:
+```c++
+MatrixXd mtx_03{4, 3};        // 4 rows, 3 columns
+mtx_03 << 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0;
+```
+set each element individually:
+ ```c++
+// Matrix dimensions as constructor arguments:
+MatrixXd mtx_04{2, 2};
+
+mtx_04(0, 0) = 3.0;
+mtx_04(1, 0) = 2.5;
+mtx_04(0, 1) = -1.0;
+mtx_04(1, 1) = mtx_04(1, 0) + mtx_04(0, 1);
+```
+
+<font color=#ff2800><strong>Attentions ! :</strong></font> avoid use of <font color=#ffcba4>auto</font> key word with Eigen’s expressions
+- Do not use the auto keyword as a replacement for a `Matrix<>` type
+
+<font color=#30D5C8><strong>STL Compatibility</strong></font>
+Both the `Eigen Vector` and `Matrix` classes is their compatibility with `STL`
+```c++
+VectorXd u{12};                      // 12 elements
+std::mt19937_64 mt{100};             // Mersenne Twister eng, seed = 100
+ 
+std::student_t_distribution<> tdist{5};     // 5 degrees of freedom
+std::generate(u.begin(), u.end(), [&mt, &tdist]() {return tdist(mt);});
+```
 
 
 # Strings
 ## Formatting
-Simple format string ...duuh
+Simple format string
 ```c++
 #include <format>
 int main{

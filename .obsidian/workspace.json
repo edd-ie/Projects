@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Quantitative Finance/Math Roadmap/Phase 1 - Math Foundations/Geometry & Trigonometry.md",
+                "file": "Languages/C++.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Geometry & Trigonometry"
+              "title": "C++"
             }
           },
           {
@@ -123,13 +123,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Quantitative Finance/Math Roadmap/Phase 1 - Math Foundations/Geometry & Trigonometry.md",
+                "file": "Languages/C++.md",
                 "followCursor": false,
                 "showSearch": true,
-                "searchQuery": ""
+                "searchQuery": "Eigen "
               },
               "icon": "lucide-list",
-              "title": "Outline of Geometry & Trigonometry"
+              "title": "Outline of C++"
             }
           },
           {
@@ -194,14 +194,15 @@
       "omnisearch:Omnisearch": false
     }
   },
-  "active": "08513442523df7c3",
+  "active": "72c8915d21cd3941",
   "lastOpenFiles": [
+    "Colour codes.md",
+    "Languages/C++.md",
+    "Quantitative Finance/Math Roadmap/Phase 1 - Math Foundations/Geometry & Trigonometry.md",
     "Quantitative Finance/Math Roadmap/Phase 1 - Math Foundations/Precalculus - Functions.md",
     "Quantitative Finance/Math Roadmap/00 - START HERE.md",
     "Quantitative Finance/Math Roadmap/Z - Flashcards.md",
     "Quantitative Finance/Math Roadmap/Roadmap.md",
-    "Languages/C++.md",
-    "Colour codes.md",
     "Quantitative Finance/Math Roadmap/Phase 1 - Math Foundations/Algebra.md",
     "Quantitative Finance/Math Roadmap/Phase 4 - ODEs, Probability, Real Analysis/Probability Theory.md",
     "Quantitative Finance/Math Roadmap/Phase 4 - ODEs, Probability, Real Analysis/Real Analysis.md",
@@ -209,7 +210,6 @@
     "Quantitative Finance/Math Roadmap/Phase 2 - Calculus/Calculus III.md",
     "Quantitative Finance/Math Roadmap/Phase 2 - Calculus/Calculus II.md",
     "Quantitative Finance/Math Roadmap/Phase 2 - Calculus/Calculus I.md",
-    "Quantitative Finance/Math Roadmap/Phase 1 - Math Foundations/Geometry & Trigonometry.md",
     "Quantitative Finance/Study Plan.md",
     "Languages/kdb+.md",
     "Quantitative Finance/Project Checklist & Resources.md",
