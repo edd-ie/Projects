@@ -3757,3 +3757,103 @@ Managing all the intricacies of `std::chrono` dates can eventually become compli
  `Modifying member functions`
 - Add years, months, and days to a date
 - Roll a weekend date to a business date - move date falling on a weekend forward to the next business day (Monday), assuming no holidays
+
+
+# [Boost](https://www.boost.org/)
+Open source C++ Libraries, peer-reviewed, portable and free
+- [Boost Libraries](https://www.boost.org/libraries/latest/grid/)
+
+## math library
+<font color=#30D5C8><strong>Installing Boost.Math (Especially with Vcpkg)</strong></font>
+1. **Install Boost.Math (and potentially other Boost components) via Vcpkg:**
+    - Open your command line (or PowerShell/Git Bash).
+    - Navigate to your Vcpkg installation directory.
+    - Run the install command for Boost.Math:
+```Bash
+vcpkg install boost-math:x64-mingw-dynamic # For MinGW as your compiler/toolchain
+ # Or if you're using MSVC:
+ # vcpkg install boost-math:x64-windows
+```
+- Vcpkg will download, build (if necessary), and install Boost.Math and its dependencies into your Vcpkg `installed` directory.
+
+2. **Correct your `CMakeLists.txt`:**
+    Your `CMakeLists.txt` should look something like this. Pay close attention to what goes into `add_executable` and what goes into `target_link_libraries`.
+```CMake
+cmake_minimum_required(VERSION 3.20) # Ensure a modern CMake version
+project(MachineLearning CXX)
+# --- Vcpkg Integration (usually at the top) ---
+# This line tells CMake to find and use Vcpkg's toolchain file.
+# CLion often sets this up automatically in its CMake profile.
+# If not, you might need:
+# set(CMAKE_TOOLCHAIN_FILE "C:/Users/_edd.ie_/.vcpkg-clion/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE PATH "Vcpkg toolchain file")
+# This line usually comes from CLion's settings or a higher-level CMake setup.
+# If you explicitly included it and it's causing issues, temporarily comment it out IF CLion handles it.
+# include(${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake) # This line usually isn't necessary if CMAKE_TOOLCHAIN_FILE is set
+    
+# --- Find Boost components that you need (including Boost.Math) ---
+# This will locate the Boost libraries installed by Vcpkg
+find_package(Boost REQUIRED COMPONENTS math) # REQUIRED means CMake will fail if Boost.Math isn't found
+    
+# --- Define your executable target ---
+add_executable(MachineLearning
+	main.cpp
+	# DO NOT PUT .hpp or .h files here!
+)
+    
+# --- Link your executable to Boost.Math ---
+target_link_libraries(MachineLearning PRIVATE Boost::math)
+
+# include directories needed for your own headers 
+target_include_directories(MachineLearning PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/folderName
+)  
+```
+
+Contents:
+- [The Mathematical Constants](https://www.boost.org/doc/libs/1_86_0/libs/math/doc/html/math_toolkit/constants.html)
+- [Statistical Distributions Reference](https://www.boost.org/doc/libs/1_86_0/libs/math/doc/html/math_toolkit/dist_ref.html)
+- [Non-Member Properties](https://www.boost.org/doc/libs/latest/libs/math/doc/html/math_toolkit/dist_ref/nmp.html) - probability density f(x), cdf, e.t.c.
+
+```c++
+#include <boost/math/distributions.hpp>
+ using boost::math::students_t;    // t-distribution
+ using boost::math::normal;        // Normal distribution
+ 
+// Construct a normal distribution with mean 0 and standard deviation 1:
+normal std_normal{};
+// Construct a non-standard normal distribution
+// with mean 0.08 and standard deviation 0.25:
+normal non_std_normal{0.08, 0.25};
+
+// Construct a students_t distribution with 4 degrees of freedom: 
+students_t stu_t{4};    // n = 4
+
+double mean = std_normal.mean();
+double sd = non_std_normal.standard_deviation();
+double dof = stu_t.degrees_of_freedom();
+```
+
+## Multi-Array
+The Boost Multidimensional Array library (aka MultiArray) features the `boost::multi_array` class template. 
+- More efficient and convenient way to express N-dimensional arrays 
+- [The Boost Multidimensional Array Library (Boost.MultiArray)](https://www.boost.org/doc/libs/1_86_0/libs/multi_array/doc/user.html)
+
+**2-D array**
+_A 2×3 `MultiArray` of `std::string`._
+```c++
+#include <boost/multi_array.hpp>
+#include <string>
+ // . . .
+using std::string, std::format;
+// Each element can be individually set, with each index placed
+// in its respective square bracket operator:
+boost::multi_array<string, 2> ma{boost::extents[2][3]};
+ma[0][0] = "Carl";
+ma[0][1] = "Friedrich";
+ma[0][2] = "Gauss";
+ma[1][0] = "John";
+
+cout << format("Number of extents (dimensions) = {}\n", ma.num_dimensions());
+cout << format("Row size = {}, Col size = {}\n\n", ma.shape()[0], ma.shape()[1]);
+```

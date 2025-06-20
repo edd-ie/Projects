@@ -92,7 +92,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 242.5
+    "width": 242.5,
+    "collapsed": true
   },
   "right": {
     "id": "afde6462c99d2d73",
@@ -126,7 +127,7 @@
                 "file": "Languages/C++.md",
                 "followCursor": false,
                 "showSearch": true,
-                "searchQuery": "Eigen "
+                "searchQuery": ""
               },
               "icon": "lucide-list",
               "title": "Outline of C++"
