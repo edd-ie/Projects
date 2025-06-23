@@ -3857,3 +3857,232 @@ ma[1][0] = "John";
 cout << format("Number of extents (dimensions) = {}\n", ma.num_dimensions());
 cout << format("Row size = {}, Col size = {}\n\n", ma.shape()[0], ma.shape()[1]);
 ```
+
+
+# Modules
+A single file, containing both declarations and implementations.
+- Instead having both <font color=#cd76ea><strong>.hpp / .h</strong></font> & <font color=#cd76ea><strong>.cpp</strong></font>
+- Version >> <font color="7cfc00">C++20 and higher</font>
+- extension : <font color=#cd76ea><strong>.cppm</strong></font> 
+
+_Primary module interface unit_
+```cpp
+export module SingleFileModule; 
+// SimpleClass declaration and implementation together
+export class SimpleClass {
+	int k_;
+public:
+    SimpleClass(int k) :k_{k} {}
+    int get_val() const{
+        return k_;
+    }
+    void reset_val(int k){
+        k_ = k;
+    }
+};
+```
+<font color=#ffcba4><strong>export</strong></font> - precedes the class definition, makes the module available to any code the imports it
+```cpp
+import SingleFileModule;
+//...
+int some_fcn(){ 
+	SimpleClass sc{10}; // Exported from SingleFileExample module
+	// . . . 
+}
+```
+
+Modules can contain standalone non-member functions.
+```cpp
+export module SingleFileModule;
+import <vector>;         // Standard Library Header Units are imported...
+import <algorithm>;      // to be discussed in the next section.
+import <ranges>;
+import <iterator>;       // std::back_inserter(.)
+// . . .
+std::vector<double> vector_fcn_helper(const std::vector<double>& x){
+    std::vector<double> y;
+    y.reserve(x.size());
+    std::ranges::transform(x, std::back_inserter(y),
+        [](double q) {return 3 * q;});
+    return y;
+}
+ 
+export std::vector<double> vector_fcn(const std::vector<double>& x){
+    return vector_fcn_helper(x);
+}
+```
+
+`vector_fcn_helper(.)` is not exported, but it is called from the exported `vector_fcn(.)`
+```cpp
+// . . .
+std::vector<double> v{1.0, 2.0, 3.0};
+std::vector<double> w = vector_fcn(v);
+```
+
+<font color=#30D5C8><strong>Standard Library :</strong></font>
+Proposals to the ISO C++ Committee for reorganizing the Standard Library into Standard Modules -> [module support for the standard library.pdf](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2412r0.pdf)
+
+
+<font color=#30D5C8><strong>Using C libraries in  modules :</strong></font>
+```cpp
+module;
+#include <cmath>    // Legacy C-derived headers go in the global fragment
+                    // at the top of the file.
+ 
+export module SingleFileModule;
+import <vector>;        // Importing a Standard header unit
+                        // comes after the module name is defined.
+
+// . . .
+export std::vector<double> math_fcn(const std::vector<double>& x){
+    std::vector<double> y;
+    y.reserve(x.size());
+    std::ranges::transform(x, std::back_inserter(y),
+        [](double q) {return std::sin(q) + std::cos(q);});
+    return y;
+}
+```
+
+<font color=#30D5C8><strong>Templates in modules :</strong></font>
+```cpp
+export module Templates;
+import <iostream>;
+
+export template<typename T>
+T factored_polynomial(T a, T b, T c, T d){
+    return (a + b) * (c + d);
+}
+
+export template<typename T>
+void print(T t){
+	std::cout << t << " ";
+}
+```
+
+
+<font color=#30D5C8><strong>Reasons for using modules :</strong></font>
+1. Imported module will not “leak” other modules previously imported into it
+	- `Module A` imports `Module B` if `Module C`  imports `A` it will not access `B` unless it also explicitly imports it unlike `#include`
+	- If you explicitly want anyone the imports `A` to have access to `B` use  <font color=#ffcba4>export import</font>
+```cpp
+//***FILE B***//
+export module B;
+
+export int b_fx(){
+	return 4;
+}
+
+//***FILE A***//
+export module A
+export import B
+
+export double a_fx(){
+	return b_fx() - 0.86;
+}
+
+//***FILE C***//
+import A
+void test(){
+	double a = a_fx();
+	int b = B_fx();
+}
+```
+
+2. Eliminate need for pre-processor directives like `#ifndef`, `#pragma`, `#define`
+	- File extensions used for precompiled declarations that are generated with modules for the three major compilers are as follows: 
+		- Visual Studio: `.ifc`
+		- Clang: `.pcm` 
+		- gcc: `.gcm`
+
+
+<font color=#30D5C8><strong>Separate declaration & implementation :</strong></font>
+```cpp
+//Student.cppm
+export module Student;
+import <vector>;
+import <string>;
+import <utility>;
+import Courses;
+
+export enum class StudentType{
+	fullTime = 0,
+	partTime
+};
+
+using std::vector;
+using std::string;
+export class Student{
+	string name;
+	StudentType type;
+	vector<Courses> courses{};
+public:
+	Student(string name, StudentType type=0);
+	void addCourse(Course& course);
+	StudentType getType();
+};
+```
+
+```cpp
+//Student.cpp
+module;
+// Global fragme for using #includes
+module Student;
+
+Student::Student(string name, StudentType type=):
+	name{std::move(name)}, type{type}{}
+	
+void Student::addCourse(Course& course){
+	courses.push_back(course);
+}
+
+StudentType Student::getType(){
+	return type;
+}
+```
+
+
+<font color=#30D5C8><strong>Namespaces :</strong></font>
+Namespaces can also be enclosed within modules. 
+Two basic options. 
+1. Export the entirety of a namespace:
+```cpp
+export namespace OptionValuation{
+    enum class PayoffType    {
+        Call = 1,
+        Put = -1
+    };
+    class BlackScholes{
+	    std::array<double, 2> compute_norm_args_(double vol); 
+        double strike_, spot_, time_to_exp_;
+        PayoffType payoff_type_;
+        double rate_, div_;
+    public:
+        BlackScholes(double strike, double spot, double time_to_exp,
+            PayoffType payoff_type, double rate, double div = 0.0);
+        double operator()(double vol);    
+    };
+ }
+```
+
+2. Export individual classes and functions in a namespace.
+	- if you don’t want to make an item in the namespace available outside the module
+```cpp
+namespace OptionValuation    // export not applied to the entire namespace
+{
+    export enum class PayoffType   // export explicitly where required
+    {
+        Call = 1,
+        Put = -1
+    };
+    export class BlackScholes
+    {
+        . . .
+    };
+    int mystery_function(int n);    // This function is not exported
+}
+```
+
+
+<font color=#30D5C8><strong>Partitions :</strong></font>
+Modules with a larger scope can be further divided into _`partitions`_.
+- Further read - <font color=#cd76ea>Chapter 16 of C++20: The Complete Guide (Josuttis)</font>
