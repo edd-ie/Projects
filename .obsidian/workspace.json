@@ -162,7 +162,7 @@
             }
           }
         ],
-        "currentTab": 4
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
@@ -180,7 +180,7 @@
       "omnisearch:Omnisearch": false
     }
   },
-  "active": "d1d9aeec67520b84",
+  "active": "9cac78a497e38551",
   "lastOpenFiles": [
     "Languages/kdb+.md",
     "Quantitative Finance/Study Plan.md"
