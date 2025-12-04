@@ -2753,7 +2753,7 @@ auto num = std::count_if(map.begin(), map.end(),
         return p.second == value;} );
 ```
 
-
+### Increment
 `std::iota` :
 Generates a sequence of incremented values
 - Useful for testing
@@ -2766,7 +2766,7 @@ std::iota(w.begin(), w.end(), -2.5);
 // -2.5 -1.5 -0.5 0.5 1.5 2.5
 ```
 
-
+### Accumulate
 `std::accumulate` :
 Computes the sum of elements in a container.
 - Result is a scalar value.
