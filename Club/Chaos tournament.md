@@ -1,4 +1,5 @@
 _A deception-enabled competitive extension of Rock–Paper–Scissors–Lizard–Spock._
+Bots attempt to _learn_ opponent tendencies, exploit patterns, and avoid being exploited themselves.
 
 ---
 
@@ -15,6 +16,47 @@ Scoring uses standard RPSLS outcomes:
 
 Matches run for **10,000 rounds**.
 Scores are **hidden** from bots during the match.
+
+### **1.1 Finals Bracket**
+
+Top 4 or 8 bots enter a **single-elimination bracket**.  
+Finals use longer matches (e.g., 20,000 rounds) to reduce noise.
+
+## **1.2 Payoff Matrix**
+
+Use standard RPSLS rules:
+
+- Rock crushes Scissors & Lizard
+- Paper covers Rock & disproves Spock
+- Scissors cut Paper & decapitate Lizard
+- Lizard eats Paper & poisons Spock
+- Spock smashes Scissors & vaporizes Rock
+
+|              | **Rock** | **Paper** | **Scissors** | **Lizard** | **Spock** |
+| :----------: | :------: | :-------: | :----------: | :--------: | :-------: |
+|   **Rock**   |  **0**   |    -1     |      1       |     1      |    -1     |
+|  **Paper**   |    1     |   **0**   |      -1      |     -1     |     1     |
+| **Scissors** |    -1    |     1     |    **0**     |     1      |    -1     |
+|  **Lizard**  |    -1    |     1     |      -1      |   **0**    |     1     |
+|  **Spock**   |    1     |    -1     |      1       |     -1     |   **0**   |
+
+
+## **1.3 Pattern Exploitation**
+
+Bots can sample opponent frequencies:
+
+- “Opponent plays Lizard 38% of the last 200 rounds.”
+- “Opponent avoids Rock after losing.”
+
+This naturally creates exploit–counter-exploit loops.
+
+## **1.4 Markov or Sequence Predictors**
+
+Bots can track transition patterns:
+
+- P(Lizard → Scissors)
+- P(Spock after losing)
+- P(Scissors after opponent plays Rock)
 
 ---
 
@@ -78,9 +120,9 @@ Scores remain hidden for the entire match.
 
 ---
 
-# **4. Deception Token Mechanics (Clarified)**
+# **4. Deception Token Mechanics**
 
-### **4.1 Tokens Are Per-Bot, Not Shared**
+### **4.1 Tokens Are Per-Bot
 
 Every bot has its own 50-token pool **for each match**.
 Using a shadow move does not affect:
@@ -104,6 +146,18 @@ Strategic uses include:
 - Triggering model collapse right before a pivot
 - Concealing adaptation timing
 
+### **4.4 Why use a shadow move?**
+
+- Hide your losing streaks
+- Break opponent’s Markov model
+- Force opponent’s predictor into a trap:  
+    e.g., feed fake “Rock streaks” then play Scissors
+
+### **4.2 Why _not_ use a shadow move?**
+
+- Tokens are limited
+- Opponent can detect overuse
+
 ---
 
 # **5. Strategic Model**
@@ -126,7 +180,7 @@ The system rewards:
 
 ---
 
-# **6. Scoring Model (Revised & Tightened)**
+# **6. Scoring Model **
 
 Final match score is a weighted combination of three components:
 
@@ -193,6 +247,5 @@ Matches in finals use **longer rounds** (15,000–20,000) for stability.
 - Deception is fully deterministic.
 - Token pools are individual and hidden but inferable.
 - Visible history is always consistent with the rules.
-- RNG (if used by bots) is seeded externally per match for reproducibility.
 
 ---
