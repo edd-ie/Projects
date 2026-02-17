@@ -1,14 +1,14 @@
 #Cpp #quant #leetcode #roadmap 
 Focus on understanding both brute-force and optimized solutions.
 ## 🔢 Arrays & Math
-- [ ] [Two Sum](https://leetcode.com/problems/two-sum/)
-- [ ] [Best Time to Buy and Sell Stock](https://leetcode.com/problems/best-time-to-buy-and-sell-stock/)
-- [ ] [Maximum Subarray](https://leetcode.com/problems/maximum-subarray/)
-- [ ] [Product of Array Except Self](https://leetcode.com/problems/product-of-array-except-self/)
-- [ ] [Rotate Array](https://leetcode.com/problems/rotate-array/)
+- [x] [Two Sum](https://leetcode.com/problems/two-sum/)
+- [x] [Best Time to Buy and Sell Stock](https://leetcode.com/problems/best-time-to-buy-and-sell-stock/)
+- [x] [Maximum Subarray](https://leetcode.com/problems/maximum-subarray/)
+- [x] [Product of Array Except Self](https://leetcode.com/problems/product-of-array-except-self/)
+- [x] [Rotate Array](https://leetcode.com/problems/rotate-array/)
 
 ## 📊 Sorting & Greedy
-- [ ] [Merge Intervals](https://leetcode.com/problems/merge-intervals/)
+- [x] [Merge Intervals](https://leetcode.com/problems/merge-intervals/)
 - [ ] [Insert Interval](https://leetcode.com/problems/insert-interval/)
 - [ ] [Non-overlapping Intervals](https://leetcode.com/problems/non-overlapping-intervals/)
 - [ ] [Meeting Rooms II](https://leetcode.com/problems/meeting-rooms-ii/)
@@ -17,14 +17,14 @@ Focus on understanding both brute-force and optimized solutions.
 ## 🧠 Dynamic Programming
 - [ ] [Climbing Stairs](https://leetcode.com/problems/climbing-stairs/)
 - [ ] [House Robber](https://leetcode.com/problems/house-robber/)
-- [ ] [Longest Increasing Subsequence](https://leetcode.com/problems/longest-increasing-subsequence/)
-- [ ] [Coin Change](https://leetcode.com/problems/coin-change/)
+- [x] [Longest Increasing Subsequence](https://leetcode.com/problems/longest-increasing-subsequence/)
+- [x] [Coin Change](https://leetcode.com/problems/coin-change/)
 - [ ] [Maximum Profit in Job Scheduling](https://leetcode.com/problems/maximum-profit-in-job-scheduling/)
 
 ## 🧮 Bit Manipulation & Number Theory
 - [ ] [Single Number](https://leetcode.com/problems/single-number/)
 - [ ] [Counting Bits](https://leetcode.com/problems/counting-bits/)
-- [ ] [Sum of Two Integers](https://leetcode.com/problems/sum-of-two-integers/)
+- [x] [Sum of Two Integers](https://leetcode.com/problems/sum-of-two-integers/)
 - [ ] [Power of Two](https://leetcode.com/problems/power-of-two/)
 - [ ] [Reverse Bits](https://leetcode.com/problems/reverse-bits/)
 
