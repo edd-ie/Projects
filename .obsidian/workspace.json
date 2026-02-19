@@ -158,13 +158,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Club/Chaos tournament.md",
+                "file": "Operating System/IO_uring.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Chaos tournament"
+              "title": "Outline of IO_uring"
             }
           },
           {
@@ -197,7 +197,7 @@
       "omnisearch:Omnisearch": false
     }
   },
-  "active": "5175ff6cdcdb05a2",
+  "active": "7c2b1d4a1f8c8ff6",
   "lastOpenFiles": [
     "Colour codes.md",
     "Operating System/IO_uring.md",
