@@ -13,30 +13,15 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Colour codes.md",
+                "file": "Research/Sockets.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Colour codes"
-            }
-          },
-          {
-            "id": "5175ff6cdcdb05a2",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Operating System/IO_uring.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "IO_uring"
+              "title": "Sockets"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -68,7 +53,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "tag:#Cpp",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -129,12 +114,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Languages/C++.md",
+                "file": "Research/Sockets.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from C++"
+              "title": "Outgoing links from Sockets"
             }
           },
           {
@@ -158,13 +143,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Operating System/IO_uring.md",
+                "file": "Research/Sockets.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of IO_uring"
+              "title": "Outline of Sockets"
             }
           },
           {
@@ -199,19 +184,25 @@
   },
   "active": "7c2b1d4a1f8c8ff6",
   "lastOpenFiles": [
-    "Colour codes.md",
-    "Operating System/IO_uring.md",
-    "Operating System/Research.md",
-    "resources/Request-vs-Concurrency.png",
+    "Research/IO_uring.md",
+    "Research/Sockets.md",
+    "Pasted image 20260222183953.png",
     "Languages/C++.md",
+    "Research/Ideas.md",
+    "Cpp_Fintech_Vault/Cpp_Fintech_Roadmap.md",
+    "Cpp_Fintech_Vault/Cpp_Fintech_Index.md",
+    "Untitled.base",
+    "Untitled 3.base",
+    "Untitled 2.base",
+    "Untitled 1.base",
+    "Colour codes.md",
+    "resources/Request-vs-Concurrency.png",
     "Quantitative Finance/LeetCode Problem Tracker.md",
     "Android/Indoor Navigation (Labyrinth).md",
     "Graphics/OpenGL/c++/C++ OpenGL.md",
     "Club/Chaos tournament.md",
     "Club",
     "Cpp_Fintech_Vault/Cpp_Fintech_Roadmap_Checklist.md",
-    "Cpp_Fintech_Vault/Cpp_Fintech_Index.md",
-    "Cpp_Fintech_Vault/Cpp_Fintech_Roadmap.md",
     "Languages/kdb+.md",
     "Quantitative Finance/Study Plan.md"
   ]

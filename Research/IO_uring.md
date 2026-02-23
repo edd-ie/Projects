@@ -1,3 +1,4 @@
+#OS #linux #research #I/O #Cpp 
 
 When you call a system call like [read(2)](http://man7.org/linux/man-pages/man2/read.2.html):
 - Program blocks until the file is read and the data is made available. 
@@ -14,8 +15,8 @@ Dealing with millions of requests/hour and efficiency matters
 ### **Iterative**: 
 - This serves one request after another. 
 - While it is serving one request, other requests that might arrive have to wait till the previous one is done processing. 
-- There is [a limit](http://man7.org/linux/man-pages/man2/listen.2.html) to how many requests the operating system will queue up.
-	- By default, Linux queues up to 128 for kernel versions below 5.4 and 4,096 in newer ones.
+- (There is [a limit](http://man7.org/linux/man-pages/man2/listen.2.html) to how many requests the operating system will queue up.
+	- By default, Linux queues up to 128 for kernel versions below 5.4 and 4,096 in newer ones.) --> listen()
 ### **Forking**: 
 - This creates a new process for each request that needs to be served. 
 - Requests don’t have to wait for previous requests to get processed. 
@@ -36,9 +37,10 @@ Dealing with millions of requests/hour and efficiency matters
 - A very efficient model and is the one followed by most web application frameworks.
 
 ### **Poll**: 
-- This single threaded and uses the [poll(2)](http://man7.org/linux/man-pages/man2/poll.2.html) system call to multiplex between requests. 
+- This single threaded and uses the [poll(2)](http://man7.org/linux/man-pages/man2/poll.2.html) system call to multiplex between requests. #I/O 
 - [poll(2)](http://man7.org/linux/man-pages/man2/poll.2.html) however has performance problems scaling to a large number of file descriptors.
 - The state for each request is tracked and a series of callbacks to functions are made that take processing of that request to the next stage.
+- Reactive -> notified if available
 
 ### **epoll** 
 - This is a single-threaded, server that uses the [epoll(7)](http://man7.org/linux/man-pages/man7/epoll.7.html) family of system calls in place of [poll(2)](http://man7.org/linux/man-pages/man2/poll.2.html), but is otherwise, architecturally the same.
@@ -141,6 +143,7 @@ There is a [polling mode](https://unixism.net/loti/tutorial/sq_poll.html#sq-pol
 void io_uring_prep_nop(struct io_uring_sqe *sqe)
 ```
 This function sets up the submission queue entry pointed to by `sqe` with an `IORING_OP_NOP` operation, which is a no-op. This kind of operation exists for testing purposes and serves to test the speed and efficiency of the `io_uring` interface.
+* Useful for to `post` in event loops - perform out of line actions
 
 ## Setting up io_uring
 These ring buffers are shared between kernel and user space. 
@@ -150,8 +153,11 @@ Set up with [`io_uring_setup()`](https://unixism.net/loti/ref-iouring/io_uring_
 #include <linux/io_uring.h>
 #include <sys/mman.h>
 
-int io_uring_setup(u32 entries, struct io_uring_params *p)
 void *mmap(size_t length; void addr[length], size_t length, int prot, int flags, int fd, off_t offset);
+
+int io_uring_setup(unsigned entries, struct io_uring_params *p){
+    return static_cast<int>(syscall(__NR_io_uring_setup, entries, p));
+}
 ```
 
  [io_uring_setup()](https://unixism.net/loti/ref-iouring/io_uring_setup.html#c.io_uring_setup) - system call sets up a `SQ` and `CQ` with at least <font color=#30D5C8>entries</font> entries, and returns a file descriptor which can be used to perform subsequent operations on the io_uring instance.
@@ -211,23 +217,73 @@ Why use vectored or scatter/gather I/O over regular `read()` and `write()` :
 2. Calls are atomic while multiple calls to `read()` and `write()` are not
 
 ### CQE
-An instance of a struct which the kernel responds with for every SQE struct instance that is added to the submission queue. This contains the results of the operation you requested via an SQE instance.
+An instance of `io_uring_cqe` struct which the kernel responds with for every `SQE`. 
+This contains the results of the operation you requested via an SQE instance.
 
 ```c
 struct io_uring_cqe {
 	__u64  user_data;  /* sqe->user_data passed back */
 	__s32  res;    /* result code for this event */
 	__u32  flags;
+	/*
+	 * If the ring is initialized with IORING_SETUP_CQE32, then this field
+	 * contains 16-bytes of padding, doubling the size of the CQE.
+	 */
+	__u64 big_cqe[];
 };
 ```
 
 `CQEs` can arrive in any order as they become available. Whichever operation finishes quickly, it is immediately made available.
+- Waiting for previous processes completion before moving to the next slows down the whole process.
 
 To identify the which SQE request a particular CQE:
 - *`user_data`* field to identify it by passing a pointer.
 
-`CQES` corresponds with a system calls return value store in *`res`*:
-- read operation: # of bytes read / -errno if there's an error.
+`CQES` corresponds with a system calls return value, stored in *`res`*:
+- read operation: # of bytes read (success) or -errno/negative number (error).
+
+Force ordering of certain operations with SQE ordering, in effect chaining them:
+- Link next operation to current with the `IOSQE_IO_LINK` flag
+1. Call [`io_uring_prep_write()`](https://unixism.net/loti/ref-liburing/submission.html#c.io_uring_prep_write "io_uring_prep_write") set the `IOSQE_IO_LINK` flag on it so that the next operation is linked to this operation. 
+2. Call [`io_uring_prep_read()`](https://unixism.net/loti/ref-liburing/submission.html#c.io_uring_prep_read "io_uring_prep_read"), which is now linked to the previous write operation. We set the `IOSQE_IO_LINK` flag on this operation as well 
+3. Call [`io_uring_prep_close()`](https://unixism.net/loti/ref-liburing/submission.html#c.io_uring_prep_close "io_uring_prep_close") linked with the previous. 
+
+- This causes `io_uring` to execute the write, read and close operations one after the other.
+-  failure of a one operation will cause all subsequent linked operations to fail with the error *“Operation cancelled"*.
+```c
+struct io_uring_sqe *sqe;
+struct io_uring_cqe *cqe;
+int fd = open(FILE_NAME, O_RDWR|O_TRUNC|O_CREAT, 0644);
+if (fd < 0 ) {/*...*/}
+
+sqe = io_uring_get_sqe(ring);
+if (!sqe) {/*...*/}
+
+io_uring_prep_write(sqe, fd, STR, strlen(STR), 0 );
+sqe->flags |= IOSQE_IO_LINK;
+
+sqe = io_uring_get_sqe(ring);
+if (!sqe) {/*...*/}
+
+io_uring_prep_read(sqe, fd, buff, strlen(STR),0);
+sqe->flags |= IOSQE_IO_LINK;
+
+sqe = io_uring_get_sqe(ring);
+if (!sqe) {/*...*/}
+
+io_uring_prep_close(sqe, fd);
+
+io_uring_submit(ring);
+for (int i = 0; i < 3; i++) {
+    int ret = io_uring_wait_cqe(ring, &cqe);
+    if (ret < 0) {/*...*/}
+    /* Now that we have the CQE, let's process the data */
+    if (cqe->res < 0){/*...*/}
+    printf("Result of the operation: %d\n", cqe->res);
+    io_uring_cqe_seen(ring, cqe);
+}
+```
+
 
 ### SQE
 More complex as the entries have to be generic enough to represent wide range of IO operations
@@ -256,12 +312,74 @@ struct io_uring_sqe {
 };
 ```
 
+Reading a file using the [readv( )](http://man7.org/linux/man-pages/man2/readv.2.html) system call:
 - `opcode` - specify the operation, in case, `readv()` using the `IORING_OP_READV` constant.
 - `fd` is used to specify the file which we want to read from
 - `addr` is used to point to the array of `iovec` structures that hold the addresses and lengths of the buffers we’ve allocated for I/O.
 - `len` is used to hold the length of the arrays of `iovecs`.
 
+```c
+ /*
+* io_uring communication happens via 2 shared kernel-user space ring buffers,
+* which can be jointly mapped with a single mmap() call in recent kernels.
+ * While the completion queue is directly manipulated, the submission queue
+* has an indirection array in between.
+* */
+int sring_sz = p.sq_off.array + p.sq_entries * sizeof(unsigned);
+int cring_sz = p.cq_off.cqes + p.cq_entries * sizeof(struct io_uring_cqe);
 
+/*
+* In kernel version >=5.4 , can map the submission and
+* completion buffers with a single mmap() call.
+* check the features field of the
+* io_uring_params structure, which is a bit mask.
+* If the IORING_FEAT_SINGLE_MMAP is set, then
+* can do away with the second mmap() call to map the completion ring.
+ * */
+if (p.features & IORING_FEAT_SINGLE_MMAP){
+	if (cring_sz > sring_sz){
+	    sring_sz = cring_sz;
+	}
+	cring_sz = sring_sz;
+}
+
+/*
+* Map in the submission and completion queue ring buffers.
+ * Older kernels only map in the submission queue, though.
+ * */
+sq_ptr = mmap(0, sring_sz, PROT_READ | PROT_WRITE,
+    MAP_SHARED | MAP_POPULATE, s->ring_fd, IORING_OFF_SQ_RING);
+if (sq_ptr == MAP_FAILED) {/**/}
+
+if (p.features & IORING_FEAT_SINGLE_MMAP) {
+    cq_ptr = sq_ptr;
+} else {
+	/* Map in CQ ring buffer in older kernels separately */
+    cq_ptr = mmap(0, cring_sz, PROT_READ | PROT_WRITE,
+        MAP_SHARED | MAP_POPULATE, s->ring_fd, IORING_OFF_CQ_RING);
+    if (cq_ptr == MAP_FAILED) {/**/}
+}
+
+/* Map in the submission queue entries array */
+s->sqes = mmap(0, p.sq_entries * sizeof(struct io_uring_sqe),
+    PROT_READ | PROT_WRITE, MAP_SHARED | MAP_POPULATE, s->ring_fd,
+	IORING_OFF_SQES);
+```
+`CQ` ring directly indexes the shared array of `CQEs`, the submission ring has an indirection array in between. 
+- The submission side ring buffer is an index into this array, which in turn contains the index into the `SQEs`. 
+- useful for certain applications that embed submission requests inside of internal data structures. 
+- Allows them to submit multiple submission entries in one go while allowing them to adopt `io_uring` more easily.
+
+Reading or updating the shared ring buffers from user space, care needs to be taken to ensure when reading, you see the latest data and after updating, you are “flushing” or “syncing” writes so that the kernel sees your updates. 
+
+The CPU can reorder reads and writes and so can the compiler. in `io_uring`, when there is a shared buffer involved across two different contexts: user space and kernel and these can run on different CPUs after a context switch. 
+
+Need to ensure:
+- From user space that before you read, previous writes are visible.
+- Filling up details in an SQE and update the tail of the submission ring buffer, want to ensure that the writes you made to the members of the SQE are ordered before the write that updates the ring buffer’s tail. 
+- If writes aren’t ordered, the kernel might see the tail updated, but when it reads the SQE, it might not find all the data it needs at the time it reads it. 
+
+In [polling mode](https://unixism.net/loti/tutorial/sq_poll.html#sq-poll), where the kernel is looking for changes to the tail, this becomes a real problem because of how CPUs and compilers reorder reads and writes for optimization.
 
 ### IO_Uring vs readV() file read & console concatenation
 **Test with console rendering:**
@@ -340,7 +458,34 @@ Analysis:
 - **`readv()`:** **394 MiB/s**
 - **`io_uring`:** **842 MiB/s**
 
-This is because `readv()` is a **blocking system call**. Every time you call it, the CPU has to <font color=#ffcba4>context-switch :</font> it pauses your program, jumps into kernel mode, does the work, and jumps back.
+<font color=#eab676><strong>1. Avoid context switching</strong></font>
+This is because `readv()` is a **blocking system call**. Every time you call `readv()`, the CPU must perform a **Context Switch**. This involves:
+
+1. Saving all your program's registers.
+2. Switching the CPU to "Kernel Mode" (Ring 0).
+3. Running the kernel code.
+4. Switching back and restoring your registers.
+
+`io_uring`doesn't call a syscall for every read.
+1. write your request into the `SQ` in shared memory.
+2. Both user and the kernel share memory, no "jump" is required to pass the data. 
+3. Can "batch" multiple read requests into the ring and then perform **one single syscall** (`io_uring_enter`) to tell the kernel look at the ring.
+
+<font color=#eab676><strong>2. Zero-Syscall Mode (SQPOLL)</strong></font>
+`IORING_SETUP_SQPOLL` - when enabled, the kernel creates a specific background thread that just sits there constantly watching the shared memory ring.
+
+- **Your Program:** Writes a "read" request to the ring.
+    
+- **The Kernel Thread:** Sees the new entry immediately and starts the work.
+    
+- **Result:** You just performed I/O without a **single** system call. Your CPU never left "User Mode."
+    
+
+<font color=#eab676><strong>3. Avoiding the "Data Copy"</strong></font>
+
+When you use `readv()`, the kernel often has to copy data from its own internal buffers into your program's memory buffer.
+
+`io_uring` supports **Fixed Buffers**. You can "register" a piece of memory with the kernel ahead of time. Because the kernel already knows exactly where that memory is and has it mapped, it can move data directly from the disk controller (via DMA) into your buffer with zero intermediate copying
 
 With `io_uring`, since we've mapped the rings into your own memory space, the overhead of "talking" to the kernel is significantly lower. 
 
@@ -467,6 +612,24 @@ Throughput:          820.07 MiB/s
 ========================================
 ```
 
+**Batch** version is  faster in a single-file test because of: **the cost of "Entering" the Kernel.**
+
+In standard version `io_uring` is used like a synchronous call. 
+In standard version, for every file (and inside `submit_to_sq`):
+
+1. **Submit 1 Entry.**
+2. **Call `io_uring_enter`** (A full context switch into the kernel).
+3. **Wait** for that 1 entry to finish.
+4. **Reap 1 Entry.**
+5. **Repeat.**
+
+**Batch-Processing** version:
+
+1. **Fill the Ring:** loop and push as many requests as possible (up to `QUEUE_DEPTH`) into the shared memory. This happens entirely in **User Space** with zero syscalls.
+2. **One Big Enter:** call `io_uring_enter` **once** for the whole batch.
+3. **Kernel Efficiency:** The kernel can optimize disk head movement or parallelize those reads across multiple CPU cores internally.
+4. **One Big Reap:** process all completions at once.
+
 ---
 2. Multiple file reads (10 files)
 ```txt
@@ -513,9 +676,12 @@ Throughput:          110.15 MiB/s
 ========================================
 ```
 
-### Why your `single read` was faster than `multple-read` :
+#### `Single read` was faster than `multple-read` :
 
-In `single read`, you had 1 file. The overhead of 1 `open()` and 1 `fstat()` is negligible. In `multple-read`, if you had n files, you incurred that overhead n times. Because the files are tiny (0.02 MiB), the **<font color=#ff2800>time to open  > time to read</font>.**
+ `single read` - The overhead of 1 `open()` and 1 `fstat()` is negligible. 
+ 
+ `multple-read` - for `n` files, it incurred that overhead `n times`. \
+ - Because of the small files (0.02 MiB) the **<font color=#ff2800>time to open  > time to read</font>.**
 
 To bypass the <font color=#30D5C8>Open Bottleneck</font>. we'll use `IORING_OP_OPENAT` so that even opening the files happens asynchronously inside the ring.
 
@@ -671,3 +837,10 @@ Need to use it in conjunction with [`io_uring_register_files()`](https://unixis
 - Setting a very large `sq_thread_idle` value will cause it to continue to consume CPU while there are no submissions happening from your program. 
 - Use for truly expect to handle large amounts of I/O. 
 - Still set the poller thread’s idle value to a few seconds at most.
+
+
+read from 1 pipes and write broadcast and to multiple socket for reads:
+- without reading data in the program
+- splice
+- intermidiate pipes
+- netcat read/write from a socket

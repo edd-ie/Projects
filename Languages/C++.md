@@ -55,6 +55,42 @@ int main() {
     return 0;
 }
 ```
+
+## Compiler Optimization
+Modern CPU don't just run code line-by-line, it looks ahead and and try to find and execute later lines while waiting for current line to finish.
+
+Compilers (GCC/Clang) might rearrange instructions to make them faster.
+
+### Compiler Barrier
+Scenario:
+1. Write the data for a "Read File" command into a slot.
+2. Update the `tail` index to tell the Kernel "Hey, there is new data here!"
+3. **The CPU/Compiler:** Decides to swap those two operations because it thinks it’s more efficient.    
+4. **The Kernel:** Sees the `tail` update, looks at the slot, but find **garbage** because the actual data hasn't been "flushed" to that memory address yet.
+
+```c
+// Compiler barrier for x86 architecture
+__asm__ __volatile__("" ::: "memory")
+```
+- **`__asm__`**: Tells the compiler move into assembly language.
+    
+- **`__volatile__`**: Tells the compiler, "Do not optimize this away, execute it exactly where it is."
+    
+- **`""`**: The actual assembly instruction is empty. On x86, the CPU is *"Strongly Ordered"* for writes, so often we only need to stop the _compiler_ from moving things around.
+    
+- **`::: "memory"`**: The "Clobber" list. Tells the compiler: _"Assume every single piece of memory has changed."_ 
+	- **The Result:** The compiler is forced to finish every pending memory write before it is allowed to start any write that comes after this line.
+
+```c
+#define read_barrier() __asm__ __volatile__("" ::: "memory")
+#define write_barrier() __asm__ __volatile__("" ::: "memory")
+```
+
+- **`write_barrier()`**: Ensures that all your data (the I/O request) is fully written to memory **before** you update the index that tells the kernel to start.
+    
+- **`read_barrier()`**: Ensures that when you see the kernel has finished a task, you actually **re-read** the result from memory rather than using an old, "stale" value the CPU might have cached in a register.
+
+
 # Class
 #oop 
 
